@@ -1,4 +1,4 @@
-# Student Score Management System
+# University Student Management System
 
 ## 1. Giới thiệu dự án
 
@@ -168,20 +168,7 @@ NHOM_XX_QLSV/
 ├── docs/
 └── README.md
 ```
-
----
-
-## 9. Phân công công việc
-
-| Thành viên | Vai trò chính | Nhiệm vụ |
-|---|---|---|
-| Thành viên 1 | Core Data & File I/O | Thiết kế struct, cài DynamicArray, xử lý đọc/ghi file |
-| Thành viên 2 | Business Logic & Algorithms | CRUD, xử lý điểm, GPA, tìm kiếm, sắp xếp |
-| Thành viên 3 | Console UI, Validation & Documentation | Menu console, kiểm tra đầu vào, test, ảnh minh chứng, báo cáo |
-
----
-
-## 10. Lộ trình triển khai 5 tuần
+## 9. Lộ trình triển khai 5 tuần
 
 ### Tuần 1: Chốt thiết kế và xây dựng cấu trúc lõi
 
@@ -281,8 +268,324 @@ Sản phẩm cuối tuần:
 - File ZIP nộp bài
 
 ---
+---
 
-## 11. Kế hoạch kiểm thử
+## 10. Sản phẩm cần đạt của từng thành viên
+
+Phần này mô tả chi tiết các sản phẩm mà từng thành viên cần hoàn thành trong quá trình triển khai dự án.  
+Mỗi sản phẩm cần được commit lên GitHub thông qua branch riêng và Pull Request trước khi merge vào `main`.
+
+---
+
+### 10.1. Thành viên 1 — Core Data & File I/O
+
+#### Vai trò chính
+
+Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trình, bao gồm:
+
+- Định nghĩa các kiểu dữ liệu chính.
+- Tự cài đặt cấu trúc dữ liệu `DynamicArray`.
+- Xây dựng module đọc/ghi dữ liệu từ file text.
+- Chuẩn bị dữ liệu mẫu ban đầu.
+- Hỗ trợ các thành viên khác khi tích hợp dữ liệu.
+
+#### Sản phẩm cần hoàn thành
+
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
+|---|---|---|---|---|
+| 1 | Định nghĩa kiểu dữ liệu chính | `source/types.h` | Khai báo các struct `Student`, `Subject`, `CourseClass`, `ScoreRecord` | Tuần 1 |
+| 2 | Header cho mảng động | `source/dynarray.h` | Khai báo struct `DynamicArray` và prototype các hàm thao tác mảng động | Tuần 1 |
+| 3 | Cài đặt mảng động | `source/dynarray.c` | Cài các hàm `da_init`, `da_add`, `da_get`, `da_remove`, `da_update`, `da_resize`, `da_find`, `da_clear` | Tuần 1–2 |
+| 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số | Tuần 2 |
+| 5 | Hàm tách dòng dữ liệu | `splitLine` trong `fileio.c` | Tách dữ liệu theo ký tự `|`, kiểm tra đủ số trường, xử lý dòng sai định dạng | Tuần 2 |
+| 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính | Tuần 2 |
+| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test-note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
+| 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết | Tuần 5 |
+
+#### Các hàm tối thiểu cần có
+
+```c
+void da_init(DynamicArray* arr, size_t elemSize);
+void da_add(DynamicArray* arr, void* elem);
+void* da_get(DynamicArray* arr, int index);
+void da_remove(DynamicArray* arr, int index);
+void da_update(DynamicArray* arr, int index, void* elem);
+void da_resize(DynamicArray* arr);
+int da_find(DynamicArray* arr, void* key, CompareFn cmp);
+void da_clear(DynamicArray* arr);
+```
+
+Các hàm File I/O tối thiểu:
+
+```c
+void loadStudents(DynamicArray* students, const char* path);
+void saveStudents(DynamicArray* students, const char* path);
+
+void loadSubjects(DynamicArray* subjects, const char* path);
+void saveSubjects(DynamicArray* subjects, const char* path);
+
+void loadCourseClasses(DynamicArray* classes, const char* path);
+void saveCourseClasses(DynamicArray* classes, const char* path);
+
+void loadScores(DynamicArray* scores, const char* path);
+void saveScores(DynamicArray* scores, const char* path);
+```
+
+#### Tiêu chí hoàn thành
+
+- Chương trình đọc được dữ liệu từ thư mục `data/`.
+- Chương trình không bị crash khi file rỗng.
+- Chương trình bỏ qua được dòng sai định dạng.
+- Dữ liệu sau khi thêm/sửa/xóa có thể lưu lại vào file.
+- Các hàm trong `dynarray.h` có prototype rõ ràng để thành viên khác sử dụng.
+- Không để rò rỉ bộ nhớ nghiêm trọng ở các thao tác cơ bản.
+
+---
+
+### 10.2. Thành viên 2 — Business Logic & Algorithms
+
+#### Vai trò chính
+
+Thành viên 2 phụ trách phần xử lý nghiệp vụ và thuật toán của chương trình, bao gồm:
+
+- Quản lý sinh viên.
+- Quản lý môn học.
+- Quản lý lớp học phần.
+- Quản lý điểm số.
+- Tính điểm tổng kết, GPA hệ 10, GPA hệ 4.
+- Cài đặt thuật toán tìm kiếm và sắp xếp.
+
+#### Sản phẩm cần hoàn thành
+
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
+|---|---|---|---|---|
+| 1 | CRUD sinh viên | `source/student.h`, `source/student.c` | Thêm, sửa, xóa, tìm sinh viên theo MSSV, họ tên, lớp | Tuần 2–3 |
+| 2 | CRUD môn học | `source/subject.h`, `source/subject.c` | Thêm, sửa, xóa, tìm môn học theo mã môn hoặc tên môn | Tuần 2–3 |
+| 3 | Quản lý lớp học phần | `source/courseclass.h`, `source/courseclass.c` | Tạo/xóa lớp học phần, quản lý danh sách lớp học phần | Tuần 2–3 |
+| 4 | Quản lý điểm số | `source/score.h`, `source/score.c` | Nhập điểm quá trình, điểm thi, cập nhật điểm, tìm điểm theo MSSV hoặc mã lớp học phần | Tuần 3 |
+| 5 | Tính điểm và GPA | `source/gpa.h`, `source/gpa.c` | Tính `diemTK`, GPA hệ 10, GPA hệ 4, xếp loại học lực | Tuần 3 |
+| 6 | Tìm kiếm tuyến tính | `source/search.h`, `source/search.c` | Cài `linearSearch` dùng cho tìm kiếm dữ liệu chưa sắp xếp | Tuần 3 |
+| 7 | Tìm kiếm nhị phân | `source/search.h`, `source/search.c` | Cài `binarySearch`, chỉ dùng sau khi mảng đã được sắp xếp | Tuần 3 |
+| 8 | Thuật toán sắp xếp | `source/sort.h`, `source/sort.c` | Cài `bubbleSort`, `selectionSort`, `quickSort` nếu còn thời gian | Tuần 3 |
+| 9 | Hỗ trợ báo cáo kỹ thuật | `report/` hoặc `docs/` | Viết phần giải thích thuật toán, độ phức tạp và công thức tính điểm | Tuần 5 |
+| 10 | Sửa lỗi logic cuối kỳ | Các file nghiệp vụ | Sửa lỗi còn sót sau kiểm thử tích hợp | Tuần 4–5 |
+
+#### Các chức năng nghiệp vụ tối thiểu cần có
+
+```c
+int addStudent(DynamicArray* students, Student newStudent);
+int editStudent(DynamicArray* students, const char* mssv, Student updatedStudent);
+int deleteStudent(DynamicArray* students, const char* mssv);
+int findStudentByMSSV(DynamicArray* students, const char* mssv);
+int findStudentByName(DynamicArray* students, const char* name);
+```
+
+```c
+int addSubject(DynamicArray* subjects, Subject newSubject);
+int editSubject(DynamicArray* subjects, const char* maMon, Subject updatedSubject);
+int deleteSubject(DynamicArray* subjects, const char* maMon);
+int findSubjectByCode(DynamicArray* subjects, const char* maMon);
+```
+
+```c
+int addScore(DynamicArray* scores, ScoreRecord newScore);
+int updateScore(DynamicArray* scores, const char* mssv, const char* maLHP, ScoreRecord updatedScore);
+float calcDiemTK(float diemQT, float diemThi);
+float calcGPA10(DynamicArray* scores, DynamicArray* subjects);
+float quyDoiHe4(float diemTK);
+```
+
+#### Công thức cần cài đặt đúng
+
+```text
+DiemTK = 0.4 * DiemQT + 0.6 * DiemThi
+```
+
+```text
+GPA10 = Σ(DiemTK × SoTinChi) / Σ(SoTinChi)
+```
+
+```text
+GPA4 = Σ(DiemHe4 × SoTinChi) / Σ(SoTinChi)
+```
+
+#### Tiêu chí hoàn thành
+
+- Có đủ CRUD cho sinh viên, môn học và lớp học phần.
+- Không cho phép thêm dữ liệu bị trùng khóa chính.
+- Tính đúng điểm tổng kết.
+- Tính đúng GPA hệ 10 và GPA hệ 4.
+- Có ít nhất hai thuật toán sắp xếp cơ bản.
+- Có tìm kiếm tuyến tính và tìm kiếm nhị phân.
+- Các hàm nghiệp vụ có thể được gọi từ module giao diện của Thành viên 3.
+- Code có comment ở những đoạn thuật toán quan trọng.
+
+---
+
+### 10.3. Thành viên 3 — Console UI, Validation & Documentation
+
+#### Vai trò chính
+
+Thành viên 3 phụ trách phần giao diện console, kiểm tra dữ liệu đầu vào, báo cáo kết quả và tài liệu dự án.
+
+Các nhiệm vụ chính:
+
+- Xây dựng menu chính và các submenu.
+- Tích hợp giao diện với các module của Thành viên 1 và Thành viên 2.
+- Kiểm tra dữ liệu đầu vào.
+- In bảng điểm, bảng danh sách, báo cáo thống kê.
+- Thiết kế test case và chụp ảnh kiểm thử.
+- Viết báo cáo Word và hoàn thiện tài liệu nộp bài.
+
+#### Sản phẩm cần hoàn thành
+
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
+|---|---|---|---|---|
+| 1 | Menu chính | `source/ui.h`, `source/ui.c`, `source/main.c` | Xây dựng menu console vòng lặp cho đến khi người dùng chọn thoát | Tuần 2 |
+| 2 | Submenu quản lý sinh viên | `source/ui.c` | Giao diện gọi các chức năng thêm, sửa, xóa, tìm kiếm sinh viên | Tuần 2–3 |
+| 3 | Submenu quản lý môn học | `source/ui.c` | Giao diện gọi các chức năng quản lý môn học | Tuần 2–3 |
+| 4 | Submenu quản lý lớp học phần | `source/ui.c` | Giao diện gọi các chức năng quản lý lớp học phần | Tuần 3 |
+| 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm | Tuần 3 |
+| 6 | Module validation | `source/validation.h`, `source/validation.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực, dữ liệu rỗng | Tuần 3 |
+| 7 | Module báo cáo | `source/report.h`, `source/report.c` | In bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng | Tuần 4 |
+| 8 | Bảng test case | `docs/test-plan.md` hoặc `report/` | Viết danh sách test case từ TC01 đến TC14 | Tuần 4 |
+| 9 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho các test case chính | Tuần 4–5 |
+| 10 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` | Viết báo cáo cuối kỳ theo đúng thể thức | Tuần 5 |
+| 11 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ | Tuần 5 |
+| 12 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README | Tuần 5 |
+
+#### Các hàm giao diện và validation tối thiểu cần có
+
+```c
+void showMainMenu();
+void showStudentMenu();
+void showSubjectMenu();
+void showCourseClassMenu();
+void showScoreMenu();
+void displayTable();
+void displayScoreCard();
+```
+
+```c
+int validateMSSV(const char* mssv);
+int validateScore(float score);
+int validateDate(const char* date);
+int isKeyDuplicate(DynamicArray* arr, const char* key);
+int readInt(const char* message);
+float readFloat(const char* message);
+```
+
+#### Các báo cáo cần in được
+
+```text
+Bảng danh sách sinh viên
+Bảng danh sách môn học
+Bảng điểm của một sinh viên
+Bảng điểm của một lớp học phần
+Bảng xếp hạng theo GPA
+```
+
+#### Tiêu chí hoàn thành
+
+- Menu dễ dùng, có hướng dẫn rõ ràng cho người nhập.
+- Người dùng nhập sai thì chương trình báo lỗi và cho nhập lại.
+- Không để chương trình crash khi nhập dữ liệu sai kiểu.
+- Các bảng hiển thị rõ ràng trên console.
+- Có đủ ảnh kiểm thử cho các chức năng chính.
+- Báo cáo Word đầy đủ nội dung kỹ thuật, ảnh minh chứng và kết luận.
+- README được cập nhật đúng với trạng thái cuối cùng của dự án.
+
+---
+
+## 11. Bảng tổng hợp sản phẩm bàn giao theo thành viên
+
+| Thành viên | Nhóm sản phẩm chính | File/Thư mục cần có | Mức độ ưu tiên |
+|---|---|---|---|
+| Thành viên 1 | Core Data, DynamicArray, File I/O, dữ liệu mẫu | `types.h`, `dynarray.h/.c`, `fileio.h/.c`, `data/*.txt` | Cao |
+| Thành viên 2 | CRUD, xử lý điểm, GPA, tìm kiếm, sắp xếp | `student.h/.c`, `subject.h/.c`, `courseclass.h/.c`, `score.h/.c`, `gpa.h/.c`, `sort.h/.c`, `search.h/.c` | Cao |
+| Thành viên 3 | Console UI, validation, report, test, documentation | `main.c`, `ui.h/.c`, `validation.h/.c`, `report.h/.c`, `screenshots/`, `report/`, `README.md` | Cao |
+
+---
+
+## 12. Quy định nghiệm thu sản phẩm của từng thành viên
+
+Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ các điều kiện sau:
+
+```text
+[ ] Có file mã nguồn hoặc tài liệu tương ứng trong đúng thư mục.
+[ ] Code biên dịch được cùng toàn bộ chương trình.
+[ ] Không làm hỏng chức năng của thành viên khác.
+[ ] Có commit rõ ràng trên GitHub.
+[ ] Có Pull Request được review trước khi merge vào main.
+[ ] Có mô tả ngắn trong Pull Request về nội dung đã làm.
+[ ] Với chức năng quan trọng, có ảnh hoặc test case minh chứng.
+```
+
+---
+
+## 13. Quy tắc đặt tên branch theo từng thành viên
+
+Để dễ quản lý, mỗi thành viên nên đặt branch theo nhóm việc mình phụ trách.
+
+### Thành viên 1
+
+```text
+feature/types-definition
+feature/dynamic-array
+feature/file-io
+feature/sample-data
+```
+
+### Thành viên 2
+
+```text
+feature/student-crud
+feature/subject-crud
+feature/courseclass-management
+feature/score-management
+feature/gpa-calculation
+feature/search-sort
+```
+
+### Thành viên 3
+
+```text
+feature/console-ui
+feature/input-validation
+feature/report-output
+docs/test-plan
+docs/final-report
+docs/update-readme
+```
+
+---
+
+## 14. Gợi ý Issue tương ứng với từng sản phẩm
+
+Nhóm nên tạo các Issue trên GitHub tương ứng với từng sản phẩm cần bàn giao.
+
+| Issue | Người phụ trách | Nội dung |
+|---|---|---|
+| `#1` | TV1 | Tạo `types.h` và định nghĩa các struct chính |
+| `#2` | TV1 | Cài đặt `DynamicArray` |
+| `#3` | TV1 | Cài đặt module File I/O |
+| `#4` | TV1 | Chuẩn bị dữ liệu mẫu trong thư mục `data/` |
+| `#5` | TV2 | Cài CRUD sinh viên |
+| `#6` | TV2 | Cài CRUD môn học |
+| `#7` | TV2 | Cài quản lý lớp học phần |
+| `#8` | TV2 | Cài quản lý điểm số |
+| `#9` | TV2 | Cài tính GPA và xếp loại |
+| `#10` | TV2 | Cài thuật toán tìm kiếm và sắp xếp |
+| `#11` | TV3 | Xây dựng menu console |
+| `#12` | TV3 | Cài validation dữ liệu đầu vào |
+| `#13` | TV3 | Cài chức năng in bảng điểm và báo cáo |
+| `#14` | TV3 | Viết test plan và chụp ảnh kiểm thử |
+| `#15` | TV3 | Hoàn thiện báo cáo Word và README |
+
+---
+
+
+## 15. Kế hoạch kiểm thử
 
 Một số test case chính:
 
@@ -301,9 +604,9 @@ Một số test case chính:
 
 ---
 
-## 12. Hướng dẫn build và chạy chương trình
+## 16. Hướng dẫn build và chạy chương trình
 
-### 12.1. Yêu cầu môi trường
+### 16.1. Yêu cầu môi trường
 
 Cần cài đặt:
 
@@ -311,14 +614,14 @@ Cần cài đặt:
 - Make, nếu sử dụng Makefile.
 - Git, nếu muốn clone repo từ GitHub.
 
-### 12.2. Clone repository
+### 16.2. Clone repository
 
 ```bash
 git clone https://github.com/<ten-nhom>/<ten-repo>.git
 cd <ten-repo>
 ```
 
-### 12.3. Build chương trình
+### 16.3. Build chương trình
 
 Nếu dùng Makefile:
 
@@ -333,7 +636,7 @@ Nếu chưa có Makefile, có thể biên dịch thủ công:
 gcc main.c dynarray.c fileio.c student.c subject.c courseclass.c score.c gpa.c sort.c search.c ui.c validation.c report.c -o qlsv
 ```
 
-### 12.4. Chạy chương trình
+### 16.4. Chạy chương trình
 
 Trên Linux/macOS:
 
@@ -349,7 +652,7 @@ qlsv.exe
 
 ---
 
-## 13. Quy trình làm việc Git/GitHub của nhóm
+## 17. Quy trình làm việc Git/GitHub của nhóm
 
 Nhóm thống nhất không làm trực tiếp trên branch `main`.
 
@@ -389,9 +692,8 @@ compare: feature/add-student
 
 ---
 
-## 14. Tài liệu liên quan
+## 18. Tài liệu liên quan
 
-- Kế hoạch chi tiết dự án: `docs/KeHoachDuAn_QLSV_5Tuan.docx`
 - Báo cáo cuối kỳ: `report/BaoCao_QLSV_NhomXX.docx`
 - Ảnh kiểm thử: `screenshots/`
 - Dữ liệu mẫu: `data/`
