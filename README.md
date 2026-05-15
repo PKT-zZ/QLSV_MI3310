@@ -2,7 +2,7 @@
 
 ## 1. Giới thiệu dự án
 
-Dự án **Student Score Management System** là chương trình quản lý sinh viên và điểm số chạy trên giao diện console.
+Dự án **University Student Management System** là chương trình quản lý sinh viên và điểm số chạy trên giao diện console.
 
 Dự án được thực hiện bởi nhóm 3 sinh viên ngành Toán – Khoa học máy tính trong khuôn khổ môn học Kỹ thuật lập trình của Đại học Bách Khoa Hà Nội (HUST).
 
@@ -99,27 +99,218 @@ Các thực thể chính trong chương trình:
 - Binary Search.
 - Bubble Sort.
 - Selection Sort.
-- Quick Sort, nếu còn thời gian.
+- Quick Sort, nếu dư thời gian.
 
 ---
 
 ## 7. Định dạng file lưu trữ
 
-Dữ liệu được lưu bằng file text, sử dụng dấu `|` làm ký tự phân cách.
+Dữ liệu của chương trình được lưu bằng **file text thuần**, sử dụng định dạng CSV tự thiết kế với ký tự phân cách là dấu gạch đứng `|`.
 
-| File | Nội dung |
-|---|---|
-| `students.txt` | Thông tin sinh viên |
-| `subjects.txt` | Thông tin môn học |
-| `course_classes.txt` | Thông tin lớp học phần |
-| `scores.txt` | Thông tin điểm số |
+Nhóm chọn dấu `|` thay vì dấu phẩy `,` để hạn chế lỗi khi dữ liệu văn bản như họ tên, địa chỉ hoặc ghi chú có thể chứa dấu phẩy. Cách lưu này đơn giản hơn JSON/XML vì không cần dùng thư viện parser có sẵn, phù hợp với yêu cầu tự xử lý dữ liệu bằng C.
 
-Ví dụ file `students.txt`:
+---
+
+### 7.1. Quy ước chung
+
+- Mỗi file dữ liệu có một dòng tiêu đề ở dòng đầu tiên.
+- Mỗi dòng sau dòng tiêu đề tương ứng với một bản ghi.
+- Các trường trong một dòng được phân tách bằng ký tự `|`.
+- Không đặt ký tự `|` trong nội dung của một trường dữ liệu.
+- Không để dòng trống giữa các bản ghi.
+- Dữ liệu số thực dùng dấu chấm `.` làm dấu thập phân, ví dụ `8.5`, `7.25`.
+- Dữ liệu ngày sinh dùng định dạng `DD/MM/YYYY`.
+- Khi chương trình khởi động, dữ liệu được load từ các file trong thư mục `data/`.
+- Khi người dùng chọn thoát chương trình, toàn bộ dữ liệu hiện tại được ghi lại xuống file.
+
+---
+
+### 7.2. Danh sách file dữ liệu
+
+| File | Header | Ý nghĩa |
+|---|---|---|
+| `data/students.txt` | `MSSV\|HoTen\|Lop\|NgaySinh\|Email` | Lưu thông tin sinh viên |
+| `data/subjects.txt` | `MaMon\|TenMon\|SoTinChi` | Lưu thông tin môn học |
+| `data/course_classes.txt` | `MaLHP\|MaMon\|HocKy\|NamHoc` | Lưu thông tin lớp học phần |
+| `data/scores.txt` | `MSSV\|MaLHP\|DiemQT\|DiemThi\|DiemTK\|DiemHe4` | Lưu điểm của sinh viên theo từng lớp học phần |
+
+---
+
+### 7.3. Ví dụ dữ liệu mẫu
+
+#### `students.txt`
 
 ```txt
 MSSV|HoTen|Lop|NgaySinh|Email
 22000001|Nguyen Van An|K67-MT|15/08/2003|an.nva@sv.edu.vn
 22000002|Tran Thi Bich|K67-MT|20/03/2003|bich.tt@sv.edu.vn
+22000003|Le Hoang Cuong|K67-MT|05/11/2002|cuong.lh@sv.edu.vn
+```
+
+#### `subjects.txt`
+
+```txt
+MaMon|TenMon|SoTinChi
+KTLT|Ky Thuat Lap Trinh|3
+CTDL|Cau Truc Du Lieu|3
+CSDL|Co So Du Lieu|3
+```
+
+#### `course_classes.txt`
+
+```txt
+MaLHP|MaMon|HocKy|NamHoc
+KTLT_K67_1|KTLT|1|2024
+CTDL_K67_2|CTDL|2|2024
+CSDL_K67_2|CSDL|2|2024
+```
+
+#### `scores.txt`
+
+```txt
+MSSV|MaLHP|DiemQT|DiemThi|DiemTK|DiemHe4
+22000001|KTLT_K67_1|8.5|7.0|7.60|3.0
+22000002|KTLT_K67_1|9.0|8.5|8.70|4.0
+22000003|CTDL_K67_2|7.0|7.5|7.30|3.0
+```
+
+---
+
+### 7.4. Ý nghĩa các trường dữ liệu
+
+#### Sinh viên — `Student`
+
+| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
+|---|---|---|
+| `MSSV` | `char[12]` | Mã số sinh viên, khóa chính, không được trùng |
+| `HoTen` | `char[60]` | Họ và tên sinh viên |
+| `Lop` | `char[20]` | Lớp hành chính của sinh viên |
+| `NgaySinh` | `char[12]` | Ngày sinh, định dạng `DD/MM/YYYY` |
+| `Email` | `char[60]` | Email sinh viên |
+
+#### Môn học — `Subject`
+
+| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
+|---|---|---|
+| `MaMon` | `char[10]` | Mã môn học, khóa chính, không được trùng |
+| `TenMon` | `char[80]` | Tên môn học |
+| `SoTinChi` | `int` | Số tín chỉ của môn học |
+
+#### Lớp học phần — `CourseClass`
+
+| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
+|---|---|---|
+| `MaLHP` | `char[15]` | Mã lớp học phần, khóa chính, không được trùng |
+| `MaMon` | `char[10]` | Mã môn học tương ứng, tham chiếu đến `subjects.txt` |
+| `HocKy` | `char[10]` | Học kỳ, ví dụ `1`, `2`, `He` |
+| `NamHoc` | `int` | Năm học |
+
+#### Điểm số — `ScoreRecord`
+
+| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
+|---|---|---|
+| `MSSV` | `char[12]` | Mã sinh viên, tham chiếu đến `students.txt` |
+| `MaLHP` | `char[15]` | Mã lớp học phần, tham chiếu đến `course_classes.txt` |
+| `DiemQT` | `float` | Điểm quá trình, từ `0.0` đến `10.0` |
+| `DiemThi` | `float` | Điểm thi, từ `0.0` đến `10.0` |
+| `DiemTK` | `float` | Điểm tổng kết, tính theo công thức `0.4 * DiemQT + 0.6 * DiemThi` |
+| `DiemHe4` | `float` | Điểm quy đổi sang hệ 4 |
+
+---
+
+### 7.5. Quan hệ giữa các file dữ liệu
+
+Các file dữ liệu có quan hệ logic với nhau như sau:
+
+```text
+students.txt
+    MSSV
+      |
+      | được tham chiếu bởi
+      v
+scores.txt
+    MSSV + MaLHP
+
+course_classes.txt
+    MaLHP
+      |
+      | được tham chiếu bởi
+      v
+scores.txt
+    MSSV + MaLHP
+
+subjects.txt
+    MaMon
+      |
+      | được tham chiếu bởi
+      v
+course_classes.txt
+    MaLHP + MaMon
+```
+
+Quy ước quan trọng:
+
+- `MSSV` là khóa chính của sinh viên.
+- `MaMon` là khóa chính của môn học.
+- `MaLHP` là khóa chính của lớp học phần.
+- Cặp `(MSSV, MaLHP)` là khóa duy nhất trong file `scores.txt`.
+- Một sinh viên được xem là tham gia một lớp học phần nếu tồn tại bản ghi tương ứng trong `scores.txt`.
+- Không cần tạo thêm file `enrollments.txt` trong phiên bản hiện tại để giữ thiết kế đơn giản.
+
+---
+
+### 7.6. Cơ chế load và save dữ liệu
+
+Khi chương trình khởi động:
+
+1. Gọi hàm `loadAllData()`.
+2. Đọc lần lượt các file:
+   - `data/students.txt`
+   - `data/subjects.txt`
+   - `data/course_classes.txt`
+   - `data/scores.txt`
+3. Bỏ qua dòng header đầu tiên.
+4. Tách từng dòng dữ liệu bằng ký tự `|`.
+5. Kiểm tra số lượng trường dữ liệu.
+6. Chuyển dữ liệu sang các struct tương ứng.
+7. Thêm bản ghi vào `DynamicArray`.
+
+Khi người dùng chọn thoát chương trình:
+
+1. Gọi hàm `saveAllData()`.
+2. Ghi lại toàn bộ dữ liệu hiện tại từ các `DynamicArray` xuống file.
+3. Ghi dòng header trước.
+4. Ghi từng bản ghi theo đúng định dạng đã quy định.
+
+---
+
+### 7.7. Xử lý lỗi khi đọc file
+
+Module File I/O cần xử lý các trường hợp sau:
+
+| Tình huống | Cách xử lý đề xuất |
+|---|---|
+| File không tồn tại | Tạo mảng rỗng, hiển thị cảnh báo, không làm chương trình crash |
+| File rỗng | Tạo `DynamicArray` rỗng |
+| Dòng thiếu trường | Bỏ qua dòng lỗi, hiển thị cảnh báo |
+| Dữ liệu số sai định dạng | Bỏ qua dòng lỗi hoặc gán giá trị mặc định nếu phù hợp |
+| Điểm ngoài khoảng `0–10` | Không nạp bản ghi điểm đó |
+| Trùng khóa chính | Giữ bản ghi đầu tiên, bỏ qua bản ghi trùng và hiển thị cảnh báo |
+
+---
+
+### 7.8. Ghi chú triển khai
+
+Các đường dẫn file nên được khai báo tập trung trong một file header hoặc trong `fileio.c`, ví dụ:
+
+```c
+#define STUDENT_FILE "data/students.txt"
+#define SUBJECT_FILE "data/subjects.txt"
+#define COURSE_CLASS_FILE "data/course_classes.txt"
+#define SCORE_FILE "data/scores.txt"
+```
+
+Nhóm cần thống nhất rằng chương trình sẽ được chạy từ thư mục gốc của project. Khi đó các đường dẫn dạng `data/students.txt` sẽ hoạt động ổn định.
 ```
 
 ---
@@ -168,6 +359,7 @@ NHOM_XX_QLSV/
 ├── docs/
 └── README.md
 ```
+---
 ## 9. Lộ trình triển khai 5 tuần
 
 ### Tuần 1: Chốt thiết kế và xây dựng cấu trúc lõi
