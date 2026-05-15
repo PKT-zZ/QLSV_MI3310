@@ -27,14 +27,32 @@ Các mục tiêu chính:
 
 ## 3. Phạm vi chức năng
 
+Dự án tập trung vào đúng yêu cầu của bài tập lớn: xây dựng chương trình console quản lý sinh viên và điểm số, có đọc/ghi dữ liệu bằng file text, tự cài đặt cấu trúc dữ liệu và thuật toán cơ bản.
+
+### 3.1. Chức năng bắt buộc
+
 | Nhóm chức năng | Mô tả |
 |---|---|
-| Quản lý sinh viên | Thêm, sửa, xóa, tìm kiếm sinh viên theo MSSV, họ tên, lớp |
+| Quản lý sinh viên | Thêm, sửa, xóa, tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
 | Quản lý môn học | Thêm, sửa, xóa, tìm kiếm môn học theo mã môn hoặc tên môn |
-| Quản lý lớp học phần | Tạo, xóa lớp học phần, gắn sinh viên vào lớp |
-| Quản lý điểm số | Nhập điểm quá trình, điểm thi, tính điểm tổng kết |
-| Tính toán và báo cáo | Tính GPA hệ 10, GPA hệ 4, xếp loại học lực, in bảng điểm |
-| Thuật toán | Tìm kiếm tuyến tính, tìm kiếm nhị phân, Bubble Sort, Selection Sort, Quick Sort |
+| Quản lý lớp học phần | Tạo, sửa, xóa, tìm kiếm lớp học phần; mỗi lớp học phần gắn với một môn học |
+| Quản lý điểm số | Nhập và cập nhật điểm cho sinh viên theo MSSV và mã lớp học phần/mã môn |
+| Tính toán kết quả học tập | Tính điểm tổng kết, điểm trung bình học kỳ hoặc tích lũy theo hệ 10; có thể quy đổi hệ 4 nếu nhóm triển khai |
+| Xếp loại học lực | Xếp loại học lực dựa trên điểm trung bình |
+| Tìm kiếm | Tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
+| Sắp xếp | Sắp xếp danh sách sinh viên theo MSSV, họ tên hoặc điểm trung bình |
+| Báo cáo | Hiển thị bảng điểm của một sinh viên và bảng điểm của một lớp học phần |
+
+### 3.2. Chức năng mở rộng nếu còn thời gian
+
+Các chức năng sau không bắt buộc, chỉ thực hiện sau khi các chức năng cốt lõi đã hoàn thành ổn định:
+
+| Chức năng mở rộng | Ghi chú |
+|---|---|
+| Tìm kiếm nhị phân | Chỉ áp dụng khi danh sách đã được sắp xếp theo đúng khóa |
+| Quick Sort | Không bắt buộc; chỉ dùng để nâng cao phần thuật toán |
+| Bảng xếp hạng theo GPA | Có thể thêm nếu đã hoàn thành bảng điểm sinh viên và bảng điểm lớp học phần |
+| Xuất báo cáo ra file riêng | Không bắt buộc, vì yêu cầu chính chỉ cần hiển thị báo cáo trên console |
 
 ---
 
