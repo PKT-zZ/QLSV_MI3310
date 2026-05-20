@@ -37,6 +37,10 @@ Dự án tập trung vào đúng yêu cầu của bài tập lớn: xây dựng 
 | Quản lý sinh viên | Thêm, sửa, xóa, tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
 | Quản lý môn học | Thêm, sửa, xóa, tìm kiếm môn học theo mã môn hoặc tên môn |
 | Quản lý lớp học phần | Tạo, sửa, xóa, tìm kiếm lớp học phần; mỗi lớp học phần gắn với một môn học |
+
+> **⚠ Ràng buộc toàn vẹn tham chiếu (bắt buộc thực thi):**  
+> Tuyệt đối **không cho phép xóa** một Sinh viên, Môn học hoặc Lớp học phần nếu thực thể đó đang được tham chiếu bởi ít nhất một bản ghi trong file `scores.txt`.  
+> Trước khi thực hiện xóa, chương trình **phải kiểm tra** sự tồn tại của bản ghi liên quan trong `scores.txt`. Nếu có, hiển thị thông báo lỗi và hủy thao tác xóa.
 | Quản lý điểm số | Nhập và cập nhật điểm cho sinh viên theo MSSV và mã lớp học phần/mã môn |
 | Tính toán kết quả học tập | Tính điểm tổng kết, điểm trung bình học kỳ hoặc tích lũy theo hệ 10; có thể quy đổi hệ 4 nếu nhóm triển khai |
 | Xếp loại học lực | Xếp loại học lực dựa trên điểm trung bình |
@@ -75,8 +79,7 @@ Các chức năng sau **không bắt buộc**, chỉ thực hiện sau khi các 
 
 Dự án tuân thủ các ràng buộc sau:
 
-- Không sử dụng STL, Collections hoặc container có sẵn.
-- Không sử dụng hàm `sort()`, `search()` hoặc thư viện thuật toán có sẵn.
+- Không sử dụng các thư viện cấu trúc dữ liệu hoặc hàm thuật toán có sẵn ngoài các thư viện chuẩn (như `stdio.h`, `string.h`, `stdlib.h`).
 - Không sử dụng JSON/XML parser.
 - Không sử dụng cơ sở dữ liệu thật.
 - Cấu trúc dữ liệu và thuật toán phải tự cài đặt từ đầu.
@@ -96,25 +99,45 @@ Dự án tuân thủ các ràng buộc sau:
 
 Dự án sử dụng **Dynamic Array tự cài đặt** làm cấu trúc dữ liệu lõi. Nhóm có thể chọn một trong hai cách triển khai tùy theo sở thích và khả năng:
 
-**Lựa chọn 1 — DynamicArray tổng quát (khuyến nghị):**
+**Lựa chọn 1 — Mảng động định kiểu riêng / Typed Dynamic Array (khuyến nghị):**
 
-Dùng `void*` để lưu trữ bất kỳ kiểu dữ liệu nào. Một cấu trúc dùng được cho cả `Student`, `Subject`, `CourseClass` và `ScoreRecord`.
+Khai báo một struct mảng động **riêng biệt cho từng kiểu dữ liệu**. Cách tiếp cận này an toàn kiểu dữ liệu, không cần ép kiểu `void*`, giảm thiểu nguy cơ nhầm kiểu và rò rỉ bộ nhớ.
 
 ```c
 typedef struct {
-    void*  data;       // Vùng bộ nhớ chứa các phần tử
-    int    size;       // Số phần tử hiện tại
-    int    capacity;   // Dung lượng tối đa hiện tại
-    size_t elemSize;   // Kích thước mỗi phần tử (bytes)
-} DynamicArray;
+    Student* data;   // Con trỏ đến vùng bộ nhớ cấp phát động
+    int      size;   // Số phần tử hiện tại
+    int      capacity;  // Dung lượng tối đa hiện tại
+} StudentArray;
+
+typedef struct {
+    Subject* data;
+    int      size;
+    int      capacity;
+} SubjectArray;
+
+typedef struct {
+    CourseClass* data;
+    int          size;
+    int          capacity;
+} CourseClassArray;
+
+typedef struct {
+    ScoreRecord* data;
+    int          size;
+    int          capacity;
+} ScoreArray;
 ```
 
-Ưu điểm: viết một lần, dùng lại cho mọi kiểu dữ liệu.  
-Nhược điểm: cần cast `void*` khi truy cập, dễ nhầm kiểu nếu không cẩn thận.
+Ưu điểm: an toàn kiểu dữ liệu, truy cập trực tiếp không cần cast, dễ debug.  
+Nhược điểm: phải viết lặp bộ hàm thao tác cho từng struct (nhưng logic mỗi hàm đều giống nhau và ngắn gọn).
+
+> **⚠ Lý do không khuyến nghị dùng mảng `void*` tổng quát:**  
+> Cách dùng `void*` và `elemSize` (con trỏ dạng `(char*)arr->data + i * arr->elemSize`) yêu cầu ép kiểu thủ công mỗi khi truy cập phần tử. Với nhóm chưa thành thạo con trỏ, đây là nguồn gốc thường gặp của lỗi nhầm kiểu, truy cập sai vùng nhớ và memory leak khó phát hiện. **Hãy dùng Lựa chọn 1 hoặc Lựa chọn 2 thay thế.**
 
 **Lựa chọn 2 — Mảng tĩnh đủ lớn (đơn giản hơn, an toàn hơn cho nhóm mới):**
 
-Khai báo riêng một mảng tĩnh cho mỗi loại dữ liệu. Không cần `void*` hay `malloc`.
+Khai báo riêng một mảng tĩnh cho mỗi loại dữ liệu. Không cần `malloc`.
 
 ```c
 #define MAX_STUDENTS 500
@@ -128,22 +151,24 @@ typedef struct {
 Ưu điểm: không lo quản lý bộ nhớ, truy cập trực tiếp bằng chỉ số.  
 Nhược điểm: phải viết lặp cho từng kiểu dữ liệu; không linh hoạt khi dữ liệu vượt giới hạn.
 
-> **Khuyến nghị:** Nếu nhóm chưa quen `void*` và con trỏ hàm, hãy dùng Lựa chọn 2 trước để có chương trình chạy được sớm. Có thể nâng cấp lên Lựa chọn 1 sau nếu còn thời gian.
+> **Khuyến nghị:** Nếu nhóm chưa quen với cấp phát bộ nhớ động, hãy dùng Lựa chọn 2 trước để có chương trình chạy được sớm. Có thể nâng cấp lên Lựa chọn 1 sau nếu còn thời gian.
 
 ---
 
-Các thao tác cần cài đặt (áp dụng cho Lựa chọn 1):
+Các thao tác cần cài đặt (áp dụng cho Lựa chọn 1 — Typed Dynamic Array):
 
-| Hàm | Mô tả |
+| Hàm (ví dụ cho `StudentArray`) | Mô tả |
 |---|---|
-| `da_init` | Khởi tạo mảng động |
-| `da_add` | Thêm phần tử |
-| `da_get` | Lấy phần tử theo chỉ số |
-| `da_remove` | Xóa phần tử |
-| `da_update` | Cập nhật phần tử |
-| `da_resize` | Mở rộng dung lượng mảng |
-| `da_find` | Tìm kiếm phần tử |
-| `da_clear` | Giải phóng bộ nhớ |
+| `sa_init` | Khởi tạo mảng động sinh viên |
+| `sa_add` | Thêm phần tử `Student` |
+| `sa_get` | Lấy con trỏ phần tử theo chỉ số |
+| `sa_remove` | Xóa phần tử theo chỉ số |
+| `sa_update` | Cập nhật phần tử theo chỉ số |
+| `sa_resize` | Mở rộng dung lượng mảng |
+| `sa_find` | Tìm kiếm phần tử |
+| `sa_clear` | Giải phóng bộ nhớ |
+
+Áp dụng tương tự với các prefix `suba_` (`SubjectArray`), `cca_` (`CourseClassArray`), `sca_` (`ScoreArray`).
 
 ### 6.2. Các struct chính
 
@@ -164,7 +189,7 @@ Các thực thể chính trong chương trình:
 
 **Mở rộng (không bắt buộc, chỉ làm nếu còn thời gian):**
 
-- Binary Search — chỉ áp dụng sau khi mảng đã được sắp xếp theo đúng khóa tìm kiếm.
+- Binary Search — chỉ áp dụng sau khi mảng đã được sắp xếp; **lưu ý quan trọng:** Binary Search chỉ cho kết quả đúng nếu mảng đã được sắp xếp **chính xác theo trường dữ liệu đang được dùng làm khóa tìm kiếm** (ví dụ: nếu tìm theo MSSV thì mảng phải đang được sắp xếp theo MSSV, không phải theo tên hay điểm). Dùng sai trường sắp xếp sẽ trả về kết quả sai hoặc không tìm thấy dù dữ liệu tồn tại.
 - Quick Sort — thuật toán sắp xếp nhanh hơn, dùng để minh họa trong báo cáo.
 
 ---
@@ -282,6 +307,9 @@ MSSV|MaLHP|DiemQT|DiemThi|DiemTK|DiemHe4
 | `DiemTK` | `float` | Điểm tổng kết, tính theo công thức `0.4 * DiemQT + 0.6 * DiemThi` |
 | `DiemHe4` | `float` | Điểm quy đổi sang hệ 4 |
 
+> **Ghi chú thiết kế — Phi chuẩn hóa có chủ đích (Denormalization):**  
+> Việc lưu sẵn `DiemTK` và `DiemHe4` trực tiếp vào file `scores.txt` là **thiết kế phi chuẩn hóa có chủ đích**. Về lý thuyết, hai trường này có thể tính lại bất cứ lúc nào từ `DiemQT` và `DiemThi`. Tuy nhiên, lưu sẵn giúp giảm thiểu việc tính toán lại mỗi lần load file và đơn giản hóa phần đọc/ghi dữ liệu trong phạm vi dự án này. Khi cập nhật `DiemQT` hoặc `DiemThi`, chương trình **phải tính lại và cập nhật đồng thời** `DiemTK` và `DiemHe4`.
+
 ---
 
 ### 7.5. Quan hệ giữa các file dữ liệu
@@ -290,28 +318,22 @@ Các file dữ liệu có quan hệ logic với nhau như sau:
 
 ```text
 students.txt
-    MSSV
+    MSSV  (PK)
       |
-      | được tham chiếu bởi
+      | MSSV là khóa ngoại (FK) trong scores.txt
       v
 scores.txt
-    MSSV + MaLHP
+    MSSV + MaLHP  (khóa duy nhất)
 
 course_classes.txt
-    MaLHP
-      |
-      | được tham chiếu bởi
-      v
-scores.txt
+    MaLHP  (PK)
+    MaMon  (FK) ──────────────────────────────┐
+      |                                        |
+      | MaLHP là khóa ngoại (FK) trong         | MaMon tham chiếu đến
+      | scores.txt                             v
+      v                                 subjects.txt
+scores.txt                                  MaMon  (PK)
     MSSV + MaLHP
-
-subjects.txt
-    MaMon
-      |
-      | được tham chiếu bởi
-      v
-course_classes.txt
-    MaLHP + MaMon
 ```
 
 Quy ước quan trọng:
@@ -359,6 +381,15 @@ Module File I/O cần xử lý các trường hợp sau:
 | File không tồn tại | Tạo mảng rỗng, hiển thị cảnh báo, không làm chương trình crash |
 | File rỗng | Tạo mảng rỗng |
 | Dòng thiếu trường | Bỏ qua dòng lỗi, hiển thị cảnh báo |
+
+> **⚠ Bắt buộc tự viết hàm `splitString` — Tuyệt đối không dùng `strtok`:**  
+> Hàm `strtok()` của thư viện C **tự động bỏ qua các trường rỗng liên tiếp**, ví dụ chuỗi `22000001|KTLT_K67_1||7.0||` sẽ bị `strtok` nhảy qua các `||` mà không trả về chuỗi rỗng, làm lệch toàn bộ vị trí cột và phá vỡ cấu trúc dữ liệu.  
+> Nhóm **phải tự viết hàm `splitString`** duyệt chuỗi bằng con trỏ, tách theo ký tự `|`, và **giữ nguyên các trường rỗng** dưới dạng chuỗi rỗng `""`. Ví dụ prototype:
+> ```c
+> /* Trả về số trường đã tách được; fields[] chứa con trỏ đến từng trường.
+>    Các trường rỗng (||) được giữ lại dưới dạng chuỗi rỗng "". */
+> int splitString(char* line, char delimiter, char* fields[], int maxFields);
+> ```
 | Dữ liệu số sai định dạng | Bỏ qua dòng lỗi hoặc gán giá trị mặc định nếu phù hợp |
 | Điểm ngoài khoảng `0–10` | Không nạp bản ghi điểm đó |
 | Trùng khóa chính | Giữ bản ghi đầu tiên, bỏ qua bản ghi trùng và hiển thị cảnh báo |
@@ -555,7 +586,7 @@ Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trìn
 | 2 | Header cho mảng dữ liệu | `source/dynarray.h` | Khai báo struct và prototype các hàm thao tác mảng | Tuần 1 |
 | 3 | Cài đặt mảng dữ liệu | `source/dynarray.c` | Cài các hàm `da_init`, `da_add`, `da_get`, `da_remove`, `da_update`, `da_resize`, `da_find`, `da_clear` | Tuần 1–2 |
 | 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số | Tuần 2 |
-| 5 | Hàm tách dòng dữ liệu | `splitLine` trong `fileio.c` | Tách dữ liệu theo ký tự `\|`, kiểm tra đủ số trường, xử lý dòng sai định dạng | Tuần 2 |
+| 5 | Hàm tách dòng dữ liệu | `splitString` trong `fileio.c` | Tự viết hàm tách chuỗi bằng con trỏ theo ký tự `\|`, **tuyệt đối không dùng `strtok`** (xem lý do tại Mục 7.7). Hàm phải giữ nguyên trường rỗng (`\|\|`), kiểm tra đủ số trường và xử lý dòng sai định dạng | Tuần 2 |
 | 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính | Tuần 2 |
 | 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test-note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
 | 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết | Tuần 5 |
@@ -563,30 +594,31 @@ Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trìn
 #### Các hàm tối thiểu cần có
 
 ```c
-void da_init(DynamicArray* arr, size_t elemSize);
-void da_add(DynamicArray* arr, void* elem);
-void* da_get(DynamicArray* arr, int index);
-void da_remove(DynamicArray* arr, int index);
-void da_update(DynamicArray* arr, int index, void* elem);
-void da_resize(DynamicArray* arr);
-int  da_find(DynamicArray* arr, void* key, CompareFn cmp);
-void da_clear(DynamicArray* arr);
+void sa_init(StudentArray* arr);
+void sa_add(StudentArray* arr, Student elem);
+Student* sa_get(StudentArray* arr, int index);
+void sa_remove(StudentArray* arr, int index);
+void sa_update(StudentArray* arr, int index, Student elem);
+void sa_resize(StudentArray* arr);
+int  sa_find(StudentArray* arr, const char* key);
+void sa_clear(StudentArray* arr);
+// Áp dụng tương tự: suba_* (SubjectArray), cca_* (CourseClassArray), sca_* (ScoreArray)
 ```
 
 Các hàm File I/O tối thiểu:
 
 ```c
-void loadStudents(DynamicArray* students, const char* path);
-void saveStudents(DynamicArray* students, const char* path);
+void loadStudents(StudentArray* students, const char* path);
+void saveStudents(StudentArray* students, const char* path);
 
-void loadSubjects(DynamicArray* subjects, const char* path);
-void saveSubjects(DynamicArray* subjects, const char* path);
+void loadSubjects(SubjectArray* subjects, const char* path);
+void saveSubjects(SubjectArray* subjects, const char* path);
 
-void loadCourseClasses(DynamicArray* classes, const char* path);
-void saveCourseClasses(DynamicArray* classes, const char* path);
+void loadCourseClasses(CourseClassArray* classes, const char* path);
+void saveCourseClasses(CourseClassArray* classes, const char* path);
 
-void loadScores(DynamicArray* scores, const char* path);
-void saveScores(DynamicArray* scores, const char* path);
+void loadScores(ScoreArray* scores, const char* path);
+void saveScores(ScoreArray* scores, const char* path);
 ```
 
 #### Tiêu chí hoàn thành
@@ -632,25 +664,26 @@ Thành viên 2 phụ trách phần xử lý nghiệp vụ và thuật toán củ
 #### Các chức năng nghiệp vụ tối thiểu cần có
 
 ```c
-int addStudent(DynamicArray* students, Student newStudent);
-int editStudent(DynamicArray* students, const char* mssv, Student updatedStudent);
-int deleteStudent(DynamicArray* students, const char* mssv);
-int findStudentByMSSV(DynamicArray* students, const char* mssv);
-int findStudentByName(DynamicArray* students, const char* name);
+int addStudent(StudentArray* students, Student newStudent);
+int editStudent(StudentArray* students, const char* mssv, Student updatedStudent);
+int deleteStudent(StudentArray* students, const char* mssv, ScoreArray* scores);
+int findStudentByMSSV(StudentArray* students, const char* mssv);
+int findStudentByName(StudentArray* students, const char* name);
 ```
 
 ```c
-int addSubject(DynamicArray* subjects, Subject newSubject);
-int editSubject(DynamicArray* subjects, const char* maMon, Subject updatedSubject);
-int deleteSubject(DynamicArray* subjects, const char* maMon);
-int findSubjectByCode(DynamicArray* subjects, const char* maMon);
+int addSubject(SubjectArray* subjects, Subject newSubject);
+int editSubject(SubjectArray* subjects, const char* maMon, Subject updatedSubject);
+int deleteSubject(SubjectArray* subjects, const char* maMon, ScoreArray* scores);
+int findSubjectByCode(SubjectArray* subjects, const char* maMon);
 ```
 
 ```c
-int   addScore(DynamicArray* scores, ScoreRecord newScore);
-int   updateScore(DynamicArray* scores, const char* mssv, const char* maLHP, ScoreRecord updated);
+int   addScore(ScoreArray* scores, ScoreRecord newScore);
+int   updateScore(ScoreArray* scores, const char* mssv, const char* maLHP, ScoreRecord updated);
 float calcDiemTK(float diemQT, float diemThi);
-float calcGPA10(DynamicArray* scores, DynamicArray* subjects);
+float calcGPA10(ScoreArray* scores, SubjectArray* subjects, const char* mssv);
+float calcGPA4(ScoreArray* scores, SubjectArray* subjects, const char* mssv);
 float quyDoiHe4(float diemTK);
 ```
 
@@ -671,6 +704,7 @@ GPA4 = Σ(DiemHe4 × SoTinChi) / Σ(SoTinChi)
 #### Tiêu chí hoàn thành
 
 - Có đủ CRUD cho sinh viên, môn học và lớp học phần.
+- **Không cho phép xóa** Sinh viên, Môn học hoặc Lớp học phần nếu đã tồn tại bản ghi liên quan trong `scores.txt` (xem ràng buộc toàn vẹn tham chiếu tại Mục 3.1).
 - Không cho phép thêm dữ liệu bị trùng khóa chính.
 - Tính đúng điểm tổng kết theo công thức.
 - Tính đúng GPA hệ 10.
@@ -729,7 +763,9 @@ void displayScoreCard();
 int   validateMSSV(const char* mssv);
 int   validateScore(float score);
 int   validateDate(const char* date);
-int   isKeyDuplicate(DynamicArray* arr, const char* key);
+int   isStudentKeyDuplicate(StudentArray* arr, const char* key);
+int   isSubjectKeyDuplicate(SubjectArray* arr, const char* key);
+int   isClassKeyDuplicate(CourseClassArray* arr, const char* key);
 int   readInt(const char* message);
 float readFloat(const char* message);
 ```
@@ -895,12 +931,14 @@ cd source
 make all
 ```
 
-Nếu chưa có Makefile, có thể biên dịch thủ công:
+Nếu chưa có Makefile, có thể biên dịch thủ công (chạy từ thư mục `source/`):
 
 ```bash
 gcc main.c dynarray.c fileio.c student.c subject.c courseclass.c \
-    score.c gpa.c sort.c search.c ui.c validation.c report.c -o qlsv
+    score.c gpa.c sort.c search.c ui.c validation.c report.c -o ../qlsv
 ```
+
+> **Lưu ý:** Lệnh trên được chạy từ bên trong thư mục `source/`, do đó `-o ../qlsv` sẽ đặt file thực thi ra **thư mục gốc** của project — nhất quán với lệnh chạy `./qlsv` ở Mục 16.4.
 
 ### 16.4. Chạy chương trình
 
