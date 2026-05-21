@@ -37,19 +37,21 @@ Dự án tập trung vào đúng yêu cầu của bài tập lớn: xây dựng 
 | Quản lý sinh viên | Thêm, sửa, xóa, tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
 | Quản lý môn học | Thêm, sửa, xóa, tìm kiếm môn học theo mã môn hoặc tên môn |
 | Quản lý lớp học phần | Tạo, sửa, xóa, tìm kiếm lớp học phần; mỗi lớp học phần gắn với một môn học |
-
-> **⚠ Ràng buộc toàn vẹn tham chiếu (bắt buộc thực thi):**  
-> Tuyệt đối **không cho phép xóa** một Sinh viên, Môn học hoặc Lớp học phần nếu thực thể đó đang được tham chiếu bởi ít nhất một bản ghi trong file `scores.txt`.  
-> Trước khi thực hiện xóa, chương trình **phải kiểm tra** sự tồn tại của bản ghi liên quan trong `scores.txt`. Nếu có, hiển thị thông báo lỗi và hủy thao tác xóa.
 | Quản lý điểm số | Nhập và cập nhật điểm cho sinh viên theo MSSV và mã lớp học phần/mã môn |
 | Tính toán kết quả học tập | Tính điểm tổng kết, điểm trung bình học kỳ hoặc tích lũy theo hệ 10; có thể quy đổi hệ 4 nếu nhóm triển khai |
 | Xếp loại học lực | Xếp loại học lực dựa trên điểm trung bình |
 | Tìm kiếm | Tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
 | Sắp xếp | Sắp xếp danh sách sinh viên theo MSSV, họ tên hoặc điểm trung bình |
 | Báo cáo | Hiển thị bảng điểm của một sinh viên và bảng điểm của một lớp học phần |
-- Không xóa Sinh viên nếu còn bản ghi điểm có MSSV đó trong scores.txt.
-- Không xóa Lớp học phần nếu còn bản ghi điểm có MaLHP đó trong scores.txt.
-- Không xóa Môn học nếu còn Lớp học phần nào trong course_classes.txt sử dụng MaMon đó.
+
+> **⚠ Ràng buộc toàn vẹn tham chiếu bắt buộc thực thi:**  
+> Chương trình phải kiểm tra dữ liệu liên quan trước khi xóa Sinh viên, Môn học hoặc Lớp học phần.
+>
+> - Không cho phép xóa **Sinh viên** nếu còn bản ghi điểm có `MSSV` tương ứng trong `scores.txt`.
+> - Không cho phép xóa **Lớp học phần** nếu còn bản ghi điểm có `MaLHP` tương ứng trong `scores.txt`.
+> - Không cho phép xóa **Môn học** nếu còn lớp học phần nào trong `course_classes.txt` sử dụng `MaMon` tương ứng.
+>
+> Nếu dữ liệu đang được tham chiếu, chương trình phải hiển thị thông báo lỗi và hủy thao tác xóa.
 
 ### 3.2. Chức năng mở rộng nếu còn thời gian
 
@@ -383,12 +385,14 @@ Module File I/O cần xử lý các trường hợp sau:
 | File không tồn tại | Tạo mảng rỗng, hiển thị cảnh báo, không làm chương trình crash |
 | File rỗng | Tạo mảng rỗng |
 | Dòng thiếu trường | Bỏ qua dòng lỗi, hiển thị cảnh báo |
-
-> **Ghi chú tách dòng dữ liệu:**  
-> Dùng `strtok()` để tách dòng theo ký tự `|`; đảm bảo các trường bắt buộc (MSSV, mã môn, mã lớp) không để trống trước khi lưu vào struct.
 | Dữ liệu số sai định dạng | Bỏ qua dòng lỗi hoặc gán giá trị mặc định nếu phù hợp |
 | Điểm ngoài khoảng `0–10` | Không nạp bản ghi điểm đó |
 | Trùng khóa chính | Giữ bản ghi đầu tiên, bỏ qua bản ghi trùng và hiển thị cảnh báo |
+| Mã tham chiếu không tồn tại | Bỏ qua bản ghi và hiển thị cảnh báo |
+| Trường bắt buộc bị bỏ trống | Bỏ qua dòng lỗi, không lưu vào mảng dữ liệu |
+
+> **Ghi chú tách dòng dữ liệu:**  
+> Có thể dùng `strtok()` để tách dòng theo ký tự `|`. Sau khi tách, cần kiểm tra đủ số trường và đảm bảo các trường bắt buộc như `MSSV`, `MaMon`, `MaLHP` không bị bỏ trống trước khi lưu vào struct.
 
 ---
 
