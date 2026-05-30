@@ -67,7 +67,7 @@ int sa_update(StudentArray* arr, int index, Student s) {
     return 1;
 }
 
-//Tìm kiếm theo MSSV (khóa chính). Dùng strcmp để so sánh nội dung chuỗi, không dùng
+//Tìm kiếm theo MSSV (khóa chính). Dùng strcmp để so sánh nội dung chuỗi, không dùng toán tử ==
 int sa_find(StudentArray* arr, const char* mssv) {
     for (int i = 0; i < arr->size; i++) {
         if (strcmp(arr->data[i].mssv, mssv) == 0) return i;
