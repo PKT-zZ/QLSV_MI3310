@@ -138,11 +138,11 @@ typedef struct {
 Nhược điểm: phải viết lặp bộ hàm thao tác cho từng struct (nhưng logic mỗi hàm đều giống nhau và ngắn gọn).
 
 > **⚠ Lý do không khuyến nghị dùng mảng `void*` tổng quát:**  
-> Cách dùng `void*` và `elemSize` (con trỏ dạng `(char*)arr->data + i * arr->elemSize`) yêu cầu ép kiểu thủ công mỗi khi truy cập phần tử. Với nhóm chưa thành thạo con trỏ, đây là nguồn gốc thường gặp của lỗi nhầm kiểu, truy cập sai vùng nhớ và memory leak khó phát hiện. **Hãy dùng Lựa chọn 1 hoặc Lựa chọn 2 thay thế.**
+> Cách dùng `void*` và `elemSize` (con trỏ dạng `(char*)arr->data + i * arr->elemSize`) yêu cầu ép kiểu thủ công mỗi khi truy cập phần tử. Với nhóm chưa thành thạo con trỏ, đây là nguồn gốc thường gặp của lỗi nhầm kiểu, truy cập sai vùng nhớ và memory leak khó phát hiện.
 
 ---
 
-Các thao tác cần cài đặt (áp dụng cho Lựa chọn 1 — Typed Dynamic Array):
+Các thao tác cần cài đặt (áp dụng cho Typed Dynamic Array):
 
 | Hàm (ví dụ cho `StudentArray`) | Mô tả |
 |---|---|
@@ -167,7 +167,7 @@ Các thực thể chính trong chương trình:
 - `Subject`: thông tin môn học.
 - `CourseClass`: thông tin lớp học phần.
 - `ScoreRecord`: thông tin điểm số.
-- `StudentArray`, `SubjectArray`, `CourseClassArray`, `ScoreArray`: các mảng tự cài đặt (Typed Dynamic Array hoặc mảng tĩnh theo Lựa chọn 2).
+- `StudentArray`, `SubjectArray`, `CourseClassArray`, `ScoreArray`: các mảng tự cài đặt (Typed Dynamic Array).
 
 ### 6.3. Thuật toán cần tự cài
 
