@@ -7,13 +7,13 @@ typedef struct{
     char mssv[12]; //PK. Ex: "202400000"
     char hoTen[60]; //"Salah"
     char lop[20]; //"K68-MI1-01"
-    char birthday[12]; //"09/05/2005"
+    char birthday[12]; //DD/MM/YYYY.Ex: "09/05/2005"
 } Student;
 
 //Học phần
 typedef struct{
     char maHP[10]; //MI3310
-    char tenMon[80]; //Kỹ thuật lập trình
+    char tenHP[80]; //Kỹ thuật lập trình
     int soTinChi; //2
 } Subject;
 
