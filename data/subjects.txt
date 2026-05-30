@@ -1,0 +1,6 @@
+MaHP|TenHP|SoTinChi
+MI3310|Ky Thuat Lap Trinh|2
+MI3060|Cau Truc Du Lieu & Thuat Toan|3
+MI3090|Co So Du Lieu|3
+MI2020|Kien truc may tinh|2
+MI3040|Toan Roi Rac|3
