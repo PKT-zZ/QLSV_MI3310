@@ -1,5 +1,4 @@
-/* Khai báo module đọc/ghi dữ liệu từ file text (CSV, phân cách '|')
-Quy ước:
+/* Khai báo module đọc/ghi dữ liệu từ file text
 - load*: nếu file không tồn tại thì bỏ qua, mảng giữ nguyên (không crash)
 - save*: ghi đè toàn bộ file, bao gồm dòng tiêu đề
 - loadAllData/saveAllData: gọi đủ 4 cặp hàm theo thứ tự */
