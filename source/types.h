@@ -1,6 +1,5 @@
 //Định nghĩa kiểu dữ liệu chính
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 //Sinh viên
 typedef struct{
@@ -40,5 +39,3 @@ typedef struct { Student* data; int size; int capacity; } StudentArray;
 typedef struct { Subject* data; int size; int capacity; } SubjectArray;
 typedef struct { CourseClass* data; int size; int capacity; } CourseClassArray;
 typedef struct { ScoreRecord* data; int size; int capacity; } ScoreArray;
-
-#endif
