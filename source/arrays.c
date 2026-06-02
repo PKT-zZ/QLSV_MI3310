@@ -1,4 +1,4 @@
-//arrays.c - Cài đặt Typed Dynamic Array cho 4 kiểu dữ liệu: StudentArray, SubjectArray, CourseClassArray, ScoreArray
+//Cài đặt Typed Dynamic Array cho 4 kiểu dữ liệu: StudentArray, SubjectArray, CourseClassArray, ScoreArray
 #include <stdlib.h>
 #include <string.h>
 #include "arrays.h"
