@@ -1,5 +1,5 @@
-/* Cài đặt module đọc/ghi file text định dạng CSV, phân cách '|'
-Quy ước xử lý lỗi:
+/* Module đọc/ghi file text, phân cách = '|'
+Quy ước:
 - File không tồn tại: in cảnh báo, mảng giữ nguyên (rỗng), không crash
 - File rỗng: mảng rỗng, không có gì được load
 - Dòng thiếu trường: bỏ qua dòng đó, in cảnh báo, đọc tiếp
@@ -24,7 +24,7 @@ static void trim_newline(char* s) {
         s[--len] = '\0';
 }
 
-//Tách dòng CSV phân cách bằng '|' thành mảng con trỏ tokens[]
+//Tách dòng phân cách bằng '|' thành mảng con trỏ tokens[]
 static int split_pipe(char* line, char* tokens[], int max_fields) {
     int count = 0;
     char* p = line;
@@ -38,7 +38,7 @@ static int split_pipe(char* line, char* tokens[], int max_fields) {
     return count;
 }
 
-//Copy an toàn: giống strncpy nhưng đảm bảo luôn kết thúc bằng '\0'
+//Copy chuỗi, tự động thêm '\0' vào cuối
 static void safe_copy(char* dest, const char* src, int dest_size) {
     strncpy(dest, src, dest_size - 1);
     dest[dest_size - 1] = '\0';
@@ -57,9 +57,7 @@ static int valid_he4(float v) {
 
 //SINH VIÊN
 
-/*Đọc file students.txt vào mảng students
-  Format: MSSV|HoTen|Lop|Birthday
-  Kiểm tra: đủ 4 trường, MSSV không rỗng, không trùng PK */
+//Đọc file students.txt vào mảng students. Kiểm tra: đủ 4 trường, MSSV không rỗng, không trùng PK
 void loadStudents(StudentArray* students, const char* path) {
     FILE* f = fopen(path, "r");
     if (f == NULL) {
@@ -127,9 +125,7 @@ void saveStudents(StudentArray* students, const char* path) {
 
 //MÔN HỌC
 
-/*Đọc file subjects.txt vào mảng subjects
-  Format dòng: MaHP|TenHP|SoTinChi
-  Kiểm tra: đủ 3 trường, MaHP không rỗng, SoTinChi > 0, không trùng khóa */
+//Đọc file subjects.txt vào mảng subjects. Kiểm tra: đủ 3 trường, MaHP không rỗng, SoTinChi > 0, không trùng khóa
 void loadSubjects(SubjectArray* subjects, const char* path) {
     FILE* f = fopen(path, "r");
     if (f == NULL) {
@@ -201,9 +197,7 @@ void saveSubjects(SubjectArray* subjects, const char* path) {
 
 //LỚP HỌC PHẦN
 
-/*Đọc file course_classes.txt vào mảng classes
-  Format dòng: MaLHP|MaHP|HocKy|NamHoc
-  Kiểm tra: đủ 4 trường, MaLHP không rỗng, HocKy trong 1/2/3, NamHoc >= 2000, không trùng khóa */
+//Đọc file course_classes.txt vào mảng classes. Kiểm tra: đủ 4 trường, MaLHP không rỗng, HocKy trong 1/2/3, NamHoc >= 2000, không trùng khóa
 void loadCourseClasses(CourseClassArray* classes, const char* path) {
     FILE* f = fopen(path, "r");
     if (f == NULL) {
@@ -282,9 +276,7 @@ void saveCourseClasses(CourseClassArray* classes, const char* path) {
 
 //ĐIỂM SỐ
 
-/*Đọc file scores.txt vào mảng scores
-  Format dòng: MSSV|MaLHP|DiemQT|DiemCK|DiemTK|DiemHe4
-  Kiểm tra: đủ 6 trường, MSSV/MaLHP không rỗng, DiemQT/CK/TK trong [0,10], DiemHe4 trong [0,4], không trùng khóa kép  */
+//Đọc file scores.txt vào mảng scores. Kiểm tra: đủ 6 trường, MSSV/MaLHP không rỗng, DiemQT/CK/TK trong [0,10], DiemHe4 trong [0,4], không trùng khóa kép
 void loadScores(ScoreArray* scores, const char* path) {
     FILE* f = fopen(path, "r");
     if (f == NULL) {
@@ -316,7 +308,7 @@ void loadScores(ScoreArray* scores, const char* path) {
             continue;
         }
 
-        //Chuyển đổi điểm - atof("") = 0.0, chấp nhận được cho trường rỗng
+        //Ép kiểu chuỗi sang float
         float diemQT  = (float)atof(tok[2]);
         float diemCK  = (float)atof(tok[3]);
         float diemTK  = (float)atof(tok[4]);
@@ -371,12 +363,20 @@ void saveScores(ScoreArray* scores, const char* path) {
 
 /*Load 4 bảng theo đúng thứ tự: students, subjects, course_classes, scores
   Sau khi load scores, kiểm tra toàn vẹn FK: xóa bản ghi điểm có MSSV/MaLHP không tồn tại*/
-void loadAllData(StudentArray* students, SubjectArray* subjects,
-                 CourseClassArray* classes, ScoreArray* scores) {
+void loadAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores) {
     loadStudents(students, STUDENT_FILE);
     loadSubjects(subjects, SUBJECT_FILE);
     loadCourseClasses(classes, COURSE_CLASS_FILE);
     loadScores(scores, SCORE_FILE);
+
+    //Kiểm tra FK của course_classes: MaHP phải có trong subjects
+    for (int i = classes->size - 1; i >= 0; i--) {
+        CourseClass* c = &classes->data[i];
+        if (suba_find(subjects, c->maHP) == -1) {
+            printf("[CANH BAO] LHP '%s' co MaHP '%s' khong co trong subjects. Xoa ban ghi nay.\n", c->maLHP, c->maHP);
+            cca_remove(classes, i);
+        }
+    }
 
     //Kiểm tra toàn vẹn tham chiếu trong scores. Duyệt ngược để tránh lỗi index khi xóa phần tử giữa chừng
     for (int i = scores->size - 1; i >= 0; i--) {
@@ -391,20 +391,10 @@ void loadAllData(StudentArray* students, SubjectArray* subjects,
             sca_remove(scores, i);
         }
     }
-
-    //Kiểm tra FK của course_classes: MaHP phải có trong subjects
-    for (int i = classes->size - 1; i >= 0; i--) {
-        CourseClass* c = &classes->data[i];
-        if (suba_find(subjects, c->maHP) == -1) {
-            printf("[CANH BAO] LHP '%s' co MaHP '%s' khong co trong subjects. Xoa ban ghi nay.\n", c->maLHP, c->maHP);
-            cca_remove(classes, i);
-        }
-    }
 }
 
-//Save 4 bảng theo thứ tự ngược lại (scores trước để giữ nhất quán)
-void saveAllData(StudentArray* students, SubjectArray* subjects,
-                 CourseClassArray* classes, ScoreArray* scores) {
+//Save 4 bảng theo thứ tự ngược lại
+void saveAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores) {
     saveStudents(students,     STUDENT_FILE);
     saveSubjects(subjects,     SUBJECT_FILE);
     saveCourseClasses(classes, COURSE_CLASS_FILE);
