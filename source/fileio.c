@@ -195,7 +195,7 @@ void saveSubjects(SubjectArray* subjects, const char* path) {
 }
 
 
-//LỚP HỌC PHẦN
+//LỚP HP
 
 //Đọc file course_classes.txt vào mảng classes. Kiểm tra: đủ 4 trường, MaLHP không rỗng, HocKy trong 1/2/3, NamHoc >= 2000, không trùng khóa
 void loadCourseClasses(CourseClassArray* classes, const char* path) {
@@ -359,7 +359,7 @@ void saveScores(ScoreArray* scores, const char* path) {
 }
 
 
-//LOAD / SAVE TOÀN BỘ
+//LOAD/SAVE TOÀN BỘ
 
 /*Load 4 bảng theo đúng thứ tự: students, subjects, course_classes, scores
   Sau khi load scores, kiểm tra toàn vẹn FK: xóa bản ghi điểm có MSSV/MaLHP không tồn tại*/
