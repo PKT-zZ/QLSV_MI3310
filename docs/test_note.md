@@ -16,7 +16,7 @@
 
 ## 2. Hướng dẫn chạy test
 
-**Lưu ý:** Phải chạy lệnh từ thư mục gốc của project thì code mới đọc được đúng đường dẫn `data/...` nhé.
+**Lưu ý:** Phải chạy lệnh từ thư mục gốc của project thì code mới đọc được đúng đường dẫn `data/...`
 
 ### Cách 1: Dùng Makefile
 ```bash
@@ -38,7 +38,7 @@ gcc source\arrays.c source\fileio.c source\test_fileio.c -Isource -o test_fileio
 
 **Kết quả chung: 41 PASS / 0 FAIL**
 
-> *Ghi chú: Lúc chạy test sẽ hiện ra vài dòng `[CANH BAO]`. Đây là em đang test tính năng tự động bắt lỗi khi file `.txt` bị sai định dạng, chương trình vẫn chạy bình thường không bị sập.*
+> *Ghi chú: Lúc chạy test sẽ hiện ra vài dòng `[CANH BAO]`. Đây là test tính năng tự động bắt lỗi khi file `.txt` bị sai định dạng, chương trình vẫn chạy bình thường không bị sập.*
 
 ### Bảng chi tiết các trường hợp đã test:
 
