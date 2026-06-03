@@ -1,10 +1,8 @@
-/* Khai báo module đọc/ghi dữ liệu từ file text (CSV, phân cách '|')
-Quy ước:
+/* Khai báo module đọc/ghi dữ liệu từ file text
 - load*: nếu file không tồn tại thì bỏ qua, mảng giữ nguyên (không crash)
 - save*: ghi đè toàn bộ file, bao gồm dòng tiêu đề
 - loadAllData/saveAllData: gọi đủ 4 cặp hàm theo thứ tự */
-#ifndef FILEIO_H
-#define FILEIO_H
+#pragma once
 
 #include "arrays.h"
 
@@ -21,7 +19,7 @@ void saveStudents(StudentArray* students, const char* path);
 void loadSubjects(SubjectArray* subjects, const char* path);
 void saveSubjects(SubjectArray* subjects, const char* path);
 
-//Lớp học phần
+//Lớp hphan
 void loadCourseClasses(CourseClassArray* classes, const char* path);
 void saveCourseClasses(CourseClassArray* classes, const char* path);
 
@@ -31,7 +29,4 @@ void saveScores(ScoreArray* scores, const char* path);
 
 //Load/save toàn bộ dữ liệu một lần, loadAllData còn kiểm tra toàn vẹn tham chiếu sau khi load xong 4 bảng
 void loadAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);
-
 void saveAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);
-
-#endif

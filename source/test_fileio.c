@@ -1,10 +1,4 @@
-/* test_fileio.c - Kiểm thử module arrays và fileio (TV1)
-Build và chạy từ thư mục gốc project:
-- gcc source/arrays.c source/fileio.c source/test_fileio.c -Isource -o test_fileio
-- .\test_fileio.exe    (Windows)
-Expected Output : 41 PASS, 0 FAIL
-Các dòng [CANH BAO] ở nhóm 4 và 5 là đúng, không phải lỗi */
-
+//Kiểm thử module arrays và fileio
 #include <stdio.h>
 #include <string.h>
 #include "arrays.h"
@@ -12,7 +6,6 @@ Các dòng [CANH BAO] ở nhóm 4 và 5 là đúng, không phải lỗi */
 
 static int g_pass = 0, g_fail = 0;
 
-//Tránh phụ thuộc math.h
 static float f_abs(float x) { return (x < 0.0f) ? -x : x; }
 
 #define CHECK(cond, msg) \
@@ -51,13 +44,13 @@ static void test_load_basic(void) {
             "TC02d: birthday cua 202400000 la '15/08/2006'");
     }
 
-    //TC03: môn học load đúng
+    //TC03: HP load đúng
     int j = suba_find(&sub, "MI3310");
     CHECK(j >= 0, "TC03a: tim thay MaHP MI3310");
     if (j >= 0)
         CHECK(sub.data[j].soTinChi == 2, "TC03b: MI3310 soTinChi == 2");
 
-    //TC04: lớp học phần load đúng
+    //TC04: LHP load đúng
     int k = cca_find(&cls, "169313");
     CHECK(k >= 0, "TC04a: tim thay MaLHP 169313");
     if (k >= 0) {

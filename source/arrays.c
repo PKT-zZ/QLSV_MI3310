@@ -1,19 +1,14 @@
-/* arrays.c - Cai dat Typed Dynamic Array cho 4 kieu du lieu: StudentArray, SubjectArray, CourseClassArray, ScoreArray
-Quy uoc tra ve:
-- init, add, remove, update: 1 = thanh cong, 0 = loi
-- *_find: index >= 0 neu tim thay, -1 neu khong
-- *_get: con tro hop le neu ok, NULL neu ngoai pham vi
-- *_resize: static - chi su dung noi bo file */
+//Cài đặt Typed Dynamic Array cho 4 kiểu dữ liệu: StudentArray, SubjectArray, CourseClassArray, ScoreArray
 #include <stdlib.h>
 #include <string.h>
 #include "arrays.h"
 
 //P1:StudentArray. Khóa chính: mssv
 
-//Tăng gấp đôi capacity khi mảng đầy
+//x2 capacity khi mảng đầy
 static int sa_resize(StudentArray* arr) {
     int new_cap = arr->capacity * 2;
-    //Dùng con trỏ tạm tmp để bảo vệ arr->data nếu realloc thất bại
+    //Dùng con trỏ tạm tmp để check realloc
     Student* tmp = (Student*)realloc(arr->data, new_cap * sizeof(Student));
     if (tmp == NULL) return 0;
     
@@ -49,7 +44,7 @@ Student* sa_get(StudentArray* arr, int index) {
     return &arr->data[index];
 }
 
-//Xóa phần tử tại index, dịch các phần tử sau lên một vị trí
+//Xóa phần tử tại index, dịch các phần tử sau sang trái
 int sa_remove(StudentArray* arr, int index) {
     if (index < 0 || index >= arr->size) return 0;    
     //Dịch từ index đến size-2
@@ -67,7 +62,7 @@ int sa_update(StudentArray* arr, int index, Student s) {
     return 1;
 }
 
-//Tìm kiếm theo MSSV (khóa chính). Dùng strcmp để so sánh nội dung chuỗi, không dùng toán tử ==
+//Tìm kiếm theo MSSV (khóa chính)
 int sa_find(StudentArray* arr, const char* mssv) {
     for (int i = 0; i < arr->size; i++) {
         if (strcmp(arr->data[i].mssv, mssv) == 0) return i;
@@ -75,7 +70,7 @@ int sa_find(StudentArray* arr, const char* mssv) {
     return -1;
 }
 
-//Giải phóng bộ nhớ heap. Gọi trước khi kết thúc chương trình
+//Giải phóng bộ nhớ heap
 void sa_clear(StudentArray* arr) {
     free(arr->data);
     arr->data = NULL;
@@ -198,7 +193,7 @@ int cca_update(CourseClassArray* arr, int index, CourseClass c) {
     return 1;
 }
 
-//Tìm kiếm theo maLHP - khóa chính của CourseClass
+//Tìm kiếm theo maLHP - PK của CourseClass
 int cca_find(CourseClassArray* arr, const char* maLHP) {
     for (int i = 0; i < arr->size; i++) {
         if (strcmp(arr->data[i].maLHP, maLHP) == 0) return i;

@@ -1,5 +1,4 @@
-#ifndef ARRAYS_H
-#define ARRAYS_H
+#pragma once
 #include "types.h"
 
 //StudentArray
@@ -38,5 +37,3 @@ int sca_update(ScoreArray* arr, int idx, ScoreRecord sc);
 //ScoreRecord dùng khóa kép (mssv, maLHP)
 int sca_find(ScoreArray* arr, const char* mssv, const char* maLHP);
 void sca_clear(ScoreArray* arr);
-
-#endif
