@@ -4,7 +4,11 @@
 
 Dự án **Quản lý sinh viên và điểm số (Student Management System)** là chương trình quản lý sinh viên và điểm số chạy trên giao diện console.
 
-Dự án được thực hiện bởi nhóm 3 sinh viên ngành Toán Tin trong khuôn khổ môn học Kỹ thuật lập trình.
+Dự án được thực hiện bởi nhóm 3 sinh viên ngành Toán Tin, ĐHBKHN (HUST) trong khuôn khổ môn học Kỹ thuật lập trình.
+Cụ thể về nhân sự: 
+ - Nguyễn Khánh Toàn đảm nhận công việc của Thành viên 1 + lập ra bản kế hoạch trong file README này + theo dõi tiến độ của 2 thành viên còn lại
+ - Ngô Ngọc Thái đảm nhận công việc của Thành viên 2
+ - Nguyễn Vũ Quang Anh đảm nhận công việc của Thành viên 3
 
 Chương trình tập trung vào việc tự cài đặt cấu trúc dữ liệu, thuật toán tìm kiếm, thuật toán sắp xếp và xử lý dữ liệu lưu trữ bằng file text.
 
