@@ -28,7 +28,7 @@ int sa_init(StudentArray* arr, int init_cap) {
     return 1;
 }
 
-//Thêm một Student vào cuối mảng. Tự động resize nếu đầy
+//Thêm 1 Student vào cuối mảng. Tự động resize nếu đầy
 int sa_add(StudentArray* arr, Student s) {
     if (arr->size >= arr->capacity) {
         if (!sa_resize(arr)) return 0;

@@ -27,6 +27,6 @@ void saveCourseClasses(CourseClassArray* classes, const char* path);
 void loadScores(ScoreArray* scores, const char* path);
 void saveScores(ScoreArray* scores, const char* path);
 
-//Load/save toàn bộ dữ liệu một lần, loadAllData còn kiểm tra toàn vẹn tham chiếu sau khi load xong 4 bảng
+//Load/save toàn bộ dữ liệu 1 lần, loadAllData còn kiểm tra toàn vẹn tham chiếu sau khi load xong 4 bảng
 void loadAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);
 void saveAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);

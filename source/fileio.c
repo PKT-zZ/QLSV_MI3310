@@ -107,7 +107,7 @@ void loadStudents(StudentArray* students, const char* path) {
     fclose(f);
 }
 
-//Ghi toàn bộ mảng students xuống file. Format: dòng tiêu đề + mỗi bản ghi trên một dòng
+//Ghi toàn bộ mảng students xuống file. Format: dòng tiêu đề + mỗi bản ghi trên 1 dòng
 void saveStudents(StudentArray* students, const char* path) {
     FILE* f = fopen(path, "w");
     if (f == NULL) {
@@ -308,7 +308,6 @@ void loadScores(ScoreArray* scores, const char* path) {
             continue;
         }
 
-        //Ép kiểu chuỗi sang float
         float diemQT  = (float)atof(tok[2]);
         float diemCK  = (float)atof(tok[3]);
         float diemTK  = (float)atof(tok[4]);
@@ -393,7 +392,7 @@ void loadAllData(StudentArray* students, SubjectArray* subjects, CourseClassArra
     }
 }
 
-//Save 4 bảng theo thứ tự ngược lại
+//Save 4 bảng theo thứ tự
 void saveAllData(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores) {
     saveStudents(students,     STUDENT_FILE);
     saveSubjects(subjects,     SUBJECT_FILE);
