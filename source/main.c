@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include "fileio.h"
 #include "ui.h"
-int main(void) {
+
+int main(void)
+{
     StudentArray students;
     SubjectArray subjects;
     CourseClassArray classes;
@@ -12,15 +14,26 @@ int main(void) {
     cca_init(&classes, 4);
     sca_init(&scores, 4);
 
-    loadAllData(&students, &subjects, &classes, &scores);
+    loadAllData(
+        &students,
+        &subjects,
+        &classes,
+        &scores
+    );
 
-    printf("Load data thanh cong!\n");
-    printf("So sinh vien: %d\n", students.size);
-    printf("So mon hoc: %d\n", subjects.size);
-    printf("So lop hoc phan: %d\n", classes.size);
-    printf("So ban ghi diem: %d\n", scores.size);
+    showMainMenu(
+        &students,
+        &subjects,
+        &classes,
+        &scores
+    );
 
-    saveAllData(&students, &subjects, &classes, &scores);
+    saveAllData(
+        &students,
+        &subjects,
+        &classes,
+        &scores
+    );
 
     sa_clear(&students);
     suba_clear(&subjects);
