@@ -1,336 +1,337 @@
-# Tong hop loi can sua va huong rut gon ui.c/ui.h
+# Tổng hợp vấn đề cần sửa và hướng rút gọn `ui.c` / `ui.h`
 
-## Ket luan kien truc
+## Kết luận kiến trúc
 
-Hien tai `ui.c` dang om qua nhieu viec: menu, nhap/xuat, validate, CRUD, kiem tra rang buoc, tim kiem, sap xep, tinh diem, GPA va bao cao. Huong sua nen chon la: `ui.c` chi giu vai tro giao dien console, con nghiep vu chuyen ve cac module dung theo ke hoach trong README.
+Hiện tại `ui.c` đang ôm quá nhiều công việc: hiển thị menu, nhập dữ liệu, kiểm tra dữ liệu, xử lý CRUD, kiểm tra ràng buộc, tìm kiếm, sắp xếp, tính điểm, tính GPA và in báo cáo. Cách làm này khiến các module như `student.c`, `subject.c`, `courseclass.c`, `score.c`, `gpa.c`, `sort.c`, `search.c` không phát huy đúng vai trò theo kế hoạch trong README.
 
-## Muc tieu sau khi sua
-
-- `ui.c`: chi hien thi menu, doc input, in ket qua, goi ham tu module khac.
-- `ui.h`: chi khai bao cac ham UI that su can goi tu ngoai, chu yeu la `showMainMenu`.
-- `student/subject/courseclass/score/gpa/sort/search`: chua logic nghiep vu, tim kiem, sap xep, tinh diem va tinh GPA.
-- `arrays.c`: chi giu vai tro mang dong co ban.
-- `fileio.c`: chi doc/ghi file va kiem tra loi file, khong nen lap lai cong thuc diem neu `score.c` da co.
+Hướng sửa nên chọn là: **rút gọn `ui.c` và `ui.h`, chuyển logic nghiệp vụ về đúng các module tương ứng**. Sau khi sửa, `ui.c` chỉ nên làm nhiệm vụ giao diện console: hiển thị menu, đọc input, gọi hàm từ module khác và in kết quả.
 
 ---
 
-## 1. Rut gon `ui.h`
+## 1. Rút gọn `ui.h`
 
-### Loi hien tai
-`ui.h` dang khai bao qua nhieu ham noi bo nhu `displayStudents`, `readLine`, `readInt`, `validateMSSV`, `validateScore`, `validateDate`. Nhung cac ham nay chu yeu chi phuc vu noi bo `ui.c`, khong nen dua het ra header.
+### Vấn đề
+`ui.h` đang khai báo quá nhiều hàm nội bộ như hàm nhập dữ liệu, hiển thị danh sách, kiểm tra MSSV, kiểm tra điểm, kiểm tra ngày sinh. Những hàm này chủ yếu chỉ được dùng bên trong `ui.c`, không cần công khai ra header.
 
-### Huong sua
-Rut gon `ui.h` chi con:
-- `#pragma once`
-- include cac kieu du lieu can thiet
-- prototype `showMainMenu(...)`
-
-Cac ham nhap lieu, validate, display neu chi dung trong `ui.c` thi de `static` trong `ui.c`, khong khai bao trong `ui.h`.
+### Hướng sửa
+- Đổi `ui.h` sang dùng `#pragma once` để đồng bộ với các header khác.
+- Chỉ giữ trong `ui.h` những hàm UI thật sự cần gọi từ file khác, quan trọng nhất là `showMainMenu`.
+- Các hàm như `readLine`, `readInt`, `readFloat`, `displayStudents`, `validateDate`, `validateScore` nếu chỉ dùng trong `ui.c` thì để thành hàm `static` trong `ui.c`, không khai báo trong `ui.h`.
+- Mục tiêu là làm `ui.h` gọn, đúng vai trò là header của giao diện, không phải nơi khai báo toàn bộ logic phụ.
 
 ---
 
-## 2. Rut gon `ui.c`
+## 2. Rút gọn `ui.c`
 
-### Loi hien tai
-`ui.c` dang tu lam CRUD va goi truc tiep `sa_find`, `sa_add`, `suba_find`, `cca_find`, `sca_find`, v.v. Nhu vay cac module `student.c`, `subject.c`, `courseclass.c`, `score.c`, `gpa.c`, `sort.c`, `search.c` bi giam vai tro hoac thanh dead code.
+### Vấn đề
+`ui.c` hiện vừa làm giao diện vừa xử lý nghiệp vụ. Ví dụ: thêm sinh viên, sửa sinh viên, xóa sinh viên, kiểm tra trùng MSSV, kiểm tra sinh viên đã có điểm chưa, tính điểm tổng kết, quy đổi điểm hệ 4, tìm kiếm, sắp xếp và báo cáo đều đang nằm nhiều trong `ui.c`.
 
-### Huong sua
-`ui.c` chi nen:
-- hien thi menu
-- doc input tu ban phim
-- goi ham nghiep vu tu module tuong ung
-- in thong bao thanh cong/that bai
-- in bang ket qua
-
-Khong nen de `ui.c` tu xu ly quy tac xoa, tim kiem, tinh diem, GPA, sap xep.
+### Hướng sửa
+- Giữ lại trong `ui.c` các hàm menu và các hàm nhập/xuất màn hình.
+- Không để `ui.c` tự xử lý trực tiếp các thao tác nghiệp vụ bằng cách gọi sâu vào `arrays.c` như `sa_find`, `sa_add`, `suba_find`, `cca_find`, `sca_find`.
+- Thay vào đó, `ui.c` chỉ đọc thông tin người dùng nhập, rồi gọi các hàm cấp cao từ `student.c`, `subject.c`, `courseclass.c`, `score.c`, `gpa.c`, `sort.c`, `search.c`.
+- Sau khi gọi module nghiệp vụ, `ui.c` chỉ cần in thông báo thành công/thất bại hoặc in bảng kết quả.
 
 ---
 
-## 3. Chuyen logic sinh vien sang `student.c/student.h`
+## 3. Chuyển logic sinh viên sang `student.c` / `student.h`
 
-### Loi hien tai
-Cac ham trong UI nhu them/sua/xoa sinh vien dang tu kiem tra trung MSSV, sua struct, xoa array va kiem tra sinh vien co diem hay khong.
+### Vấn đề
+Các thao tác thêm, sửa, xóa sinh viên hiện vẫn đang bị xử lý nhiều trong `ui.c`. Điều này làm `ui.c` phụ thuộc quá nhiều vào cấu trúc mảng động và các quy tắc nghiệp vụ.
 
-### Huong sua
-Chuyen sang `student.c/student.h` cac ham:
-- `findStudentRecord`
-- `addStudentRecord`
-- `updateStudentRecord`
-- `deleteStudentRecord`
-- `studentHasScore`
-- `validateMSSV` neu muon tach khoi UI
-
-Sau do trong `ui.c`, cac ham `addStudentUI`, `editStudentUI`, `deleteStudentUI` chi doc input va goi cac ham tren.
-
----
-
-## 4. Chuyen logic mon hoc sang `subject.c/subject.h`
-
-### Loi hien tai
-`ui.c` dang tu them/sua/xoa mon hoc, tu kiem tra trung MaHP, tu kiem tra mon hoc co dang duoc lop hoc phan su dung hay khong.
-
-### Huong sua
-Chuyen sang `subject.c/subject.h` cac ham:
-- `findSubjectRecord`
-- `addSubjectRecord`
-- `updateSubjectRecord`
-- `deleteSubjectRecord`
-- `subjectIsUsed`
-- validate MaHP va so tin chi neu can
-
-Trong `ui.c`, menu mon hoc chi doc input va goi ham tu `subject.c`.
+### Hướng sửa
+- Đưa các hàm xử lý sinh viên vào `student.c/student.h`.
+- Module `student.c` nên chịu trách nhiệm:
+  - tìm sinh viên theo MSSV,
+  - thêm sinh viên mới,
+  - cập nhật thông tin sinh viên,
+  - xóa sinh viên,
+  - kiểm tra sinh viên đã có điểm hay chưa trước khi xóa,
+  - kiểm tra MSSV hợp lệ nếu muốn tách validate khỏi UI.
+- Trong `ui.c`, các hàm như thêm/sửa/xóa sinh viên chỉ còn đọc dữ liệu từ bàn phím rồi gọi hàm tương ứng trong `student.c`.
 
 ---
 
-## 5. Chuyen logic lop hoc phan sang `courseclass.c/courseclass.h`
+## 4. Chuyển logic học phần sang `subject.c` / `subject.h`
 
-### Loi hien tai
-`ui.c` dang tu them/sua/xoa lop hoc phan, tu kiem tra MaLHP trung, MaHP co ton tai, hoc ky/nam hoc hop le, va lop co diem hay khong.
+### Vấn đề
+`ui.c` đang tự xử lý thêm, sửa, xóa học phần và tự kiểm tra học phần có đang được lớp học phần sử dụng hay không.
 
-### Huong sua
-Chuyen sang `courseclass.c/courseclass.h` cac ham:
-- `findCourseClassRecord`
-- `addCourseClassRecord`
-- `updateCourseClassRecord`
-- `deleteCourseClassRecord`
-- `classHasScore`
-- validate MaLHP, hoc ky, nam hoc
-
-Trong `ui.c`, menu lop hoc phan chi nhap du lieu va goi ham tu `courseclass.c`.
-
----
-
-## 6. Chuyen logic diem sang `score.c/score.h`
-
-### Loi hien tai
-`ui.c` dang tu tinh `DiemTK`, tu quy doi `DiemHe4`, tu kiem tra MSSV/MaLHP ton tai va tu them/cap nhat/xoa diem. Trong khi `score.c` da co/nen co cac ham tinh diem rieng.
-
-### Huong sua
-Chuyen sang `score.c/score.h` cac ham:
-- `calculateDiemTK`
-- `convertToHe4`
-- `addScoreRecord`
-- `updateScoreRecord`
-- `deleteScoreRecord`
-- `validateScore`
-- kiem tra MSSV ton tai
-- kiem tra MaLHP ton tai
-- kiem tra trung khoa kep `(MSSV, MaLHP)`
-
-Trong `ui.c`, khi them/cap nhat diem chi doc `DiemQT`, `DiemCK`, roi goi ham tu `score.c`.
+### Hướng sửa
+- Đưa các thao tác liên quan học phần vào `subject.c/subject.h`.
+- Module `subject.c` nên xử lý:
+  - tìm học phần theo mã,
+  - thêm học phần,
+  - cập nhật học phần,
+  - xóa học phần,
+  - kiểm tra học phần có đang được lớp học phần tham chiếu không,
+  - kiểm tra số tín chỉ hợp lệ nếu cần.
+- `ui.c` chỉ đọc mã học phần, tên học phần, số tín chỉ rồi gọi hàm từ `subject.c`.
 
 ---
 
-## 7. Bo trung lap cong thuc diem
+## 5. Chuyển logic lớp học phần sang `courseclass.c` / `courseclass.h`
 
-### Loi hien tai
-Dang co nguy co lap logic: `ui.c` co `calcDiemTK`/`quyDoiHe4`, con `score.c` co `calculateDiemTK`/`convertToHe4`.
+### Vấn đề
+`ui.c` đang tự xử lý thêm, sửa, xóa lớp học phần, tự kiểm tra mã lớp học phần trùng, mã học phần có tồn tại không, lớp có điểm hay chưa.
 
-### Huong sua
-Chi giu mot ban trong `score.c/score.h`. Xoa hoac ngung dung ban trong `ui.c`. Moi noi can tinh diem, gom ca `ui.c` va `fileio.c`, deu goi `calculateDiemTK` va `convertToHe4`.
-
----
-
-## 8. Bo sung GPA he 10 va GPA he 4 trong `gpa.c/gpa.h`
-
-### Loi hien tai
-README yeu cau tinh GPA he 10, co the quy doi he 4 va xep loai hoc luc, nhung phan nay chua du ro neu chua co ham dung chung.
-
-### Huong sua
-Trong `gpa.c/gpa.h`, bo sung:
-- `calculateStudentGPA10`
-- `calculateStudentGPA4`
-
-Cong thuc:
-- `GPA10 = tong(DiemTK * SoTinChi) / tong(SoTinChi)`
-- `GPA4 = tong(DiemHe4 * SoTinChi) / tong(SoTinChi)`
-
-Ham GPA phai duyet `scores`, tim `CourseClass` theo `MaLHP`, sau do tim `Subject` theo `MaHP` de lay `SoTinChi`.
+### Hướng sửa
+- Đưa logic lớp học phần vào `courseclass.c/courseclass.h`.
+- Module này nên xử lý:
+  - tìm lớp học phần theo mã lớp học phần,
+  - thêm lớp học phần,
+  - cập nhật lớp học phần,
+  - xóa lớp học phần,
+  - kiểm tra mã học phần có tồn tại không,
+  - kiểm tra lớp học phần có đang được bảng điểm sử dụng không,
+  - kiểm tra học kỳ, năm học nếu cần.
+- `ui.c` chỉ nhập thông tin lớp học phần và gọi hàm từ module này.
 
 ---
 
-## 9. Bo sung xep loai hoc luc trong `gpa.c/gpa.h`
+## 6. Chuyển logic điểm sang `score.c` / `score.h`
 
-### Loi hien tai
-Chua co/hoac chua tich hop xep loai hoc luc theo diem trung binh.
+### Vấn đề
+`ui.c` đang tự tính `DiemTK`, tự quy đổi `DiemHe4`, tự kiểm tra MSSV tồn tại, mã lớp học phần tồn tại, trùng khóa điểm và tự thêm/cập nhật/xóa điểm.
 
-### Huong sua
-Viet ham `classifyAcademicByGPA10(float gpa10)` trong `gpa.c/gpa.h`.
-
-Moc de xuat:
-- `>= 9.0`: Xuat sac
-- `>= 8.0`: Gioi
-- `>= 7.0`: Kha
-- `>= 5.0`: Trung binh
-- `< 5.0`: Yeu
-
----
-
-## 10. Sua bang diem sinh vien trong `ui.c`
-
-### Loi hien tai
-`showStudentScoreCard` moi in tung mon, chua tong ket GPA10, GPA4 va hoc luc.
-
-### Huong sua
-Giu ham in bang diem trong `ui.c`, nhung sau khi in danh sach diem thi goi:
-- `calculateStudentGPA10`
-- `calculateStudentGPA4`
-- `classifyAcademicByGPA10`
-
-Sau do in them 3 dong tong ket:
-- GPA he 10
-- GPA he 4
-- Hoc luc
+### Hướng sửa
+- Đưa toàn bộ logic điểm vào `score.c/score.h`.
+- Module `score.c` nên xử lý:
+  - tính điểm tổng kết `DiemTK`,
+  - quy đổi điểm hệ 4,
+  - thêm điểm,
+  - cập nhật điểm,
+  - xóa điểm,
+  - kiểm tra điểm nằm trong khoảng hợp lệ,
+  - kiểm tra sinh viên tồn tại,
+  - kiểm tra lớp học phần tồn tại,
+  - kiểm tra trùng khóa kép `(MSSV, MaLHP)`.
+- Trong `ui.c`, khi thêm hoặc sửa điểm, chỉ cần nhập `DiemQT`, `DiemCK`, sau đó gọi hàm từ `score.c`. Việc tự tính `DiemTK` và `DiemHe4` nên để `score.c` xử lý.
 
 ---
 
-## 11. Chuyen tim kiem sang `search.c/search.h`
+## 7. Gộp công thức tính điểm về một nơi
 
-### Loi hien tai
-`ui.c` dang tu lap qua danh sach de tim sinh vien, mon hoc, lop hoc phan. Nhung README yeu cau tu cai Linear Search, nen nen co module tim kiem ro rang.
+### Vấn đề
+Đang có nguy cơ trùng lặp công thức: `ui.c` có thể có `calcDiemTK` / `quyDoiHe4`, trong khi `score.c` cũng có `calculateDiemTK` / `convertToHe4`. Nếu sau này sửa công thức ở một nơi mà quên nơi còn lại thì dữ liệu sẽ không nhất quán.
 
-### Huong sua
-Chuyen sang `search.c/search.h` cac ham:
-- tim sinh vien theo MSSV
-- tim sinh vien theo ho ten
-- tim sinh vien theo lop
-- tim mon hoc theo MaHP
-- tim mon hoc theo ten
-- tim lop hoc phan theo MaLHP
-- tim diem theo MSSV/MaLHP neu can
-
-`ui.c` chi nhan tu khoa, goi ham search va in ket qua.
+### Hướng sửa
+- Chỉ giữ một bản công thức trong `score.c/score.h`.
+- Các file khác như `ui.c`, `fileio.c`, `test_fileio.c` nếu cần tính điểm thì gọi lại hàm trong `score.c`.
+- Xóa hoặc ngừng dùng các hàm tính điểm trùng lặp trong `ui.c`.
 
 ---
 
-## 12. Bo sung sap xep vao `sort.c/sort.h`
+## 8. Bổ sung GPA hệ 10 và GPA hệ 4 trong `gpa.c` / `gpa.h`
 
-### Loi hien tai
-README yeu cau sap xep danh sach sinh vien theo MSSV, ho ten hoac diem trung binh. Neu menu sinh vien chua co chuc nang nay thi chua dat du README.
+### Vấn đề
+README yêu cầu tính GPA và xếp loại, nhưng phần GPA cần được tách rõ thành module riêng thay vì để trong `ui.c` hoặc chỉ tính rời rạc trong báo cáo.
 
-### Huong sua
-Trong `sort.c/sort.h`, can co:
-- `sortStudentByMSSV`
-- `sortStudentByName`
-- `sortStudentByGPA10`
-
-Chi can Bubble Sort hoac Selection Sort. Khong can Quick Sort vi do la phan mo rong.
-
----
-
-## 13. Them menu sap xep sinh vien trong `ui.c`
-
-### Loi hien tai
-Neu `showStudentMenu` chua co muc sap xep thi ham sort co ton tai cung khong dung duoc trong chuong trinh.
-
-### Huong sua
-Trong `showStudentMenu`, them muc:
-- sap xep theo MSSV
-- sap xep theo ho ten
-- sap xep theo diem trung binh/GPA10
-
-Khi nguoi dung chon, `ui.c` goi ham tu `sort.c`, sau do in lai danh sach sinh vien.
+### Hướng sửa
+- Viết hàm tính GPA hệ 10 trong `gpa.c/gpa.h`.
+- Công thức GPA hệ 10:
+  - `GPA10 = tổng(DiemTK * SoTinChi) / tổng(SoTinChi)`.
+- Viết hàm tính GPA hệ 4:
+  - `GPA4 = tổng(DiemHe4 * SoTinChi) / tổng(SoTinChi)`.
+- Khi tính GPA, hàm phải đi qua dữ liệu theo chuỗi:
+  - từ `scores` lấy `MaLHP`,
+  - từ `course_classes` tìm lớp học phần tương ứng,
+  - từ lớp học phần lấy `MaHP`,
+  - từ `subjects` tìm học phần để lấy `SoTinChi`.
+- Nếu sinh viên chưa có điểm hoặc không có tín chỉ hợp lệ thì trả về 0 hoặc xử lý theo quy ước thống nhất.
 
 ---
 
-## 14. Sua `fileio.c` de dung lai cong thuc diem trong `score.c`
+## 9. Bổ sung xếp loại học lực trong `gpa.c` / `gpa.h`
 
-### Loi hien tai
-Khi doc `scores.txt`, chuong trinh co the tin vao `DiemTK` va `DiemHe4` trong file. Neu file co diem tong ket sai cong thuc, du lieu van co the bi load sai.
+### Vấn đề
+Bảng điểm hoặc báo cáo chưa có phần xếp loại học lực, trong khi README có nhắc đến xếp loại.
 
-### Huong sua
-Trong `fileio.c`, sau khi doc `DiemQT` va `DiemCK`, nen tinh lai:
-- `DiemTK = calculateDiemTK(DiemQT, DiemCK)`
-- `DiemHe4 = convertToHe4(DiemTK)`
-
-Co the canh bao neu gia tri trong file khong khop, nhung du lieu luu vao struct nen theo cong thuc tu `score.c`.
-
----
-
-## 15. Sua `test_fileio.c`
-
-### Loi hien tai
-`test_fileio.c` goi `feq()` nhung chua dinh nghia, co the gay loi link `undefined reference to feq`.
-
-### Huong sua
-Them ham `feq(float a, float b)` de so sanh so thuc voi epsilon, tan dung `f_abs` neu da co. Sau do chay lai `make test`.
+### Hướng sửa
+- Viết hàm xếp loại học lực trong `gpa.c/gpa.h`, nhận đầu vào là GPA hệ 10.
+- Có thể dùng các mốc:
+  - từ 9.0 trở lên: Xuất sắc,
+  - từ 8.0 đến dưới 9.0: Giỏi,
+  - từ 7.0 đến dưới 8.0: Khá,
+  - từ 5.0 đến dưới 7.0: Trung bình,
+  - dưới 5.0: Yếu.
+- `ui.c` không tự xếp loại, chỉ gọi hàm từ `gpa.c` rồi in kết quả.
 
 ---
 
-## 16. Cap nhat `docs/test_note.md`
+## 10. Bổ sung GPA và học lực vào bảng điểm sinh viên trong `ui.c`
 
-### Loi hien tai
-Tai lieu test co the ghi so PASS/FAIL cu, khong con gia tri neu test truoc do chua build duoc.
+### Vấn đề
+Hàm in bảng điểm sinh viên hiện mới in danh sách điểm từng môn, chưa có phần tổng kết GPA hệ 10, GPA hệ 4 và học lực.
 
-### Huong sua
-Sau khi sua test, chay lai:
-- `make clean`
-- `make all`
-- `make test`
-
-Ghi lai dung so PASS/FAIL that vao `docs/test_note.md`.
-
----
-
-## 17. Sua `Makefile`
-
-### Loi hien tai
-`make clean` dung `del /Q`, chi hop Windows CMD va khong phu hop neu README noi co the chay tren Linux/macOS.
-
-### Huong sua
-Doi `clean` sang cach cross-platform hon, hoac tach theo OS:
-- Windows dung `del /Q`
-- Linux/macOS/Git Bash dung `rm -f`
+### Hướng sửa
+- Giữ hàm in bảng điểm ở `ui.c` vì đây là phần hiển thị.
+- Sau khi in xong các dòng điểm từng môn, `ui.c` gọi các hàm từ `gpa.c` để lấy:
+  - GPA hệ 10,
+  - GPA hệ 4,
+  - học lực.
+- In thêm một phần tổng kết cuối bảng điểm, ví dụ:
+  - GPA hệ 10,
+  - GPA hệ 4,
+  - xếp loại học lực.
+- Không tự tính GPA trực tiếp trong `ui.c`.
 
 ---
 
-## 18. Sua `main.c`
+## 11. Chuyển tìm kiếm sang `search.c` / `search.h`
 
-### Loi hien tai
-`main.c` goi cac ham init mang dong nhung chua kiem tra gia tri tra ve. Neu malloc that bai, chuong trinh co the tiep tuc voi mang chua khoi tao dung.
+### Vấn đề
+README yêu cầu tự cài tìm kiếm tuyến tính, nhưng nếu toàn bộ tìm kiếm nằm rải rác trong `ui.c` thì module `search.c` không có vai trò rõ ràng.
 
-### Huong sua
-Kiem tra lan luot:
-- `sa_init`
-- `suba_init`
-- `cca_init`
-- `sca_init`
-
-Neu ham nao tra ve `0`, in thong bao loi, giai phong cac mang da khoi tao truoc do va thoat chuong trinh.
-
----
-
-## 19. Tao thu muc `report/` va `screenshots/`
-
-### Loi hien tai
-README co nhac san pham ban giao lien quan bao cao va anh chup man hinh, nhung Git khong luu thu muc rong.
-
-### Huong sua
-Tao:
-- `report/README.md`
-- `screenshots/README.md`
-
-De giu thu muc trong repo va giai thich muc dich tung thu muc.
+### Hướng sửa
+- Đưa các hàm tìm kiếm vào `search.c/search.h`.
+- Tối thiểu nên có:
+  - tìm sinh viên theo MSSV,
+  - tìm sinh viên theo họ tên,
+  - tìm sinh viên theo lớp,
+  - tìm học phần theo mã học phần,
+  - tìm học phần theo tên học phần,
+  - tìm lớp học phần theo mã lớp học phần,
+  - tìm điểm theo MSSV hoặc theo mã lớp học phần nếu cần.
+- Các hàm tìm kiếm nên dùng Linear Search để đúng yêu cầu cơ bản.
+- `ui.c` chỉ nhận từ khóa từ người dùng, gọi hàm tìm kiếm rồi in kết quả.
 
 ---
 
-## Thu tu uu tien nen lam
+## 12. Bổ sung sắp xếp vào `sort.c` / `sort.h`
 
-1. Rut gon `ui.h`, chi de API UI that su can cong khai.
-2. Tao/chuan hoa API trong `student/subject/courseclass/score/gpa/sort/search`.
-3. Sua `ui.c` de goi cac module thay vi tu xu ly logic.
-4. Bo sung GPA10, GPA4, xep loai hoc luc.
-5. Bo sung sort theo MSSV, ho ten, GPA10 va gan vao menu sinh vien.
-6. Sua bang diem sinh vien de hien GPA va hoc luc.
-7. Gop cong thuc diem ve `score.c`, de `ui.c` va `fileio.c` dung chung.
-8. Sua `test_fileio.c`, chay lai test va cap nhat `docs/test_note.md`.
-9. Sua Makefile, main.c va tao thu muc placeholder.
+### Vấn đề
+README yêu cầu sắp xếp danh sách sinh viên theo MSSV, họ tên hoặc điểm trung bình. Nếu chỉ có file `sort.c` nhưng menu không gọi, hoặc thiếu sắp xếp theo điểm trung bình thì chưa đủ.
 
-## Ket qua mong muon sau khi sua
+### Hướng sửa
+- Trong `sort.c/sort.h`, cần có các hàm:
+  - sắp xếp sinh viên theo MSSV,
+  - sắp xếp sinh viên theo họ tên,
+  - sắp xếp sinh viên theo điểm trung bình/GPA hệ 10.
+- Chỉ cần dùng Bubble Sort, Selection Sort hoặc Insertion Sort. Không cần Quick Sort vì đây là phần mở rộng, không bắt buộc.
+- Hàm sắp xếp theo điểm trung bình nên gọi `gpa.c` để lấy GPA hệ 10 của từng sinh viên, không tự tính lại trong `sort.c`.
 
-- `ui.c` ngan hon, chi con giao dien va dieu phoi.
-- `ui.h` gon, khong phoi bay cac ham noi bo.
-- Cac module nghiep vu co vai tro that, khong con la file trang tri.
-- Code khop hon voi README.
-- Chuc nang bat buoc ve GPA, xep loai, tim kiem, sap xep va bao cao duoc goi that tu menu.
-- Test build duoc va tai lieu test phan anh ket qua that.
+---
+
+## 13. Thêm chức năng sắp xếp vào menu sinh viên trong `ui.c`
+
+### Vấn đề
+Nếu `showStudentMenu` chưa có mục sắp xếp, người dùng không thể sử dụng chức năng này dù `sort.c` đã có hàm.
+
+### Hướng sửa
+- Trong menu sinh viên, thêm một mục “Sắp xếp danh sách sinh viên”.
+- Khi chọn mục này, cho người dùng chọn tiếp:
+  - sắp xếp theo MSSV,
+  - sắp xếp theo họ tên,
+  - sắp xếp theo điểm trung bình/GPA hệ 10.
+- Sau khi gọi hàm sắp xếp từ `sort.c`, `ui.c` in lại danh sách sinh viên.
+- Phần này giúp chức năng sắp xếp thật sự được tích hợp vào chương trình, thay vì chỉ tồn tại trong source code.
+
+---
+
+## 14. Sửa `fileio.c` để dùng lại công thức điểm trong `score.c`
+
+### Vấn đề
+Khi đọc `scores.txt`, chương trình có thể đang tin vào `DiemTK` và `DiemHe4` có sẵn trong file. Nếu dữ liệu file sai công thức, chương trình vẫn có thể load dữ liệu không nhất quán.
+
+### Hướng sửa
+- Khi đọc file điểm, vẫn có thể đọc các cột `DiemTK` và `DiemHe4` để kiểm tra định dạng nếu muốn.
+- Tuy nhiên, giá trị lưu vào struct nên được tính lại từ `DiemQT` và `DiemCK` bằng hàm trong `score.c`.
+- Nếu giá trị trong file không khớp với công thức, có thể in cảnh báo, nhưng dữ liệu chính trong chương trình nên theo kết quả tự tính.
+- Cách này giúp dữ liệu điểm luôn nhất quán giữa nhập tay, đọc file và ghi file.
+
+---
+
+## 15. Sửa `test_fileio.c`
+
+### Vấn đề
+`test_fileio.c` đang gọi `feq()` để so sánh số thực nhưng hàm này chưa được định nghĩa, có thể gây lỗi khi build hoặc link test.
+
+### Hướng sửa
+- Bổ sung hàm `feq(float a, float b)` trong `test_fileio.c`.
+- Hàm này so sánh hai số thực với một sai số nhỏ, ví dụ epsilon = 0.001.
+- Có thể tận dụng hàm `f_abs` nếu trong file đã có.
+- Sau khi thêm hàm này, chạy lại `make test` để kiểm tra kết quả thật.
+
+---
+
+## 16. Cập nhật `docs/test_note.md`
+
+### Vấn đề
+Tài liệu test có thể đang ghi kết quả PASS/FAIL cũ. Nếu trước đó test chưa build được thì con số trong tài liệu không còn đáng tin.
+
+### Hướng sửa
+- Sau khi sửa `test_fileio.c`, chạy lại:
+  - `make clean`,
+  - `make all`,
+  - `make test`.
+- Ghi lại đúng số lượng PASS/FAIL thực tế vào `docs/test_note.md`.
+- Nếu có cảnh báo trong lúc test do cố tình kiểm tra file lỗi thì ghi chú rõ để người đọc không hiểu nhầm.
+
+---
+
+## 17. Sửa `Makefile`
+
+### Vấn đề
+`make clean` dùng lệnh `del /Q`, chỉ phù hợp Windows CMD. Nếu README nói chương trình có thể chạy trên Linux/macOS hoặc môi trường Git Bash thì lệnh này không phù hợp.
+
+### Hướng sửa
+- Sửa target `clean` để dùng được trên nhiều môi trường hơn.
+- Có thể tách theo hệ điều hành:
+  - Windows dùng `del /Q`,
+  - Linux/macOS/Git Bash dùng `rm -f`.
+- Hoặc nếu nhóm chỉ chạy bằng Git Bash/MinGW thì có thể dùng `rm -f`, nhưng cần ghi rõ trong README.
+
+---
+
+## 18. Sửa `main.c`
+
+### Vấn đề
+`main.c` gọi các hàm khởi tạo mảng động nhưng chưa kiểm tra giá trị trả về. Nếu cấp phát bộ nhớ thất bại, chương trình vẫn có thể chạy tiếp với dữ liệu chưa khởi tạo đúng.
+
+### Hướng sửa
+- Kiểm tra kết quả trả về của:
+  - `sa_init`,
+  - `suba_init`,
+  - `cca_init`,
+  - `sca_init`.
+- Nếu hàm nào thất bại, in thông báo lỗi, giải phóng các mảng đã khởi tạo trước đó rồi thoát chương trình.
+- Việc này giúp chương trình an toàn hơn và xử lý lỗi bộ nhớ rõ ràng hơn.
+
+---
+
+## 19. Tạo thư mục `report/` và `screenshots/`
+
+### Vấn đề
+README có thể nhắc đến báo cáo và ảnh chụp màn hình demo, nhưng Git không lưu thư mục rỗng. Nếu repo không có hai thư mục này, phần bàn giao nhìn sẽ thiếu.
+
+### Hướng sửa
+- Tạo thư mục `report/` và thêm file `README.md` hoặc `.gitkeep`.
+- Tạo thư mục `screenshots/` và thêm file `README.md` hoặc `.gitkeep`.
+- Trong file placeholder, ghi ngắn gọn thư mục dùng để lưu báo cáo và ảnh chụp demo.
+- Nếu nhóm không nộp hai phần này thì cần chỉnh README cho khớp, tránh README nói có nhưng repo không có.
+
+---
+
+## Thứ tự ưu tiên nên sửa
+
+1. Rút gọn `ui.h`, chỉ để lại API giao diện cần công khai.
+2. Chuẩn hóa API trong các module `student`, `subject`, `courseclass`, `score`, `gpa`, `sort`, `search`.
+3. Sửa `ui.c` để gọi các module thay vì tự xử lý logic nghiệp vụ.
+4. Gộp công thức tính điểm về `score.c`.
+5. Bổ sung GPA hệ 10, GPA hệ 4 và xếp loại học lực trong `gpa.c`.
+6. Bổ sung hiển thị GPA và học lực trong bảng điểm sinh viên.
+7. Bổ sung sắp xếp theo MSSV, họ tên, GPA hệ 10 và gắn vào menu sinh viên.
+8. Chuyển logic tìm kiếm sang `search.c`.
+9. Sửa `fileio.c` để tự tính lại điểm tổng kết và điểm hệ 4 khi load điểm.
+10. Sửa `test_fileio.c`, chạy lại test và cập nhật `docs/test_note.md`.
+11. Sửa `Makefile`, `main.c`, tạo `report/` và `screenshots/`.
+
+## Kết quả mong muốn sau khi sửa
+
+- `ui.c` ngắn hơn, chỉ còn vai trò giao diện và điều phối.
+- `ui.h` gọn, không khai báo các hàm nội bộ không cần thiết.
+- Các module nghiệp vụ có vai trò thật, không còn là file tồn tại hình thức.
+- Code khớp hơn với cấu trúc và yêu cầu trong README.
+- Chức năng bắt buộc về GPA, xếp loại, tìm kiếm, sắp xếp và báo cáo được gọi thật từ menu.
+- Test build được và tài liệu test phản ánh kết quả thật.
