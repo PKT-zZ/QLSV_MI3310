@@ -13,7 +13,14 @@ void check(int cond, const char* msg) {
     else { printf("  [FAIL] %s\n", msg); fail++; }
 }
 
-static float f_abs(float x) { return (x < 0.0f) ? -x : x; }
+static float f_abs(float x) {
+    return (x < 0.0f) ? -x : x;
+}
+
+static int feq(float a, float b) {
+    const float EPS = 0.001f;
+    return f_abs(a - b) <= EPS;
+}
 
 
 //Nhóm 1: Load dữ liệu cơ bản (số lượng + nội dung)
