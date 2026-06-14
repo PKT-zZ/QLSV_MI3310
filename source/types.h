@@ -20,7 +20,7 @@ typedef struct{
 typedef struct {
     char maLHP[15]; //PK.Ex: "169312"
     char maHP[10]; //FK -> Subjects
-    int hocKy; // "1", "2", "3"
+    int hocKy; //"1", "2", "3"
     int namHoc; //2025
 } CourseClass;
 
