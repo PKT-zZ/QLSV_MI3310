@@ -12,6 +12,7 @@ Quy ước:
 #include <stdlib.h>
 #include <string.h>
 #include "fileio.h"
+#include "score.h"
 
 //Kích thước tối đa cho 1 dòng trong file
 #define MAX_LINE 512
@@ -310,14 +311,14 @@ void loadScores(ScoreArray* scores, const char* path) {
 
         float diemQT  = (float)atof(tok[2]);
         float diemCK  = (float)atof(tok[3]);
-        float diemTK  = (float)atof(tok[4]);
-        float diemHe4 = (float)atof(tok[5]);
+        float diemTKFile  = (float)atof(tok[4]);
+        float diemHe4File = (float)atof(tok[5]);
 
-        if (!valid_score(diemQT) || !valid_score(diemCK) || !valid_score(diemTK)) {
+        if (!valid_score(diemQT) || !valid_score(diemCK) || !valid_score(diemTKFile)) {
             printf("[CANH BAO] %s (dong %d): Diem QT/CK/TK ngoai khoang [0,10]. Bo qua.\n", path, lineNum);
             continue;
         }
-        if (!valid_he4(diemHe4)) {
+        if (!valid_he4(diemHe4File)) {
             printf("[CANH BAO] %s (dong %d): DiemHe4 ngoai khoang [0,4]. Bo qua.\n", path, lineNum);
             continue;
         }
@@ -329,11 +330,11 @@ void loadScores(ScoreArray* scores, const char* path) {
         ScoreRecord sc;
         safe_copy(sc.mssv,  tok[0], sizeof(sc.mssv));
         safe_copy(sc.maLHP, tok[1], sizeof(sc.maLHP));
-        sc.diemQT  = diemQT;
-        sc.diemCK  = diemCK;
-        sc.diemTK  = diemTK;
-        sc.diemHe4 = diemHe4;
-
+        sc.diemQT = diemQT;
+        sc.diemCK = diemCK;
+        //DiemTK và DiemHe4 được tính lại cho chắc
+        sc.diemTK = calculateDiemTK(sc.diemQT, sc.diemCK);
+        sc.diemHe4 = convertToHe4(sc.diemTK);
         if (!sca_add(scores, sc)) {
             printf("[LOI] Het bo nho khi them ban ghi diem (dong %d). Dung doc.\n", lineNum);
             break;
