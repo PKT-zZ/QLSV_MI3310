@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "ui.h"
+#include "sort.h"
 
 /* =========================================================
    HAM TIEN ICH NHAP DU LIEU VA VALIDATION
@@ -34,8 +35,11 @@ static int isEmptyString(const char* s) {
     }
     return 1;
 }
-
-void readLine(const char* message, char* buffer, int size) {
+static int hasPipeChar(const char* s) {
+    if (s == NULL) return 0;
+    return strchr(s, '|') != NULL;
+}
+static void readLine(const char* message, char* buffer, int size) {
     while (1) {
         size_t len;
 
@@ -57,7 +61,10 @@ void readLine(const char* message, char* buffer, int size) {
             printf("Khong duoc de trong. Vui long nhap lai.\n");
             continue;
         }
-
+if (hasPipeChar(buffer)) {
+    printf("Du lieu khong duoc chua ky tu '|'. Vui long nhap lai.\n");
+    continue;
+}
         return;
     }
 }
@@ -78,10 +85,17 @@ static int readLineOptional(const char* message, char* buffer, int size) {
     }
 
     removeNewline(buffer);
+
+    if (hasPipeChar(buffer)) {
+        printf("Du lieu khong duoc chua ky tu '|'. Bo qua gia tri vua nhap.\n");
+        buffer[0] = '\0';
+        return 0;
+    }
+
     return !isEmptyString(buffer);
 }
 
-int readInt(const char* message) {
+static int readInt(const char* message) {
     char buffer[100];
     char* end;
     long value;
@@ -104,7 +118,19 @@ int readInt(const char* message) {
         printf("Nhap sai dinh dang. Vui long nhap so nguyen.\n");
     }
 }
+static int parseIntStrict(const char* s, int* out) {
+    char* end;
+    long value;
 
+    if (s == NULL || isEmptyString(s)) return 0;
+
+    value = strtol(s, &end, 10);
+
+    if (*end != '\0') return 0;
+
+    *out = (int)value;
+    return 1;
+}
 static int readIntRange(const char* message, int min, int max) {
     int value;
 
@@ -117,7 +143,7 @@ static int readIntRange(const char* message, int min, int max) {
     }
 }
 
-float readFloat(const char* message) {
+static float readFloat(const char* message) {
     char buffer[100];
     char* end;
     float value;
@@ -153,7 +179,7 @@ static float readFloatRange(const char* message, float min, float max) {
     }
 }
 
-int validateMSSV(const char* mssv) {
+static int validateMSSV(const char* mssv) {
     int len;
 
     if (mssv == NULL) return 0;
@@ -175,10 +201,6 @@ static int validateCode(const char* code, int maxLen) {
     len = (int)strlen(code);
 
     return len > 0 && len < maxLen;
-}
-
-int validateScore(float score) {
-    return score >= 0.0f && score <= 10.0f;
 }
 
 static int validateSemester(int hocKy) {
@@ -218,7 +240,7 @@ static int daysInMonth(int month, int year) {
     }
 }
 
-int validateDate(const char* date) {
+static int validateDate(const char* date) {
     int day, month, year;
 
     if (date == NULL) return 0;
@@ -265,7 +287,7 @@ static void pauseScreen(void) {
    HIEN THI DU LIEU
    ========================================================= */
 
-void displayStudents(StudentArray* students) {
+static void displayStudents(StudentArray* students) {
     printf("\n==================== DANH SACH SINH VIEN ====================\n");
     printf("%-12s | %-25s | %-12s | %-12s\n", "MSSV", "Ho ten", "Lop", "Birthday");
     printf("-----------------------------------------------------------------------\n");
@@ -279,7 +301,7 @@ void displayStudents(StudentArray* students) {
     printf("Tong so sinh vien: %d\n", students->size);
 }
 
-void displaySubjects(SubjectArray* subjects) {
+static void displaySubjects(SubjectArray* subjects) {
     printf("\n==================== DANH SACH MON HOC ====================\n");
     printf("%-10s | %-35s | %-8s\n", "MaHP", "Ten hoc phan", "So TC");
     printf("--------------------------------------------------------------\n");
@@ -292,7 +314,7 @@ void displaySubjects(SubjectArray* subjects) {
     printf("Tong so mon hoc: %d\n", subjects->size);
 }
 
-void displayCourseClasses(CourseClassArray* classes) {
+static void displayCourseClasses(CourseClassArray* classes) {
     printf("\n==================== DANH SACH LOP HOC PHAN ====================\n");
     printf("%-15s | %-10s | %-8s | %-8s\n", "MaLHP", "MaHP", "Hoc ky", "Nam hoc");
     printf("-----------------------------------------------------------\n");
@@ -305,7 +327,7 @@ void displayCourseClasses(CourseClassArray* classes) {
     printf("Tong so lop hoc phan: %d\n", classes->size);
 }
 
-void displayScores(ScoreArray* scores) {
+static void displayScores(ScoreArray* scores) {
     printf("\n==================== DANH SACH DIEM ====================\n");
     printf("%-12s | %-15s | %-8s | %-8s | %-8s | %-8s\n",
            "MSSV", "MaLHP", "DiemQT", "DiemCK", "DiemTK", "He4");
@@ -378,17 +400,22 @@ static void editStudentUI(StudentArray* students) {
         printf("Khong tim thay sinh vien.\n");
         return;
     }
+Student* s = sa_get(students, index);
 
+if (s == NULL) {
+    printf("Loi: index sinh vien khong hop le.\n");
+    return;
+}
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("Ho ten moi: ", buffer, sizeof(buffer))) {
-        strncpy(students->data[index].hoTen, buffer, sizeof(students->data[index].hoTen) - 1);
-        students->data[index].hoTen[sizeof(students->data[index].hoTen) - 1] = '\0';
+        strncpy(s->hoTen, buffer, sizeof(s->hoTen) - 1);
+        s->hoTen[sizeof(s->hoTen) - 1] = '\0';
     }
 
     if (readLineOptional("Lop moi: ", buffer, sizeof(buffer))) {
-        strncpy(students->data[index].lop, buffer, sizeof(students->data[index].lop) - 1);
-        students->data[index].lop[sizeof(students->data[index].lop) - 1] = '\0';
+        strncpy(s->lop, buffer, sizeof(s->lop) - 1);
+        s->lop[sizeof(s->lop) - 1] = '\0';
     }
 
     while (1) {
@@ -397,8 +424,8 @@ static void editStudentUI(StudentArray* students) {
         }
 
         if (validateDate(buffer)) {
-            strncpy(students->data[index].birthday, buffer, sizeof(students->data[index].birthday) - 1);
-            students->data[index].birthday[sizeof(students->data[index].birthday) - 1] = '\0';
+            strncpy(s->birthday, buffer, sizeof(s->birthday) - 1);
+            s->birthday[sizeof(s->birthday) - 1] = '\0';
             break;
         }
 
@@ -463,19 +490,48 @@ static void searchStudentUI(StudentArray* students) {
 
     if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
+static void sortStudentUI(StudentArray* students) {
+    int choice;
 
-void showStudentMenu(StudentArray* students, ScoreArray* scores) {
+    printf("\n========== SAP XEP SINH VIEN ==========\n");
+    printf("1. Sap xep theo MSSV\n");
+    printf("2. Sap xep theo ho ten\n");
+    printf("0. Quay lai\n");
+
+    choice = readIntRange("Nhap lua chon: ", 0, 2);
+
+    switch (choice) {
+        case 1:
+            sortStudentByMSSV(students);
+            printf("Da sap xep danh sach sinh vien theo MSSV.\n");
+            displayStudents(students);
+            break;
+
+        case 2:
+            sortStudentByName(students);
+            printf("Da sap xep danh sach sinh vien theo ho ten.\n");
+            displayStudents(students);
+            break;
+
+        case 0:
+            break;
+
+        default:
+            printf("Lua chon khong hop le.\n");
+    }
+}
+static void showStudentMenu(StudentArray* students, ScoreArray* scores) {
     int choice;
 
     do {
         printf("\n========== QUAN LY SINH VIEN =========="
-               "\n1. Hien thi danh sach sinh vien"
-               "\n2. Them sinh vien"
-               "\n3. Sua sinh vien"
-               "\n4. Xoa sinh vien"
-               "\n5. Tim sinh vien"
-               "\n0. Quay lai\n");
-
+       "\n1. Hien thi danh sach sinh vien"
+       "\n2. Them sinh vien"
+       "\n3. Sua sinh vien"
+       "\n4. Xoa sinh vien"
+       "\n5. Tim sinh vien"
+       "\n6. Sap xep danh sach sinh vien"
+       "\n0. Quay lai\n");
         choice = readInt("Nhap lua chon: ");
 
         switch (choice) {
@@ -484,6 +540,7 @@ void showStudentMenu(StudentArray* students, ScoreArray* scores) {
             case 3: editStudentUI(students); break;
             case 4: deleteStudentUI(students, scores); break;
             case 5: searchStudentUI(students); break;
+            case 6: sortStudentUI(students); break;
             case 0: break;
             default: printf("Lua chon khong hop le.\n");
         }
@@ -500,7 +557,14 @@ static int subjectIsUsed(CourseClassArray* classes, const char* maHP) {
     }
     return 0;
 }
-
+static int subjectHasCourseClass(CourseClassArray* classes, const char* maHP) {
+    for (int i = 0; i < classes->size; i++) {
+        if (strcmp(classes->data[i].maHP, maHP) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 static void addSubjectUI(SubjectArray* subjects) {
     Subject s;
 
@@ -547,22 +611,28 @@ static void editSubjectUI(SubjectArray* subjects) {
         printf("Khong tim thay mon hoc.\n");
         return;
     }
+Subject* s = suba_get(subjects, index);
 
+if (s == NULL) {
+    printf("Loi: index mon hoc khong hop le.\n");
+    return;
+}
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("Ten hoc phan moi: ", buffer, sizeof(buffer))) {
-        strncpy(subjects->data[index].tenHP, buffer, sizeof(subjects->data[index].tenHP) - 1);
-        subjects->data[index].tenHP[sizeof(subjects->data[index].tenHP) - 1] = '\0';
+        strncpy(s->tenHP, buffer, sizeof(s->tenHP) - 1);
+        s->tenHP[sizeof(s->tenHP) - 1] = '\0';
     }
 
     if (readLineOptional("So tin chi moi: ", buffer, sizeof(buffer))) {
-        int credit = atoi(buffer);
-        if (validateCredit(credit)) {
-            subjects->data[index].soTinChi = credit;
-        } else {
-            printf("So tin chi khong hop le, giu nguyen gia tri cu.\n");
-        }
+    int credit;
+
+    if (parseIntStrict(buffer, &credit) && validateCredit(credit)) {
+        s->soTinChi = credit;
+    } else {
+        printf("So tin chi khong hop le, giu nguyen gia tri cu.\n");
     }
+}
 
     printf("Sua mon hoc thanh cong.\n");
 }
@@ -621,7 +691,7 @@ static void searchSubjectUI(SubjectArray* subjects) {
     if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
 
-void showSubjectMenu(SubjectArray* subjects,
+static void showSubjectMenu(SubjectArray* subjects,
                      CourseClassArray* classes,
                      ScoreArray* scores) {
     int choice;
@@ -718,29 +788,42 @@ static void editCourseClassUI(CourseClassArray* classes, SubjectArray* subjects)
         printf("Khong tim thay lop hoc phan.\n");
         return;
     }
+CourseClass* c = cca_get(classes, index);
 
+if (c == NULL) {
+    printf("Loi: index lop hoc phan khong hop le.\n");
+    return;
+}
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("MaHP moi: ", buffer, sizeof(buffer))) {
         if (suba_find(subjects, buffer) != -1) {
-            strncpy(classes->data[index].maHP, buffer, sizeof(classes->data[index].maHP) - 1);
-            classes->data[index].maHP[sizeof(classes->data[index].maHP) - 1] = '\0';
+            strncpy(c->maHP, buffer, sizeof(c->maHP) - 1);
+            c->maHP[sizeof(c->maHP) - 1] = '\0';
         } else {
             printf("MaHP khong ton tai, giu nguyen gia tri cu.\n");
         }
     }
 
-    if (readLineOptional("Hoc ky moi: ", buffer, sizeof(buffer))) {
-        int hocKy = atoi(buffer);
-        if (validateSemester(hocKy)) classes->data[index].hocKy = hocKy;
-        else printf("Hoc ky khong hop le, giu nguyen gia tri cu.\n");
-    }
+   if (readLineOptional("Hoc ky moi: ", buffer, sizeof(buffer))) {
+    int hocKy;
 
-    if (readLineOptional("Nam hoc moi: ", buffer, sizeof(buffer))) {
-        int namHoc = atoi(buffer);
-        if (validateYear(namHoc)) classes->data[index].namHoc = namHoc;
-        else printf("Nam hoc khong hop le, giu nguyen gia tri cu.\n");
+    if (parseIntStrict(buffer, &hocKy) && validateSemester(hocKy)) {
+        c->hocKy = hocKy;
+    } else {
+        printf("Hoc ky khong hop le, giu nguyen gia tri cu.\n");
     }
+}
+
+   if (readLineOptional("Nam hoc moi: ", buffer, sizeof(buffer))) {
+    int namHoc;
+
+    if (parseIntStrict(buffer, &namHoc) && validateYear(namHoc)) {
+        c->namHoc = namHoc;
+    } else {
+        printf("Nam hoc khong hop le, giu nguyen gia tri cu.\n");
+    }
+}
 
     printf("Sua lop hoc phan thanh cong.\n");
 }
@@ -799,7 +882,7 @@ static void searchCourseClassUI(CourseClassArray* classes) {
     if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
 
-void showCourseClassMenu(CourseClassArray* classes,
+static void showCourseClassMenu(CourseClassArray* classes,
                          SubjectArray* subjects,
                          ScoreArray* scores) {
     int choice;
@@ -876,11 +959,16 @@ static void updateScoreUI(ScoreArray* scores) {
         printf("Khong tim thay ban ghi diem.\n");
         return;
     }
+ScoreRecord* sc = sca_get(scores, index);
 
-    scores->data[index].diemQT = readFloatRange("Nhap diem qua trinh moi (0-10): ", 0.0f, 10.0f);
-    scores->data[index].diemCK = readFloatRange("Nhap diem cuoi ky moi (0-10): ", 0.0f, 10.0f);
-    scores->data[index].diemTK = calcDiemTK(scores->data[index].diemQT, scores->data[index].diemCK);
-    scores->data[index].diemHe4 = quyDoiHe4(scores->data[index].diemTK);
+if (sc == NULL) {
+    printf("Loi: index diem khong hop le.\n");
+    return;
+}
+    sc->diemQT = readFloatRange("Nhap diem qua trinh moi (0-10): ", 0.0f, 10.0f);
+    sc->diemCK = readFloatRange("Nhap diem cuoi ky moi (0-10): ", 0.0f, 10.0f);
+    sc->diemTK = calcDiemTK(sc->diemQT, sc->diemCK);
+    sc->diemHe4 = quyDoiHe4(sc->diemTK);
 
     printf("Cap nhat diem thanh cong. DiemTK = %.2f, He4 = %.2f\n",
            scores->data[index].diemTK, scores->data[index].diemHe4);
@@ -928,7 +1016,7 @@ static void searchScoreUI(ScoreArray* scores) {
     if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
 
-void showScoreMenu(ScoreArray* scores,
+static void showScoreMenu(ScoreArray* scores,
                    StudentArray* students,
                    CourseClassArray* classes) {
     int choice;
@@ -971,12 +1059,20 @@ static void showStudentScoreCard(StudentArray* students, ScoreArray* scores) {
         return;
     }
 
-    printf("\nBang diem sinh vien: %s - %s\n", students->data[studentIndex].mssv, students->data[studentIndex].hoTen);
+    Student* s = sa_get(students, studentIndex);
+
+    if (s == NULL) {
+        printf("Loi: index sinh vien khong hop le.\n");
+        return;
+    }
+
+    printf("\nBang diem sinh vien: %s - %s\n", s->mssv, s->hoTen);
     printf("%-15s | %-8s | %-8s | %-8s | %-8s\n", "MaLHP", "DiemQT", "DiemCK", "DiemTK", "He4");
     printf("------------------------------------------------------------\n");
 
     for (int i = 0; i < scores->size; i++) {
         ScoreRecord* sc = &scores->data[i];
+
         if (strcmp(sc->mssv, mssv) == 0) {
             printf("%-15s | %-8.2f | %-8.2f | %-8.2f | %-8.2f\n",
                    sc->maLHP, sc->diemQT, sc->diemCK, sc->diemTK, sc->diemHe4);
@@ -984,7 +1080,9 @@ static void showStudentScoreCard(StudentArray* students, ScoreArray* scores) {
         }
     }
 
-    if (!found) printf("Sinh vien nay chua co diem.\n");
+    if (!found) {
+        printf("Sinh vien nay chua co diem.\n");
+    }
 }
 
 static void showClassScoreTable(CourseClassArray* classes, ScoreArray* scores) {
@@ -1042,7 +1140,7 @@ static void showReportMenu(StudentArray* students,
    MENU CHINH
    ========================================================= */
 
-void showMainMenu(StudentArray* students,
+static void showMainMenu(StudentArray* students,
                   SubjectArray* subjects,
                   CourseClassArray* classes,
                   ScoreArray* scores) {
