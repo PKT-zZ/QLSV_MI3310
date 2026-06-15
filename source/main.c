@@ -9,10 +9,31 @@ int main(void)
     CourseClassArray classes;
     ScoreArray scores;
 
-    sa_init(&students, 4);
-    suba_init(&subjects, 4);
-    cca_init(&classes, 4);
-    sca_init(&scores, 4);
+    if (!sa_init(&students, 4)) {
+        printf("Loi khoi tao mang sinh vien.\n");
+        return 1;
+    }
+
+    if (!suba_init(&subjects, 4)) {
+        printf("Loi khoi tao mang mon hoc.\n");
+        sa_clear(&students);
+        return 1;
+    }
+
+    if (!cca_init(&classes, 4)) {
+        printf("Loi khoi tao mang lop hoc phan.\n");
+        sa_clear(&students);
+        suba_clear(&subjects);
+        return 1;
+    }
+
+    if (!sca_init(&scores, 4)) {
+        printf("Loi khoi tao mang diem.\n");
+        sa_clear(&students);
+        suba_clear(&subjects);
+        cca_clear(&classes);
+        return 1;
+    }
 
     loadAllData(
         &students,
