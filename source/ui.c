@@ -557,14 +557,7 @@ static int subjectIsUsed(CourseClassArray* classes, const char* maHP) {
     }
     return 0;
 }
-static int subjectHasCourseClass(CourseClassArray* classes, const char* maHP) {
-    for (int i = 0; i < classes->size; i++) {
-        if (strcmp(classes->data[i].maHP, maHP) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
+
 static void addSubjectUI(SubjectArray* subjects) {
     Subject s;
 
@@ -1140,7 +1133,7 @@ static void showReportMenu(StudentArray* students,
    MENU CHINH
    ========================================================= */
 
-static void showMainMenu(StudentArray* students,
+void showMainMenu(StudentArray* students,
                   SubjectArray* subjects,
                   CourseClassArray* classes,
                   ScoreArray* scores) {
