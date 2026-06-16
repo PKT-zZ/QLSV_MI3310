@@ -16,9 +16,9 @@ int main() {
     sa_init(&arr, 2);
     check_arr(arr.size == 0 && arr.capacity == 2, "Khoi tao mang rong chuan xac");
 
-    Student s1; strcpy(s1.mssv, "SV001");
-    Student s2; strcpy(s2.mssv, "SV002");
-    Student s3; strcpy(s3.mssv, "SV003");
+    Student s1; strcpy(s1.mssv, "2023001");
+    Student s2; strcpy(s2.mssv, "2024002");
+    Student s3; strcpy(s3.mssv, "2025003");
 
     sa_add(&arr, s1);
     sa_add(&arr, s2);
@@ -27,8 +27,8 @@ int main() {
     sa_add(&arr, s3);
     check_arr(arr.size == 3 && arr.capacity >= 3, "Them vuot capacity -> tu resize, khong crash");
 
-    int idx = sa_find(&arr, "SV002");
-    check_arr(idx == 1, "Tim thay SV002 o index 1");
+    int idx = sa_find(&arr, "2024002");
+    check_arr(idx == 1, "Tim thay 2024002 o index 1");
     check_arr(sa_find(&arr, "KHONGCO") == -1, "Tim khoa khong ton tai -> -1");
 
     //Edge case: index ngoài phạm vi
@@ -38,7 +38,7 @@ int main() {
 
     sa_remove(&arr, 0);
     check_arr(arr.size == 2, "Xoa 1 sinh vien, size giam xuong 2");
-    check_arr(strcmp(arr.data[0].mssv, "SV002") == 0, "Don mang sang trai dung");
+    check_arr(strcmp(arr.data[0].mssv, "2024002") == 0, "Don mang sang trai dung");
 
     sa_clear(&arr);
     check_arr(arr.data == NULL && arr.size == 0, "Giai phong bo nho thanh cong");
