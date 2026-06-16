@@ -24,7 +24,7 @@ int main() {
     sa_add(&arr, s2);
     check_arr(arr.size == 2, "Them 2 sinh vien, size == 2");
 
-    sa_add(&arr, s3); //vượt capacity ban đầu -> phải tự resize
+    sa_add(&arr, s3);
     check_arr(arr.size == 3 && arr.capacity >= 3, "Them vuot capacity -> tu resize, khong crash");
 
     int idx = sa_find(&arr, "SV002");
