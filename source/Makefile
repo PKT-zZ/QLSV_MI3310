@@ -8,13 +8,13 @@ CFLAGS = -Wall -Wextra -std=c99
 MAIN_EXE = ../qlsv.exe
 TEST_EXE = ../test_fileio.exe
 
-#Danh sách file nguồn của chương trình chính
+#Danh sách file nguồn của ctrinh chính
 SRC_MAIN = arrays.c fileio.c \
            student.c subject.c courseclass.c score.c \
            gpa.c sort.c search.c \
            ui.c main.c
 
-#Danh sách file nguồn cho integration test đọc/ghi dữ liệu
+#Danh sách file cho integration test đọc/ghi dữ liệu
 SRC_TEST = arrays.c fileio.c score.c test_fileio.c
 
 ifeq ($(OS),Windows_NT)
@@ -30,12 +30,12 @@ all:
 	$(CC) $(CFLAGS) $(SRC_MAIN) -o $(MAIN_EXE)
 	@echo "Build thành công. Chạy ../qlsv.exe để mở chương trình."
 
-#Integration test: đọc/ghi dữ liệu với file trong data/
+#Integration test: đọc/ghi dữ liệu file trong data/
 test:
 	$(CC) $(CFLAGS) $(SRC_TEST) -o $(TEST_EXE)
 	cd .. && $(DOTSLASH)test_fileio.exe
 
-#Unit test: từng module riêng lẻ, không đụng đến data/
+#Unit test: từng module riêng, không đụng đến data/
 test_types:
 	$(CC) $(CFLAGS) test_types.c -o ../test_types.exe
 	cd .. && $(DOTSLASH)test_types.exe
@@ -57,6 +57,6 @@ unit_test: test_types test_arrays test_fileio_unit test_gpa
 #Xóa file build cũ
 clean:
 	-$(CLEAN_CMD)
-	@echo "Đã dọn dẹp."
+	@echo "Đã dọn dẹp"
 
 .PHONY: all test test_types test_arrays test_fileio_unit test_gpa unit_test clean
