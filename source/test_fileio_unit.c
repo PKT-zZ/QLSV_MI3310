@@ -22,7 +22,7 @@ int main() {
         printf("  [SKIP] khong tao duoc file tam\n");
     } else {
         fprintf(f, "MSSV|HoTen|Lop|Birthday\n");
-        fprintf(f, "999|Test Unit|K68|01/01/2000\n");
+        fprintf(f, "2020007|Test|K68|01/01/2000\n");
         fclose(f);
 
         StudentArray arr;
@@ -30,8 +30,8 @@ int main() {
         loadStudents(&arr, tmp_in);
         check_io(arr.size == 1, "Doc duoc 1 dong hop le tu file tam");
         if (arr.size > 0) {
-            check_io(strcmp(arr.data[0].mssv, "999") == 0, "Lay dung MSSV");
-            check_io(strcmp(arr.data[0].hoTen, "Test Unit") == 0, "Lay dung HoTen");
+            check_io(strcmp(arr.data[0].mssv, "2020007") == 0, "Lay dung MSSV");
+            check_io(strcmp(arr.data[0].hoTen, "Test") == 0, "Lay dung HoTen");
         }
         sa_clear(&arr);
         remove(tmp_in);
@@ -43,9 +43,9 @@ int main() {
         printf("  [SKIP] khong tao duoc file tam\n");
     } else {
         fprintf(f, "MSSV|HoTen|Lop|Birthday\n");
-        fprintf(f, "888|Sinh Vien A|K68|01/01/2000\n"); //hop le
-        fprintf(f, "THIEU|Chi co 2 truong\n");          //thieu truong -> bo qua
-        fprintf(f, "888|Sinh Vien Trung|K68|01/01/2000\n"); //trung MSSV -> bo qua
+        fprintf(f, "6767|Sinh Vien A|K68|01/01/2000\n"); //hop le
+        fprintf(f, "THIEU|Chi co 2 truong\n"); //thieu truong -> bo qua
+        fprintf(f, "6767|A Nhan Ban|K68|01/01/2000\n"); //trung MSSV -> bo qua
 
         fclose(f);
 
