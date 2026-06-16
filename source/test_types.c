@@ -1,4 +1,4 @@
-//Test: struct Student, Subject, CourseClass, ScoreRecord trong types.h, chỉ kiểm tra kích thước trường và việc gán/đọc giá trị có biên dịch và hoạt động đúng
+//Test: struct Student, Subject, CourseClass, ScoreRecord trong types.h, chỉ kiểm tra kích thước trường và việc gán/đọc giá trị có hoạt động đúng ko
 #include <stdio.h>
 #include <string.h>
 #include "types.h"
