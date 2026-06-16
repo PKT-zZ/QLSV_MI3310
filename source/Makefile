@@ -1,14 +1,10 @@
-#Makefile cho dự án QLSV_MI3310
 #Chạy các lệnh make trong thư mục source/
-#Ghi chú về môi trường:
-# - Trên Linux/macOS hoặc Git Bash/MSYS2: chạy file bằng ./ten_file
-# - Trên Windows CMD/PowerShell: có thể chạy trực tiếp ten_file.exe
-# - Lệnh xóa file cũng khác nhau: Linux/macOS dùng rm -f, Windows dùng del
+#Trên Linux/macOS cần ./ trước tên file khi chạy, Windows thì không
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 
-#File thực thi được đặt ở thư mục gốc của repo để chương trình có thể làm việc với thư mục data/
+#File thực thi đặt ở thư mục gốc để chương trình đọc được thư mục data/
 MAIN_EXE = ../qlsv.exe
 TEST_EXE = ../test_fileio.exe
 
@@ -18,31 +14,49 @@ SRC_MAIN = arrays.c fileio.c \
            gpa.c sort.c search.c \
            ui.c main.c
 
-#Danh sách file nguồn dùng cho kiểm thử File I/O, score.c được đưa vào vì fileio.c sử dụng hàm tính DiemTK và quy đổi điểm hệ 4
+#Danh sách file nguồn cho integration test đọc/ghi dữ liệu
 SRC_TEST = arrays.c fileio.c score.c test_fileio.c
 
-#Một số lệnh chạy/xóa file khác nhau giữa Windows và Linux/macOS
 ifeq ($(OS),Windows_NT)
-	RUN_TEST = cd .. && test_fileio.exe
-	CLEAN_CMD = del /Q ..\qlsv.exe ..\test_fileio.exe 2>nul
+	DOTSLASH =
+	CLEAN_CMD = del /Q ..\*.exe 2>nul
 else
-	RUN_TEST = cd .. && ./test_fileio.exe
-	CLEAN_CMD = rm -f $(MAIN_EXE) $(TEST_EXE)
+	DOTSLASH = ./
+	CLEAN_CMD = rm -f ../*.exe
 endif
 
 #Build chương trình chính
 all:
 	$(CC) $(CFLAGS) $(SRC_MAIN) -o $(MAIN_EXE)
-	@echo "Build thanh cong. Chay ../qlsv.exe de mo chuong trinh."
+	@echo "Build thành công. Chạy ../qlsv.exe để mở chương trình."
 
-#Build và chạy bộ kiểm thử File I/O
+#Integration test: đọc/ghi dữ liệu với file trong data/
 test:
 	$(CC) $(CFLAGS) $(SRC_TEST) -o $(TEST_EXE)
-	$(RUN_TEST)
+	cd .. && $(DOTSLASH)test_fileio.exe
 
-#Xóa các file build cũ
+#Unit test: từng module riêng lẻ, không đụng đến data/
+test_types:
+	$(CC) $(CFLAGS) test_types.c -o ../test_types.exe
+	cd .. && $(DOTSLASH)test_types.exe
+
+test_arrays:
+	$(CC) $(CFLAGS) arrays.c test_arrays.c -o ../test_arrays.exe
+	cd .. && $(DOTSLASH)test_arrays.exe
+
+test_fileio_unit:
+	$(CC) $(CFLAGS) arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit.exe
+	cd .. && $(DOTSLASH)test_fileio_unit.exe
+
+test_gpa:
+	$(CC) $(CFLAGS) arrays.c gpa.c test_gpa.c -o ../test_gpa.exe
+	cd .. && $(DOTSLASH)test_gpa.exe
+
+unit_test: test_types test_arrays test_fileio_unit test_gpa
+
+#Xóa file build cũ
 clean:
 	-$(CLEAN_CMD)
-	@echo "Da don dep file build."
+	@echo "Đã dọn dẹp."
 
-.PHONY: all test clean
+.PHONY: all test test_types test_arrays test_fileio_unit test_gpa unit_test clean
