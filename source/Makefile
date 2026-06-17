@@ -17,18 +17,18 @@ SRC_MAIN = arrays.c fileio.c \
 #Danh sách file cho integration test đọc/ghi dữ liệu
 SRC_TEST = arrays.c fileio.c score.c test_fileio.c
 
+DOTSLASH = ./
+
 ifeq ($(OS),Windows_NT)
-	DOTSLASH =
 	CLEAN_CMD = del /Q ..\*.exe 2>nul
 else
-	DOTSLASH = ./
 	CLEAN_CMD = rm -f ../*.exe
 endif
 
 #Build chương trình chính
 all:
 	$(CC) $(CFLAGS) $(SRC_MAIN) -o $(MAIN_EXE)
-	@echo "Build thành công. Chạy ../qlsv.exe để mở chương trình."
+	@echo "Build thanh cong. Chay ../qlsv.exe de mo chuong trinh."
 
 #Integration test: đọc/ghi dữ liệu file trong data/
 test:
