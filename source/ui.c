@@ -1219,7 +1219,9 @@ static void showStudentScoreCard(
     );
 }
 
-static void showClassScoreTable(CourseClassArray* classes, ScoreArray* scores) {
+static void showClassScoreTable(CourseClassArray* classes,
+                                ScoreArray* scores,
+                                StudentArray* students) {
     char maLHP[15];
     int classIndex;
     int found = 0;
@@ -1232,15 +1234,22 @@ static void showClassScoreTable(CourseClassArray* classes, ScoreArray* scores) {
         return;
     }
 
-    printf("\nBang diem lop hoc phan: %s\n", maLHP);
-    printf("%-12s | %-8s | %-8s | %-8s | %-8s\n", "MSSV", "DiemQT", "DiemCK", "DiemTK", "He4");
-    printf("------------------------------------------------------------\n");
+    printf("%-12s | %-25s | %-8s | %-8s | %-8s | %-8s\n",
+       "MSSV", "HoTen", "DiemQT", "DiemCK", "DiemTK", "He4");
+printf("--------------------------------------------------------------------------------\n");
 
     for (int i = 0; i < scores->size; i++) {
         ScoreRecord* sc = &scores->data[i];
         if (strcmp(sc->maLHP, maLHP) == 0) {
-            printf("%-12s | %-8.2f | %-8.2f | %-8.2f | %-8.2f\n",
-                   sc->mssv, sc->diemQT, sc->diemCK, sc->diemTK, sc->diemHe4);
+            int studentIndex = sa_find(students, sc->mssv);
+const char* hoTen = "Khong ro";
+
+if (studentIndex != -1) {
+    hoTen = students->data[studentIndex].hoTen;
+}
+
+printf("%-12s | %-25s | %-8.2f | %-8.2f | %-8.2f | %-8.2f\n",
+       sc->mssv, hoTen, sc->diemQT, sc->diemCK, sc->diemTK, sc->diemHe4);
             found = 1;
         }
     }
@@ -1266,7 +1275,7 @@ static void showReportMenu(
 
         switch (choice) {
             case 1:showStudentScoreCard(students, scores, classes, subjects); break;
-            case 2: showClassScoreTable(classes, scores); break;
+            case 2: showClassScoreTable(classes, scores, students); break;
             case 0: break;
             default: printf("Lua chon khong hop le.\n");
         }
