@@ -1,4 +1,4 @@
-<img width="1085" height="555" alt="image" src="https://github.com/user-attachments/assets/18e5d2c6-c04d-46a5-bf61-e03d9837be94" /># Quản lý sinh viên và điểm số | Student Management System
+# Quản lý sinh viên và điểm số | Student Management System
 
 ## 1. Giới thiệu dự án
 
