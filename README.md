@@ -442,11 +442,18 @@ QLSV_MI3310/
 ├── docs/
 │   └── test_note.md
 │
+├── screenshots/
+│   ├── TCxx_mo_ta_ngan_01.png
+│   ├── TCxx_mo_ta_ngan_02.png
+│   └── ...
+│
 ├── README.md
 └── .gitignore
 ```
 
-> Nếu có nộp kèm báo cáo Word hoặc ảnh minh chứng, có thể bổ sung thêm `report/` và `screenshots/` trong bản nộp cuối. README hiện ưu tiên phản ánh các file/thư mục đang có trong repo.
+> `screenshots/` dùng để lưu ảnh minh chứng kiểm thử. Nhóm chọn khoảng **10–15 test case tiêu biểu** trong Mục 13 để chụp ảnh, không bắt buộc phải chụp đủ toàn bộ TC01–TC28.
+>
+> Nếu Git không nhận thư mục `screenshots/` khi chưa có ảnh, có thể tạo tạm file `screenshots/.gitkeep`, sau đó thay bằng ảnh kiểm thử khi hoàn thiện.
 
 ## 9. Lộ trình triển khai 5 tuần
 
@@ -711,7 +718,7 @@ Các nhiệm vụ chính:
 - Tích hợp giao diện với các module của Thành viên 1 và Thành viên 2.
 - Kiểm tra dữ liệu đầu vào (validation tích hợp trong `ui.c`).
 - In bảng điểm, bảng danh sách, báo cáo thống kê (tích hợp trong `ui.c`).
-- Thiết kế test case và chụp ảnh kiểm thử.
+- Thiết kế test case và chụp ảnh kiểm thử cho khoảng 10–15 test case tiêu biểu.
 - Viết báo cáo Word và hoàn thiện tài liệu nộp bài.
 
 #### Sản phẩm cần hoàn thành
@@ -725,7 +732,7 @@ Các nhiệm vụ chính:
 | 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm | Tuần 3 |
 | 6 | Validation và in báo cáo | `source/ui.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực; in bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng (gộp trong `ui.c`) | Tuần 3–4 |
 | 7 | Bảng test case | `docs/test_note.md` hoặc `README.md` | Viết danh sách test case từ TC01 đến TC28 | Tuần 4 |
-| 8 | Ảnh kiểm thử | `screenshots/` nếu nộp kèm | Chụp ảnh kết quả chạy chương trình cho các test case chính nếu giảng viên yêu cầu | Tuần 4–5 |
+| 8 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho khoảng 10–15 test case tiêu biểu trong Mục 13 | Tuần 4–5 |
 | 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` nếu nộp kèm | Viết báo cáo cuối kỳ theo đúng thể thức nếu giảng viên yêu cầu | Tuần 5 |
 | 10 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ | Tuần 5 |
 | 11 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README | Tuần 5 |
@@ -760,7 +767,7 @@ Bảng điểm của một lớp học phần
 - Người dùng nhập sai thì chương trình báo lỗi và cho nhập lại.
 - Không để chương trình crash khi nhập dữ liệu sai kiểu.
 - Các bảng hiển thị rõ ràng trên console.
-- Có đủ ảnh kiểm thử cho các chức năng chính.
+- Có khoảng 10–15 ảnh kiểm thử cho các chức năng chính, lưu trong `screenshots/`.
 - Báo cáo Word đầy đủ nội dung kỹ thuật, ảnh minh chứng và kết luận.
 - README được cập nhật đúng với trạng thái cuối cùng của dự án.
 
@@ -772,7 +779,7 @@ Bảng điểm của một lớp học phần
 |---|---|---|---|
 | Thành viên 1 | Core Data, Typed Arrays, File I/O, dữ liệu mẫu, kiểm thử nền tảng | `types.h`, `arrays.h/.c`, `fileio.h/.c`, `data/*.txt`, `source/test_types.c`, `source/test_arrays.c`, `source/test_fileio_unit.c`, `source/test_gpa.c`, `source/test_fileio.c`, `docs/test_note.md` | Cao |
 | Thành viên 2 | CRUD, xử lý điểm, GPA, tìm kiếm tuyến tính, sắp xếp | `student.h/.c`, `subject.h/.c`, `courseclass.h/.c`, `score.h/.c`, `gpa.h/.c`, `sort.h/.c`, `search.h/.c` | Cao |
-| Thành viên 3 | Console UI, validation, test, documentation | `main.c`, `ui.h/.c`, `README.md`, `docs/test_note.md`; `screenshots/`, `report/` nếu nộp kèm | Cao |
+| Thành viên 3 | Console UI, validation, test, documentation | `main.c`, `ui.h/.c`, `README.md`, `docs/test_note.md`, `screenshots/`; `report/` nếu nộp kèm | Cao |
 
 ---
 
@@ -825,6 +832,38 @@ Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tín
 | TC26 | Đọc file sai định dạng | Một dòng thiếu trường hoặc sai kiểu dữ liệu | Bỏ qua dòng lỗi, dữ liệu hợp lệ vẫn được load |
 | TC27 | Lưu dữ liệu và mở lại chương trình | Thêm/sửa dữ liệu, thoát chương trình, chạy lại | Dữ liệu vẫn còn sau khi khởi động lại |
 | TC28 | Quy đổi GPA hệ 4 | Điểm tổng kết thuộc các mốc quy đổi hệ 4 | Điểm hệ 4 được quy đổi đúng |
+
+### 13.1. Ảnh minh chứng kiểm thử
+
+Nhóm không cần chụp ảnh toàn bộ 28 test case. Khi nộp bài, chỉ cần chọn khoảng **10–15 test case tiêu biểu** để minh chứng chương trình đã chạy được các chức năng chính.
+
+Các nhóm test nên có ảnh minh chứng:
+
+- Thêm dữ liệu hợp lệ và chặn dữ liệu trùng khóa.
+- Nhập/cập nhật điểm, chặn điểm ngoài khoảng `0–10`.
+- Tính điểm tổng kết, GPA hệ 10, GPA hệ 4 và xếp loại học lực.
+- Tìm kiếm và sắp xếp sinh viên.
+- Hiển thị bảng điểm sinh viên và bảng điểm lớp học phần.
+- Chặn xóa dữ liệu đang được tham chiếu.
+- Kiểm thử load/save dữ liệu nếu cần minh chứng thêm.
+
+Ảnh kiểm thử đặt trong thư mục `screenshots/`, đặt tên ngắn gọn theo mã test case, ví dụ:
+
+```text
+screenshots/
+├── TC01_them_sinh_vien_hop_le.png
+├── TC02_trung_mssv.png
+├── TC07_nhap_diem_hop_le.png
+├── TC08_diem_ngoai_khoang.png
+├── TC14_gpa_he_10.png
+├── TC15_xep_loai_hoc_luc.png
+├── TC16_tim_sinh_vien.png
+├── TC18_sap_xep_mssv.png
+├── TC20_bang_diem_sinh_vien.png
+├── TC21_bang_diem_lop_hoc_phan.png
+├── TC22_chan_xoa_sinh_vien_co_diem.png
+└── TC27_luu_va_doc_lai_du_lieu.png
+```
 
 ---
 
@@ -930,4 +969,4 @@ Các bước chạy kiểm thử tự động bằng Makefile như `make unit_te
 
 - Ghi chú kiểm thử: [`docs/test_note.md`](docs/test_note.md)
 - Dữ liệu mẫu: `data/`
-- Ảnh kiểm thử: `screenshots/` 
+- Ảnh kiểm thử: `screenshots/` — lưu khoảng 10–15 ảnh minh chứng cho các test case tiêu biểu
