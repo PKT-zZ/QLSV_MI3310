@@ -42,7 +42,7 @@ Dự án tập trung vào đúng yêu cầu của bài tập lớn: xây dựng 
 | Quản lý môn học | Thêm, sửa, xóa, tìm kiếm môn học theo mã học phần hoặc tên môn |
 | Quản lý lớp học phần | Tạo, sửa, xóa, tìm kiếm lớp học phần; mỗi lớp học phần gắn với một môn học |
 | Quản lý điểm số | Nhập và cập nhật điểm cho sinh viên theo MSSV và mã lớp học phần/mã học phần |
-| Tính toán kết quả học tập | Tính điểm tổng kết, điểm trung bình học kỳ hoặc tích lũy theo hệ 10; có thể quy đổi hệ 4 nếu nhóm triển khai |
+| Tính toán kết quả học tập | Tính điểm tổng kết, GPA hệ 10, GPA hệ 4 và xếp loại học lực |
 | Xếp loại học lực | Xếp loại học lực dựa trên điểm trung bình |
 | Tìm kiếm | Tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
 | Sắp xếp | Sắp xếp danh sách sinh viên theo MSSV, họ tên hoặc điểm trung bình |
@@ -402,7 +402,7 @@ Nhóm cần thống nhất rằng chương trình sẽ được chạy từ thư
 ## 8. Cấu trúc thư mục dự án
 
 ```text
-NHOM_XX_QLSV/
+QLSV_MI3310/
 ├── source/
 │   ├── main.c
 │   ├── types.h
@@ -426,6 +426,11 @@ NHOM_XX_QLSV/
 │   ├── search.c
 │   ├── ui.h
 │   ├── ui.c
+│   ├── test_types.c
+│   ├── test_arrays.c
+│   ├── test_fileio_unit.c
+│   ├── test_gpa.c
+│   ├── test_fileio.c
 │   └── Makefile
 │
 ├── data/
@@ -434,13 +439,14 @@ NHOM_XX_QLSV/
 │   ├── course_classes.txt
 │   └── scores.txt
 │
-├── screenshots/
-├── report/
 ├── docs/
-└── README.md
+│   └── test_note.md
+│
+├── README.md
+└── .gitignore
 ```
 
----
+> Nếu có nộp kèm báo cáo Word hoặc ảnh minh chứng, có thể bổ sung thêm `report/` và `screenshots/` trong bản nộp cuối. README hiện ưu tiên phản ánh các file/thư mục đang có trong repo.
 
 ## 9. Lộ trình triển khai 5 tuần
 
@@ -571,7 +577,7 @@ Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trìn
 | 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số | Tuần 2 |
 | 5 | Hàm tách dòng dữ liệu | `fileio.c` | Dùng `strtok()` để tách dòng theo ký tự `\|`; đảm bảo các trường bắt buộc không để trống, kiểm tra đủ số trường và xử lý dòng sai định dạng | Tuần 2 |
 | 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính | Tuần 2 |
-| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test-note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
+| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test_note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
 | 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết | Tuần 5 |
 
 #### Các hàm tối thiểu cần có
@@ -649,34 +655,21 @@ Thành viên 2 phụ trách phần xử lý nghiệp vụ và thuật toán củ
 | 10 | Hỗ trợ báo cáo kỹ thuật | `report/` hoặc `docs/` | Viết phần giải thích thuật toán, độ phức tạp và công thức tính điểm | Tuần 5 |
 | 11 | Sửa lỗi logic cuối kỳ | Các file nghiệp vụ | Sửa lỗi còn sót sau kiểm thử tích hợp | Tuần 4–5 |
 
-#### Các chức năng nghiệp vụ tối thiểu cần có
+#### Các module/hàm nghiệp vụ chính hiện có
 
-```c
-int addStudent(StudentArray* students, Student newStudent);
-int editStudent(StudentArray* students, const char* mssv, Student updatedStudent);
-int deleteStudent(StudentArray* students, const char* mssv, ScoreArray* scores);
-int findStudentByMSSV(StudentArray* students, const char* mssv);
-int findStudentByName(StudentArray* students, const char* name);
-```
+README không liệt kê prototype giả định nữa, mà mô tả theo đúng các module đang có trong mã nguồn:
 
-```c
-int addSubject(SubjectArray* subjects, Subject newSubject);
-int editSubject(SubjectArray* subjects, const char* maHP, Subject updatedSubject);
-int deleteSubject(SubjectArray* subjects, const char* maHP,
-                  CourseClassArray* classes, ScoreArray* scores);
-int findSubjectByCode(SubjectArray* subjects, const char* maHP);
-```
+| Module | Chức năng chính |
+|---|---|
+| `student.h/.c` | Thêm, sửa, xóa, tìm sinh viên theo MSSV |
+| `subject.h/.c` | Thêm, sửa, xóa, tìm học phần theo mã học phần |
+| `courseclass.h/.c` | Thêm, sửa, xóa, tìm lớp học phần theo mã lớp học phần |
+| `score.h/.c` | Nhập điểm, cập nhật điểm, tính điểm tổng kết và quy đổi điểm hệ 4 |
+| `gpa.h/.c` | Tính GPA hệ 10, GPA hệ 4 theo trọng số tín chỉ và xếp loại học lực |
+| `search.h/.c` | Tìm kiếm tuyến tính theo MSSV, họ tên, lớp, mã học phần, tên học phần, mã lớp học phần |
+| `sort.h/.c` | Sắp xếp sinh viên theo MSSV, họ tên và GPA |
 
-```c
-int   addScore(ScoreArray* scores, ScoreRecord newScore);
-int   updateScore(ScoreArray* scores, const char* mssv, const char* maLHP, ScoreRecord updated);
-float calcDiemTK(float diemQT, float diemCK);
-float calcGPA10(ScoreArray* scores, CourseClassArray* classes,
-                SubjectArray* subjects, const char* mssv);
-float calcGPA4(ScoreArray* scores, CourseClassArray* classes,
-               SubjectArray* subjects, const char* mssv);
-float quyDoiHe4(float diemTK);
-```
+Các tên hàm cụ thể được khai báo trong từng file `.h` tương ứng. Cách viết này tránh tình trạng README liệt kê prototype không khớp với mã nguồn thực tế.
 
 #### Công thức cần cài đặt đúng
 
@@ -731,35 +724,26 @@ Các nhiệm vụ chính:
 | 4 | Submenu quản lý lớp học phần | `source/ui.c` | Giao diện gọi các chức năng quản lý lớp học phần | Tuần 3 |
 | 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm | Tuần 3 |
 | 6 | Validation và in báo cáo | `source/ui.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực; in bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng (gộp trong `ui.c`) | Tuần 3–4 |
-| 7 | Bảng test case | `docs/test-plan.md` hoặc `report/` | Viết danh sách test case từ TC01 đến TC14 | Tuần 4 |
-| 8 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho các test case chính | Tuần 4–5 |
-| 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` | Viết báo cáo cuối kỳ theo đúng thể thức | Tuần 5 |
+| 7 | Bảng test case | `docs/test_note.md` hoặc `README.md` | Viết danh sách test case từ TC01 đến TC28 | Tuần 4 |
+| 8 | Ảnh kiểm thử | `screenshots/` nếu nộp kèm | Chụp ảnh kết quả chạy chương trình cho các test case chính nếu giảng viên yêu cầu | Tuần 4–5 |
+| 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` nếu nộp kèm | Viết báo cáo cuối kỳ theo đúng thể thức nếu giảng viên yêu cầu | Tuần 5 |
 | 10 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ | Tuần 5 |
 | 11 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README | Tuần 5 |
 
-#### Các hàm giao diện và validation tối thiểu cần có
+#### Các chức năng giao diện và validation cần có
 
-```c
-void showMainMenu();
-void showStudentMenu();
-void showSubjectMenu();
-void showCourseClassMenu();
-void showScoreMenu();
-void displayTable();
-void displayScoreCard();
-```
+Các hàm giao diện chi tiết được cài đặt chủ yếu trong `ui.c`; `ui.h` chỉ cần public những hàm cần gọi từ module khác, đặc biệt là hàm menu chính.
 
-```c
-/* Các hàm validation và đọc dữ liệu đầu vào — khai báo trong ui.h, cài trong ui.c */
-int   validateMSSV(const char* mssv);
-int   validateScore(float score);
-int   validateDate(const char* date);
-int   isStudentKeyDuplicate(StudentArray* arr, const char* key);
-int   isSubjectKeyDuplicate(SubjectArray* arr, const char* key);
-int   isClassKeyDuplicate(CourseClassArray* arr, const char* key);
-int   readInt(const char* message);
-float readFloat(const char* message);
-```
+Các chức năng giao diện cần có:
+
+- Menu chính.
+- Submenu quản lý sinh viên.
+- Submenu quản lý học phần.
+- Submenu quản lý lớp học phần.
+- Submenu quản lý điểm.
+- Menu báo cáo/bảng điểm.
+- Đọc và kiểm tra dữ liệu đầu vào: chuỗi rỗng, ký tự phân cách `|`, số nguyên, số thực, điểm trong khoảng `0–10`, ngày sinh, học kỳ, năm học và số tín chỉ.
+- Chặn thao tác xóa dữ liệu đang được tham chiếu theo các ràng buộc đã nêu ở Mục 3.1.
 
 #### Các báo cáo cần in được
 
@@ -788,7 +772,7 @@ Bảng điểm của một lớp học phần
 |---|---|---|---|
 | Thành viên 1 | Core Data, Typed Arrays, File I/O, dữ liệu mẫu, kiểm thử nền tảng | `types.h`, `arrays.h/.c`, `fileio.h/.c`, `data/*.txt`, `source/test_types.c`, `source/test_arrays.c`, `source/test_fileio_unit.c`, `source/test_gpa.c`, `source/test_fileio.c`, `docs/test_note.md` | Cao |
 | Thành viên 2 | CRUD, xử lý điểm, GPA, tìm kiếm tuyến tính, sắp xếp | `student.h/.c`, `subject.h/.c`, `courseclass.h/.c`, `score.h/.c`, `gpa.h/.c`, `sort.h/.c`, `search.h/.c` | Cao |
-| Thành viên 3 | Console UI, validation, report, test, documentation | `main.c`, `ui.h/.c`, `screenshots/`, `report/`, `README.md` | Cao |
+| Thành viên 3 | Console UI, validation, test, documentation | `main.c`, `ui.h/.c`, `README.md`, `docs/test_note.md`; `screenshots/`, `report/` nếu nộp kèm | Cao |
 
 ---
 
@@ -848,7 +832,7 @@ Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tín
 
 TV1 đã hoàn thành bộ kiểm thử tự động gồm 5 file, bao phủ toàn bộ phạm vi code do TV1 phụ trách (`types.h`, `arrays.c`, `fileio.c`, `gpa.c`). Chi tiết từng test case xem tại [`docs/test_note.md`](docs/test_note.md).
 
-**Tổng kết: 68/68 PASS — không có lỗi.**
+**Tổng kết theo kết quả kiểm thử đã ghi nhận: 68/68 PASS.**
 
 | File test | Loại | Module kiểm tra | Số case | Kết quả |
 |---|---|---|---|---|
@@ -909,16 +893,15 @@ git clone https://github.com/PKT-zZ/QLSV_MI3310.git
 cd QLSV_MI3310
 ```
 
-### 15.3. Build chương trình + Chạy chương trình
+### 15.3. Build chương trình
 
-````md
 Dự án sử dụng `Makefile` đặt trong thư mục `source/`. Để biên dịch chương trình chính, chạy các lệnh sau từ thư mục gốc của dự án:
 
 ```bash
 cd source
 make clean
 make all
-````
+```
 
 Sau khi build thành công, file thực thi `qlsv.exe` sẽ được tạo ở thư mục gốc của dự án.
 
@@ -943,12 +926,8 @@ Chương trình sẽ hiển thị menu chính để thực hiện các chức n�
 
 Các bước chạy kiểm thử tự động bằng Makefile như `make unit_test`, `make test` và kết quả kiểm thử chi tiết được ghi trong file [`docs/test_note.md`](docs/test_note.md).
 
-```
-
----
-
 ## 16. Tài liệu liên quan
 
-- Báo cáo cuối kỳ: `report/BaoCao_QLSV_NhomXX.docx`
-- Ảnh kiểm thử: `screenshots/`
+- Ghi chú kiểm thử: [`docs/test_note.md`](docs/test_note.md)
 - Dữ liệu mẫu: `data/`
+- Ảnh kiểm thử: `screenshots/` 
