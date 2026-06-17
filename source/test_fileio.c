@@ -245,5 +245,5 @@ int main() {
     else
         printf("KET QUA: %d PASS, %d FAIL -- co loi!\n", pass, fail);
 
-    return 0;
+    return fail > 0 ? 1 : 0;
 }
