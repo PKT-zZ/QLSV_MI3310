@@ -1,743 +1,584 @@
-# Quản lý sinh viên và điểm số | Student Management System
+# QLSV_MI3310 — Tổng hợp lỗi đang có cần sửa trước khi chạy test/nộp
 
-## 1. Giới thiệu dự án
-
-Dự án **Quản lý sinh viên và điểm số (Student Management System)** là chương trình quản lý sinh viên và điểm số chạy trên giao diện console.
-
-Dự án được thực hiện bởi nhóm 3 sinh viên ngành Toán Tin, ĐHBKHN (HUST) trong khuôn khổ môn học Kỹ thuật lập trình.
-Cụ thể về nhân sự: 
- - Nguyễn Khánh Toàn đảm nhận công việc của Thành viên 1 + lập ra bản kế hoạch trong file README này + theo dõi tiến độ của 2 thành viên còn lại
- - Ngô Ngọc Thái đảm nhận công việc của Thành viên 2
- - Nguyễn Vũ Quang Anh đảm nhận công việc của Thành viên 3
-
-Chương trình tập trung vào việc tự cài đặt cấu trúc dữ liệu, thuật toán tìm kiếm, thuật toán sắp xếp và xử lý dữ liệu lưu trữ bằng file text.
+> Phạm vi bản này: chỉ tập trung vào lỗi làm code/test/Makefile không chạy đúng, tính năng README đã nêu nhưng code/test chưa khớp, và tài liệu README/test_note đang sai lệch.  
+> Không xét các vấn đề phụ như phong cách code, comment dài, dấu hiệu AI, module chưa tối ưu, hay kiến trúc chưa sạch.
 
 ---
 
-## 2. Mục tiêu dự án
+## Kết luận ngắn
 
-Xây dựng một chương trình console hoàn chỉnh bằng ngôn ngữ C, cho phép quản lý sinh viên, môn học, lớp học phần và điểm số.
+Repo hiện **chưa nên coi là bản ổn để nộp/chạy mục 13** vì còn các lỗi trực tiếp ảnh hưởng đến build/test và tài liệu:
 
-Các mục tiêu chính:
-
-- Quản lý thông tin sinh viên.
-- Quản lý môn học.
-- Quản lý lớp học phần.
-- Quản lý điểm quá trình, điểm cuối kỳ và điểm tổng kết.
-- Tính GPA hệ 10, GPA hệ 4 và xếp loại học lực.
-- Tự cài đặt cấu trúc dữ liệu và thuật toán, không sử dụng thư viện container hoặc hàm thuật toán có sẵn.
-- Tạo sản phẩm có thể demo và bảo vệ trước giảng viên.
+1. `test_gpa.c` đang gọi hàm `calculateStudentGPA()` nhưng `gpa.h/gpa.c` hiện không có hàm này.
+2. `test_fileio.c` vẫn `return 0` dù có thể có test fail, làm `make test` báo pass giả.
+3. `README.md` và `docs/test_note.md` đang ghi `68/68 PASS`, nhưng kết luận này không còn đáng tin khi `test_gpa.c` đang gọi sai API.
+4. Hướng dẫn clone/build/chạy trong `README.md` đang sai hoặc lệch với Makefile thực tế.
+5. `README.md` nhắc một số file/thư mục/tên hàm chưa khớp repo hiện tại.
+6. Makefile có thể chạy được về mặt target, nhưng phần chạy file `.exe` trên Git Bash/MSYS2 có rủi ro do biến `DOTSLASH` đang phụ thuộc `$(OS)` theo kiểu chưa chắc đúng với shell đang dùng.
 
 ---
 
-## 3. Phạm vi chức năng
+## 1. Lỗi build/test: `test_gpa.c` gọi hàm không tồn tại
 
-Dự án tập trung vào đúng yêu cầu của bài tập lớn: xây dựng chương trình console quản lý sinh viên và điểm số, có đọc/ghi dữ liệu bằng file text, tự cài đặt cấu trúc dữ liệu và thuật toán cơ bản.
+### File liên quan
 
-### 3.1. Chức năng bắt buộc
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+- `source/Makefile`
 
-| Nhóm chức năng | Mô tả |
-|---|---|
-| Quản lý sinh viên | Thêm, sửa, xóa, tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
-| Quản lý môn học | Thêm, sửa, xóa, tìm kiếm môn học theo mã học phần hoặc tên môn |
-| Quản lý lớp học phần | Tạo, sửa, xóa, tìm kiếm lớp học phần; mỗi lớp học phần gắn với một môn học |
-| Quản lý điểm số | Nhập và cập nhật điểm cho sinh viên theo MSSV và mã lớp học phần/mã học phần |
-| Tính toán kết quả học tập | Tính điểm tổng kết, điểm trung bình học kỳ hoặc tích lũy theo hệ 10; có thể quy đổi hệ 4 nếu nhóm triển khai |
-| Xếp loại học lực | Xếp loại học lực dựa trên điểm trung bình |
-| Tìm kiếm | Tìm kiếm sinh viên theo MSSV, họ tên hoặc lớp |
-| Sắp xếp | Sắp xếp danh sách sinh viên theo MSSV, họ tên hoặc điểm trung bình |
-| Báo cáo | Hiển thị bảng điểm của một sinh viên và bảng điểm của một lớp học phần |
+### Hiện trạng
 
-> **⚠ Ràng buộc toàn vẹn tham chiếu bắt buộc thực thi:**  
-> Chương trình phải kiểm tra dữ liệu liên quan trước khi xóa Sinh viên, Môn học hoặc Lớp học phần.
->
-> - Không cho phép xóa **Sinh viên** nếu còn bản ghi điểm có `MSSV` tương ứng trong `scores.txt`.
-> - Không cho phép xóa **Lớp học phần** nếu còn bản ghi điểm có `MaLHP` tương ứng trong `scores.txt`.
-> - Không cho phép xóa **Môn học** nếu còn lớp học phần nào trong `course_classes.txt` sử dụng `MaHP` tương ứng.
->
-> Nếu dữ liệu đang được tham chiếu, chương trình phải hiển thị thông báo lỗi và hủy thao tác xóa.
-
-### 3.2. Chức năng mở rộng nếu còn thời gian
-
-Các chức năng sau **không bắt buộc**, chỉ thực hiện sau khi các chức năng cốt lõi đã hoàn thành ổn định:
-
-| Chức năng mở rộng | Ghi chú |
-|---|---|
-| Tìm kiếm nhị phân (Binary Search) | Chỉ áp dụng khi danh sách đã được sắp xếp theo đúng khóa |
-| Quick Sort | Không bắt buộc; chỉ dùng để nâng cao phần thuật toán |
-| Bảng xếp hạng theo GPA | Có thể thêm nếu đã hoàn thành bảng điểm sinh viên và bảng điểm lớp học phần |
-| Xuất báo cáo ra file riêng | Không bắt buộc, vì yêu cầu chính chỉ cần hiển thị báo cáo trên console |
-| Các thống kê nâng cao | Thống kê phân phối điểm, tỉ lệ đạt/rớt theo lớp học phần, v.v. |
-
----
-
-## 4. Công nghệ sử dụng
-
-| Thành phần | Lựa chọn |
-|---|---|
-| Ngôn ngữ lập trình | C, khuyến nghị ANSI C / C99 |
-| Giao diện | Console menu |
-| Lưu trữ dữ liệu | File text định dạng CSV tự thiết kế, dùng dấu phân cách `\|` |
-| Cấu trúc dữ liệu chính | Dynamic Array tự cài đặt |
-| Build | Makefile |
-| Quản lý mã nguồn | Git và GitHub |
-
----
-
-## 5. Ràng buộc kỹ thuật
-
-Dự án tuân thủ các ràng buộc sau:
-
-- Không sử dụng các thư viện cấu trúc dữ liệu hoặc hàm thuật toán có sẵn ngoài các thư viện chuẩn (như `stdio.h`, `string.h`, `stdlib.h`).
-- Không sử dụng JSON/XML parser.
-- Không sử dụng cơ sở dữ liệu thật.
-- Cấu trúc dữ liệu và thuật toán phải tự cài đặt từ đầu.
-- Dữ liệu được đọc/ghi bằng file text.
-- Chương trình chạy trên console với menu lặp cho đến khi người dùng chọn thoát.
-- Mã sinh viên, mã học phần và mã lớp học phần là khóa chính, không được trùng lặp.
-
-> **Lưu ý về thuật toán:**  
-> Phiên bản cơ bản chỉ cần cài **Linear Search** và một thuật toán sắp xếp đơn giản như **Bubble Sort** hoặc **Selection Sort** là đủ để đáp ứng yêu cầu bài tập lớn.  
-> **Binary Search** và **Quick Sort** là phần mở rộng — không bắt buộc, chỉ thực hiện nếu còn thời gian và các chức năng cốt lõi đã ổn định.
-
----
-
-## 6. Cấu trúc dữ liệu và thuật toán
-
-### 6.1. Cấu trúc dữ liệu chính
-
-Dự án sử dụng **Dynamic Array tự cài đặt** làm cấu trúc dữ liệu lõi. Nhóm có thể chọn một trong hai cách triển khai tùy theo sở thích và khả năng:
-
-**Chọn Mảng động định kiểu riêng / Typed Dynamic Array:**
-
-Khai báo một struct mảng động **riêng biệt cho từng kiểu dữ liệu**. Cách tiếp cận này an toàn kiểu dữ liệu, không cần ép kiểu `void*`, giảm thiểu nguy cơ nhầm kiểu và rò rỉ bộ nhớ.
+Trong `source/gpa.h`, API hiện có:
 
 ```c
-typedef struct {
-    Student* data;   // Con trỏ đến vùng bộ nhớ cấp phát động
-    int      size;   // Số phần tử hiện tại
-    int      capacity;  // Dung lượng tối đa hiện tại
-} StudentArray;
-
-typedef struct {
-    Subject* data;
-    int      size;
-    int      capacity;
-} SubjectArray;
-
-typedef struct {
-    CourseClass* data;
-    int          size;
-    int          capacity;
-} CourseClassArray;
-
-typedef struct {
-    ScoreRecord* data;
-    int          size;
-    int          capacity;
-} ScoreArray;
+float calculateStudentGPA4(...);
+float calculateStudentGPA10(...);
+const char* getAcademicRank(float gpa10);
 ```
 
-Ưu điểm: an toàn kiểu dữ liệu, truy cập trực tiếp không cần cast, dễ debug.  
-Nhược điểm: phải viết lặp bộ hàm thao tác cho từng struct (nhưng logic mỗi hàm đều giống nhau và ngắn gọn).
+Trong `source/gpa.c`, code cũng chỉ triển khai:
 
-> **⚠ Lý do không khuyến nghị dùng mảng `void*` tổng quát:**  
-> Cách dùng `void*` và `elemSize` (con trỏ dạng `(char*)arr->data + i * arr->elemSize`) yêu cầu ép kiểu thủ công mỗi khi truy cập phần tử. Với nhóm chưa thành thạo con trỏ, đây là nguồn gốc thường gặp của lỗi nhầm kiểu, truy cập sai vùng nhớ và memory leak khó phát hiện.
-
----
-
-Các thao tác cần cài đặt (áp dụng cho Typed Dynamic Array):
-
-| Hàm (ví dụ cho `StudentArray`) | Mô tả |
-|---|---|
-| `sa_init` | Khởi tạo mảng động sinh viên với `init_cap`; nếu `init_cap <= 0` dùng mặc định 4 |
-| `sa_add` | Thêm phần tử `Student`, trả về `1` nếu thành công, `0` nếu lỗi cấp phát |
-| `sa_get` | Lấy con trỏ phần tử theo chỉ số |
-| `sa_remove` | Xóa phần tử theo chỉ số, trả về `1` nếu thành công, `0` nếu index sai |
-| `sa_update` | Cập nhật phần tử theo chỉ số, trả về `1` nếu thành công, `0` nếu index sai |
-| `sa_resize` | Mở rộng dung lượng mảng; hiện cài `static` trong `arrays.c`, không gọi trực tiếp từ module khác |
-| `sa_find` | Tìm kiếm theo khóa chính `mssv`; các mảng khác tìm theo khóa tương ứng |
-| `sa_clear` | Giải phóng bộ nhớ |
-
-Áp dụng tương tự với các prefix `suba_` (`SubjectArray`), `cca_` (`CourseClassArray`), `sca_` (`ScoreArray`).
-
-### 6.2. Các struct chính
-
-> Ghi chú cập nhật theo mã nguồn hiện tại: `Subject` dùng trường `maHP` thay cho `maMon`; `CourseClass` tham chiếu học phần bằng `maHP`; `Student` dùng trường `birthday`; `ScoreRecord` dùng `diemCK` cho điểm cuối kỳ. README cần giữ thống nhất với các tên này để tránh lỗi khi các thành viên khác gọi hàm hoặc đọc/ghi file.
-
-Các thực thể chính trong chương trình:
-
-- `Student`: thông tin sinh viên.
-- `Subject`: thông tin môn học.
-- `CourseClass`: thông tin lớp học phần.
-- `ScoreRecord`: thông tin điểm số.
-- `StudentArray`, `SubjectArray`, `CourseClassArray`, `ScoreArray`: các mảng tự cài đặt (Typed Dynamic Array).
-
-### 6.3. Thuật toán cần tự cài
-
-**Bắt buộc:**
-
-- Linear Search — tìm kiếm tuyến tính, dùng cho mọi trường hợp.
-- Bubble Sort hoặc Selection Sort — sắp xếp theo MSSV, họ tên hoặc điểm trung bình.
-
-**Mở rộng (không bắt buộc, chỉ làm nếu còn thời gian):**
-
-- Binary Search — chỉ áp dụng sau khi mảng đã được sắp xếp; **lưu ý quan trọng:** Binary Search chỉ cho kết quả đúng nếu mảng đã được sắp xếp **chính xác theo trường dữ liệu đang được dùng làm khóa tìm kiếm** (ví dụ: nếu tìm theo MSSV thì mảng phải đang được sắp xếp theo MSSV, không phải theo tên hay điểm). Dùng sai trường sắp xếp sẽ trả về kết quả sai hoặc không tìm thấy dù dữ liệu tồn tại.
-- Quick Sort — thuật toán sắp xếp nhanh hơn, dùng để minh họa trong báo cáo.
-
----
-
-## 7. Định dạng file lưu trữ
-
-Dữ liệu của chương trình được lưu bằng **file text thuần**, sử dụng định dạng CSV tự thiết kế với ký tự phân cách là dấu gạch đứng `|`.
-
-Nhóm chọn dấu `|` thay vì dấu phẩy `,` để hạn chế lỗi khi dữ liệu văn bản như họ tên, địa chỉ hoặc ghi chú có thể chứa dấu phẩy. Cách lưu này đơn giản hơn JSON/XML vì không cần dùng thư viện parser có sẵn, phù hợp với yêu cầu tự xử lý dữ liệu bằng C.
-
----
-
-### 7.1. Quy ước chung
-
-- Mỗi file dữ liệu có một dòng tiêu đề ở dòng đầu tiên.
-- Mỗi dòng sau dòng tiêu đề tương ứng với một bản ghi.
-- Các trường trong một dòng được phân tách bằng ký tự `|`.
-- Không đặt ký tự `|` trong nội dung của một trường dữ liệu.
-- Không để dòng trống giữa các bản ghi.
-- Dữ liệu số thực dùng dấu chấm `.` làm dấu thập phân, ví dụ `8.5`, `7.25`.
-- Dữ liệu ngày sinh dùng định dạng `DD/MM/YYYY`.
-- Khi chương trình khởi động, dữ liệu được load từ các file trong thư mục `data/`.
-- Khi người dùng chọn thoát chương trình, toàn bộ dữ liệu hiện tại được ghi lại xuống file.
-
----
-
-### 7.2. Danh sách file dữ liệu
-
-| File | Header | Ý nghĩa |
-|---|---|---|
-| `data/students.txt` | `MSSV\|HoTen\|Lop\|Birthday` | Lưu thông tin sinh viên |
-| `data/subjects.txt` | `MaHP\|TenHP\|SoTinChi` | Lưu thông tin môn học |
-| `data/course_classes.txt` | `MaLHP\|MaHP\|HocKy\|NamHoc` | Lưu thông tin lớp học phần |
-| `data/scores.txt` | `MSSV\|MaLHP\|DiemQT\|DiemCK\|DiemTK\|DiemHe4` | Lưu điểm của sinh viên theo từng lớp học phần |
-
----
-
-### 7.3. Ví dụ dữ liệu mẫu
-
-#### `students.txt`
-
-```txt
-MSSV|HoTen|Lop|Birthday
-22000001|Nguyen Van An|K67-MT|15/08/2003
-22000002|Tran Thi Bich|K67-MT|20/03/2003
-22000003|Le Hoang Cuong|K67-MT|05/11/2002
+```c
+calculateStudentGPA4(...)
+calculateStudentGPA10(...)
+getAcademicRank(...)
 ```
 
-#### `subjects.txt`
+Nhưng trong `source/test_gpa.c`, test vẫn gọi:
 
-```txt
-MaHP|TenHP|SoTinChi
-KTLT|Ky Thuat Lap Trinh|3
-CTDL|Cau Truc Du Lieu|3
-CSDL|Co So Du Lieu|3
+```c
+calculateStudentGPA(...)
 ```
 
-#### `course_classes.txt`
+ở 3 chỗ:
 
-```txt
-MaLHP|MaHP|HocKy|NamHoc
-KTLT_K67_1|KTLT|1|2024
-CTDL_K67_2|CTDL|2|2024
-CSDL_K67_2|CSDL|2|2024
+```c
+float gpa1 = calculateStudentGPA("SV001", &scores, &clss, &subs);
+float gpa2 = calculateStudentGPA("SV001", &scores, &clss, &subs);
+float gpa3 = calculateStudentGPA("SV999", &scores, &clss, &subs);
 ```
 
-#### `scores.txt`
+### Ảnh hưởng
 
-```txt
-MSSV|MaLHP|DiemQT|DiemCK|DiemTK|DiemHe4
-22000001|KTLT_K67_1|8.5|7.0|7.75|3.0
-22000002|KTLT_K67_1|9.0|8.5|8.75|4.0
-22000003|CTDL_K67_2|7.0|7.5|7.25|3.0
+`make unit_test` sẽ bị lỗi ở target `test_gpa`, vì Makefile đang build:
+
+```make
+test_gpa:
+	$(CC) $(CFLAGS) arrays.c gpa.c test_gpa.c -o ../test_gpa.exe
+	cd .. && $(DOTSLASH)test_gpa.exe
+```
+
+Khi link, `test_gpa.c` cần hàm `calculateStudentGPA`, nhưng `gpa.c` không cung cấp hàm này.
+
+### Kết luận lỗi
+
+Đây là lỗi **bắt buộc sửa**. Nếu không sửa, kết quả `unit_test` không thể đúng.
+
+### Sửa tối thiểu
+
+Đổi trong `source/test_gpa.c`:
+
+```c
+calculateStudentGPA(...)
+```
+
+thành:
+
+```c
+calculateStudentGPA4(...)
+```
+
+Cụ thể:
+
+```c
+float gpa1 = calculateStudentGPA4("SV001", &scores, &clss, &subs);
+float gpa2 = calculateStudentGPA4("SV001", &scores, &clss, &subs);
+float gpa3 = calculateStudentGPA4("SV999", &scores, &clss, &subs);
+```
+
+Sửa luôn comment đầu file:
+
+```c
+//Test: hàm calculateStudentGPA()
+```
+
+thành:
+
+```c
+//Test: hàm calculateStudentGPA4()
 ```
 
 ---
 
-### 7.4. Ý nghĩa các trường dữ liệu
+## 2. Lỗi test: `test_fileio.c` có thể báo pass giả
 
-#### Sinh viên — `Student`
+### File liên quan
 
-| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
-|---|---|---|
-| `MSSV` | `char[12]` | Mã số sinh viên, khóa chính, không được trùng |
-| `HoTen` | `char[60]` | Họ và tên sinh viên |
-| `Lop` | `char[20]` | Lớp hành chính của sinh viên |
-| `Birthday` | `char[12]` | Ngày sinh, định dạng `DD/MM/YYYY`; trong struct hiện tại đặt tên trường là `birthday` |
+- `source/test_fileio.c`
+- `source/Makefile`
+- `docs/test_note.md`
+- `README.md`
 
-#### Môn học — `Subject`
+### Hiện trạng
 
-| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
-|---|---|---|
-| `MaHP` | `char[10]` | Mã học phần, khóa chính, không được trùng |
-| `TenHP` | `char[80]` | Tên môn học |
-| `SoTinChi` | `int` | Số tín chỉ của môn học |
+Trong `test_fileio.c`, chương trình có biến đếm lỗi:
 
-#### Lớp học phần — `CourseClass`
+```c
+int pass = 0, fail = 0;
+```
 
-| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
-|---|---|---|
-| `MaLHP` | `char[15]` | Mã lớp học phần, khóa chính, không được trùng |
-| `MaHP` | `char[10]` | Mã học phần tương ứng, tham chiếu đến `subjects.txt` |
-| `HocKy` | `int` | Học kỳ, ví dụ `1`, `2`, `3` |
-| `NamHoc` | `int` | Năm học |
+Cuối chương trình có phân nhánh in kết quả:
 
-#### Điểm số — `ScoreRecord`
+```c
+if (fail == 0)
+    printf("KET QUA: %d/%d PASS -- tat ca dung!\n", pass, pass + fail);
+else
+    printf("KET QUA: %d PASS, %d FAIL -- co loi!\n", pass, fail);
+```
 
-| Trường | Kiểu dữ liệu dự kiến | Ý nghĩa |
-|---|---|---|
-| `MSSV` | `char[12]` | Mã sinh viên, tham chiếu đến `students.txt` |
-| `MaLHP` | `char[15]` | Mã lớp học phần, tham chiếu đến `course_classes.txt` |
-| `DiemQT` | `float` | Điểm quá trình, từ `0.0` đến `10.0` |
-| `DiemCK` | `float` | Điểm cuối kỳ, từ `0.0` đến `10.0` |
-| `DiemTK` | `float` | Điểm tổng kết, tính theo công thức `0.5 * DiemQT + 0.5 * DiemCK` |
-| `DiemHe4` | `float` | Điểm quy đổi sang hệ 4 |
+Nhưng ngay sau đó vẫn:
 
-> **Ghi chú thiết kế — Phi chuẩn hóa có chủ đích (Denormalization):**  
-> Việc lưu sẵn `DiemTK` và `DiemHe4` trực tiếp vào file `scores.txt` là **thiết kế phi chuẩn hóa có chủ đích**. Về lý thuyết, hai trường này có thể tính lại bất cứ lúc nào từ `DiemQT` và `DiemCK`. Tuy nhiên, lưu sẵn giúp giảm thiểu việc tính toán lại mỗi lần load file và đơn giản hóa phần đọc/ghi dữ liệu trong phạm vi dự án này. Khi cập nhật `DiemQT` hoặc `DiemCK`, chương trình **phải tính lại và cập nhật đồng thời** `DiemTK` và `DiemHe4`.
+```c
+return 0;
+```
+
+### Ảnh hưởng
+
+Nếu có test fail, chương trình vẫn trả exit code `0`.
+
+Điều này làm:
+
+```bash
+make test
+```
+
+vẫn có thể được Makefile xem là thành công dù bên trong test đã báo lỗi.
+
+### Kết luận lỗi
+
+Đây là lỗi **bắt buộc sửa** vì làm sai kết quả kiểm thử.
+
+### Sửa tối thiểu
+
+Đổi:
+
+```c
+return 0;
+```
+
+thành:
+
+```c
+return fail > 0 ? 1 : 0;
+```
+
+Sau khi sửa, nếu integration test có lỗi, `make test` sẽ trả lỗi đúng.
 
 ---
 
-### 7.5. Quan hệ giữa các file dữ liệu
+## 3. Lỗi tài liệu: README và test_note ghi `68/68 PASS` không còn đáng tin
 
-Các file dữ liệu có quan hệ logic với nhau như sau:
+### File liên quan
+
+- `README.md`
+- `docs/test_note.md`
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+- `source/test_fileio.c`
+
+### Hiện trạng
+
+`README.md` đang ghi:
 
 ```text
-students.txt
-    MSSV  (PK)
-      |
-      | MSSV là khóa ngoại (FK) trong scores.txt
-      v
-scores.txt
-    MSSV + MaLHP  (khóa duy nhất)
-
-course_classes.txt
-    MaLHP  (PK)
-    MaHP  (FK) ──────────────────────────────┐
-      |                                        |
-      | MaLHP là khóa ngoại (FK) trong         | MaHP tham chiếu đến
-      | scores.txt                             v
-      v                                 subjects.txt
-scores.txt                                  MaHP  (PK)
-    MSSV + MaLHP
+Tổng kết: 68/68 PASS — không có lỗi.
 ```
 
-Quy ước quan trọng:
-
-- `MSSV` là khóa chính của sinh viên.
-- `MaHP` là khóa chính của môn học.
-- `MaLHP` là khóa chính của lớp học phần.
-- Cặp `(MSSV, MaLHP)` là khóa duy nhất trong file `scores.txt`.
-- Một sinh viên được xem là tham gia một lớp học phần nếu tồn tại bản ghi tương ứng trong `scores.txt`.
-- Không cần tạo thêm file `enrollments.txt` trong phiên bản hiện tại để giữ thiết kế đơn giản.
-
----
-
-### 7.6. Cơ chế load và save dữ liệu
-
-Khi chương trình khởi động:
-
-1. Gọi hàm `loadAllData()`.
-2. Đọc lần lượt các file:
-   - `data/students.txt`
-   - `data/subjects.txt`
-   - `data/course_classes.txt`
-   - `data/scores.txt`
-3. Bỏ qua dòng header đầu tiên.
-4. Tách từng dòng dữ liệu bằng ký tự `|`.
-5. Kiểm tra số lượng trường dữ liệu.
-6. Chuyển dữ liệu sang các struct tương ứng.
-7. Thêm bản ghi vào mảng dữ liệu.
-
-Khi người dùng chọn thoát chương trình:
-
-1. Gọi hàm `saveAllData()`.
-2. Ghi lại toàn bộ dữ liệu hiện tại xuống file.
-3. Ghi dòng header trước.
-4. Ghi từng bản ghi theo đúng định dạng đã quy định.
-
----
-
-### 7.7. Xử lý lỗi khi đọc file
-
-Module File I/O cần xử lý các trường hợp sau:
-
-| Tình huống | Cách xử lý đề xuất |
-|---|---|
-| File không tồn tại | Tạo mảng rỗng, hiển thị cảnh báo, không làm chương trình crash |
-| File rỗng | Tạo mảng rỗng |
-| Dòng thiếu trường | Bỏ qua dòng lỗi, hiển thị cảnh báo |
-| Dữ liệu số sai định dạng | Bỏ qua dòng lỗi hoặc gán giá trị mặc định nếu phù hợp |
-| Điểm ngoài khoảng `0–10` | Không nạp bản ghi điểm đó |
-| Trùng khóa chính | Giữ bản ghi đầu tiên, bỏ qua bản ghi trùng và hiển thị cảnh báo |
-| Mã tham chiếu không tồn tại | Bỏ qua bản ghi và hiển thị cảnh báo |
-| Trường bắt buộc bị bỏ trống | Bỏ qua dòng lỗi, không lưu vào mảng dữ liệu |
-
-> **Ghi chú tách dòng dữ liệu:**  
-> Có thể dùng `strtok()` để tách dòng theo ký tự `|`. Sau khi tách, cần kiểm tra đủ số trường và đảm bảo các trường bắt buộc như `MSSV`, `MaHP`, `MaLHP` không bị bỏ trống trước khi lưu vào struct.
-
----
-
-### 7.8. Ghi chú triển khai
-
-Các đường dẫn file nên được khai báo tập trung trong một file header hoặc trong `fileio.c`, ví dụ:
-
-```c
-#define STUDENT_FILE      "data/students.txt"
-#define SUBJECT_FILE      "data/subjects.txt"
-#define COURSE_CLASS_FILE "data/course_classes.txt"
-#define SCORE_FILE        "data/scores.txt"
-```
-
-Nhóm cần thống nhất rằng chương trình sẽ được chạy từ thư mục gốc của project. Khi đó các đường dẫn dạng `data/students.txt` sẽ hoạt động ổn định.
-
----
-
-## 8. Cấu trúc thư mục dự án
+`docs/test_note.md` cũng ghi:
 
 ```text
-NHOM_XX_QLSV/
-├── source/
-│   ├── main.c
-│   ├── types.h
-│   ├── arrays.h
-│   ├── arrays.c
-│   ├── fileio.h
-│   ├── fileio.c
-│   ├── student.h
-│   ├── student.c
-│   ├── subject.h
-│   ├── subject.c
-│   ├── courseclass.h
-│   ├── courseclass.c
-│   ├── score.h
-│   ├── score.c
-│   ├── gpa.h
-│   ├── gpa.c
-│   ├── sort.h
-│   ├── sort.c
-│   ├── search.h
-│   ├── search.c
-│   ├── ui.h
-│   ├── ui.c
-│   └── Makefile
-│
-├── data/
-│   ├── students.txt
-│   ├── subjects.txt
-│   ├── course_classes.txt
-│   └── scores.txt
-│
-├── screenshots/
-├── report/
-├── docs/
-└── README.md
+Kết quả tổng hợp 68/68 test case PASS — không có lỗi.
 ```
 
----
-
-## 9. Lộ trình triển khai 5 tuần
-
-### Tuần 1: Chốt thiết kế và xây dựng cấu trúc lõi
-
-Mục tiêu:
-
-- Chốt yêu cầu kỹ thuật.
-- Tạo cấu trúc thư mục.
-- Viết `types.h`.
-- Bắt đầu cài đặt mảng dữ liệu (Typed Array hoặc mảng tĩnh).
-- Phác thảo menu console.
-
-Sản phẩm cuối tuần:
-
-- `types.h`
-- `arrays.h` (hoặc khai báo mảng tĩnh)
-- Cấu trúc thư mục ban đầu
-- Tài liệu thiết kế nội bộ
-
----
-
-### Tuần 2: Hoàn thiện cấu trúc dữ liệu, File I/O và CRUD danh mục
-
-Mục tiêu:
-
-- Hoàn thiện `arrays.c` (hoặc mảng tĩnh).
-- Viết module đọc/ghi file.
-- Cài CRUD cho sinh viên, môn học và lớp học phần.
-- Có menu cơ bản chạy được.
-
-Sản phẩm cuối tuần:
-
-- `arrays.c`
-- `fileio.c`
-- `student.c`
-- `subject.c`
-- `courseclass.c`
-- Menu cơ bản
-
----
-
-### Tuần 3: Nhập điểm, tính GPA, tìm kiếm và sắp xếp
-
-Mục tiêu:
-
-- Cài module điểm số.
-- Cài công thức tính điểm tổng kết.
-- Cài GPA hệ 10, GPA hệ 4 và xếp loại.
-- Cài Linear Search và một thuật toán sắp xếp (Bubble Sort hoặc Selection Sort).
-- Tích hợp validation.
-
-Sản phẩm cuối tuần:
-
-- `score.c`
-- `gpa.c`
-- `sort.c`
-- `search.c`
-- Menu nhập điểm hoạt động (validation tích hợp trong `ui.c`)
-
----
-
-### Tuần 4: Hoàn thiện giao diện, báo cáo bảng điểm và kiểm thử tích hợp
-
-Mục tiêu:
-
-- Hoàn thiện toàn bộ menu.
-- Cài chức năng in bảng điểm.
-- Kiểm thử end-to-end.
-- Chụp ảnh minh chứng các test case chính.
-
-Sản phẩm cuối tuần:
-
-- Chương trình chạy hoàn chỉnh
-- Chức năng in bảng điểm (tích hợp trong `ui.c`)
-- Ít nhất 80% test case pass
-- Ảnh kiểm thử trong thư mục `screenshots/`
-
----
-
-### Tuần 5: Tinh chỉnh, kiểm thử cuối và đóng gói nộp bài
-
-Mục tiêu:
-
-- Review toàn bộ code.
-- Xóa code thừa.
-- Bổ sung comment.
-- Hoàn thiện báo cáo Word.
-- Đóng gói sản phẩm cuối.
-
-Sản phẩm cuối tuần:
-
-- Mã nguồn sạch
-- Báo cáo hoàn chỉnh
-- File dữ liệu mẫu
-- Ảnh kiểm thử
-- README hoàn thiện
-- File ZIP nộp bài
-
----
-
-## 10. Sản phẩm cần đạt của từng thành viên
-
-Phần này mô tả chi tiết các sản phẩm mà từng thành viên cần hoàn thành trong quá trình triển khai dự án.  
-Mỗi sản phẩm cần được commit lên GitHub thông qua branch riêng và Pull Request trước khi merge vào `main`.
-
----
-
-### 10.1. Thành viên 1 — Core Data & File I/O
-
-#### Vai trò chính
-
-Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trình, bao gồm:
-
-- Định nghĩa các kiểu dữ liệu chính.
-- Tự cài đặt cấu trúc dữ liệu Typed Dynamic Array (hoặc mảng tĩnh theo Lựa chọn 2).
-- Xây dựng module đọc/ghi dữ liệu từ file text.
-- Chuẩn bị dữ liệu mẫu ban đầu.
-- Hỗ trợ các thành viên khác khi tích hợp dữ liệu.
-
-#### Sản phẩm cần hoàn thành
-
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | Định nghĩa kiểu dữ liệu chính | `source/types.h` | Khai báo các struct `Student`, `Subject`, `CourseClass`, `ScoreRecord` | Tuần 1 |
-| 2 | Header cho mảng dữ liệu | `source/arrays.h` | Khai báo struct và prototype các hàm thao tác mảng | Tuần 1 |
-| 3 | Cài đặt mảng dữ liệu | `source/arrays.c` | Cài các hàm `sa_init`, `sa_add`, `sa_get`, `sa_remove`, `sa_update`, `sa_resize`, `sa_find`, `sa_clear` (và tương tự cho các kiểu khác) | Tuần 1–2 |
-| 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số | Tuần 2 |
-| 5 | Hàm tách dòng dữ liệu | `fileio.c` | Dùng `strtok()` để tách dòng theo ký tự `\|`; đảm bảo các trường bắt buộc không để trống, kiểm tra đủ số trường và xử lý dòng sai định dạng | Tuần 2 |
-| 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính | Tuần 2 |
-| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test-note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
-| 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết | Tuần 5 |
-
-#### Các hàm tối thiểu cần có
-
-```c
-int      sa_init(StudentArray* arr, int init_cap);
-int      sa_add(StudentArray* arr, Student s);
-Student* sa_get(StudentArray* arr, int index);
-int      sa_remove(StudentArray* arr, int index);
-int      sa_update(StudentArray* arr, int index, Student s);
-int      sa_find(StudentArray* arr, const char* mssv);
-void     sa_clear(StudentArray* arr);
-
-// Áp dụng tương tự:
-// suba_* cho SubjectArray, tìm theo maHP
-// cca_*  cho CourseClassArray, tìm theo maLHP
-// sca_*  cho ScoreArray, tìm theo khóa kép (mssv, maLHP)
-```
-
-> Ghi chú: các hàm `*_resize` đang được cài là `static` trong `arrays.c`, chỉ dùng nội bộ module nên không khai báo trong `arrays.h`. Các hàm `init`, `add`, `remove`, `update` trả về `1` nếu thành công và `0` nếu lỗi.
-
-Các hàm File I/O tối thiểu:
-
-```c
-void loadStudents(StudentArray* students, const char* path);
-void saveStudents(StudentArray* students, const char* path);
-
-void loadSubjects(SubjectArray* subjects, const char* path);
-void saveSubjects(SubjectArray* subjects, const char* path);
-
-void loadCourseClasses(CourseClassArray* classes, const char* path);
-void saveCourseClasses(CourseClassArray* classes, const char* path);
-
-void loadScores(ScoreArray* scores, const char* path);
-void saveScores(ScoreArray* scores, const char* path);
-```
-
-#### Tiêu chí hoàn thành
-
-- Chương trình đọc được dữ liệu từ thư mục `data/`.
-- Chương trình không bị crash khi file rỗng.
-- Chương trình bỏ qua được dòng sai định dạng.
-- Dữ liệu sau khi thêm/sửa/xóa có thể lưu lại vào file.
-- Các hàm trong `arrays.h` có prototype rõ ràng để thành viên khác sử dụng.
-- Không để rò rỉ bộ nhớ nghiêm trọng ở các thao tác cơ bản.
-
----
-
-### 10.2. Thành viên 2 — Business Logic & Algorithms
-
-#### Vai trò chính
-
-Thành viên 2 phụ trách phần xử lý nghiệp vụ và thuật toán của chương trình, bao gồm:
-
-- Quản lý sinh viên.
-- Quản lý môn học.
-- Quản lý lớp học phần.
-- Quản lý điểm số.
-- Tính điểm tổng kết, GPA hệ 10, GPA hệ 4.
-- Cài đặt thuật toán tìm kiếm và sắp xếp.
-
-#### Sản phẩm cần hoàn thành
-
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | CRUD sinh viên | `source/student.h`, `source/student.c` | Thêm, sửa, xóa, tìm sinh viên theo MSSV, họ tên, lớp | Tuần 2–3 |
-| 2 | CRUD môn học | `source/subject.h`, `source/subject.c` | Thêm, sửa, xóa, tìm môn học theo mã học phần hoặc tên môn | Tuần 2–3 |
-| 3 | Quản lý lớp học phần | `source/courseclass.h`, `source/courseclass.c` | Tạo/xóa lớp học phần, quản lý danh sách lớp học phần | Tuần 2–3 |
-| 4 | Quản lý điểm số | `source/score.h`, `source/score.c` | Nhập điểm quá trình, điểm cuối kỳ, cập nhật điểm, tìm điểm theo MSSV hoặc mã lớp học phần | Tuần 3 |
-| 5 | Tính điểm và GPA | `source/gpa.h`, `source/gpa.c` | Tính `diemTK`, GPA hệ 10, xếp loại học lực; GPA hệ 4 nếu còn thời gian | Tuần 3 |
-| 6 | Tìm kiếm tuyến tính *(bắt buộc)* | `source/search.h`, `source/search.c` | Cài `linearSearch` dùng cho tìm kiếm dữ liệu chưa sắp xếp | Tuần 3 |
-| 7 | Thuật toán sắp xếp *(bắt buộc)* | `source/sort.h`, `source/sort.c` | Cài `bubbleSort` hoặc `selectionSort` để sắp xếp theo MSSV, họ tên, điểm trung bình | Tuần 3 |
-| 8 | Tìm kiếm nhị phân *(mở rộng)* | `source/search.c` | Cài `binarySearch` nếu còn thời gian; chỉ dùng sau khi mảng đã sắp xếp | Tuần 4 |
-| 9 | Quick Sort *(mở rộng)* | `source/sort.c` | Cài `quickSort` nếu còn thời gian, dùng minh họa trong báo cáo | Tuần 4 |
-| 10 | Hỗ trợ báo cáo kỹ thuật | `report/` hoặc `docs/` | Viết phần giải thích thuật toán, độ phức tạp và công thức tính điểm | Tuần 5 |
-| 11 | Sửa lỗi logic cuối kỳ | Các file nghiệp vụ | Sửa lỗi còn sót sau kiểm thử tích hợp | Tuần 4–5 |
-
-#### Các chức năng nghiệp vụ tối thiểu cần có
-
-```c
-int addStudent(StudentArray* students, Student newStudent);
-int editStudent(StudentArray* students, const char* mssv, Student updatedStudent);
-int deleteStudent(StudentArray* students, const char* mssv, ScoreArray* scores);
-int findStudentByMSSV(StudentArray* students, const char* mssv);
-int findStudentByName(StudentArray* students, const char* name);
-```
-
-```c
-int addSubject(SubjectArray* subjects, Subject newSubject);
-int editSubject(SubjectArray* subjects, const char* maHP, Subject updatedSubject);
-int deleteSubject(SubjectArray* subjects, const char* maHP,
-                  CourseClassArray* classes, ScoreArray* scores);
-int findSubjectByCode(SubjectArray* subjects, const char* maHP);
-```
-
-```c
-int   addScore(ScoreArray* scores, ScoreRecord newScore);
-int   updateScore(ScoreArray* scores, const char* mssv, const char* maLHP, ScoreRecord updated);
-float calcDiemTK(float diemQT, float diemCK);
-float calcGPA10(ScoreArray* scores, CourseClassArray* classes,
-                SubjectArray* subjects, const char* mssv);
-float calcGPA4(ScoreArray* scores, CourseClassArray* classes,
-               SubjectArray* subjects, const char* mssv);
-float quyDoiHe4(float diemTK);
-```
-
-#### Công thức cần cài đặt đúng
+Trong đó có ghi:
 
 ```text
-DiemTK = 0.5 * DiemQT + 0.5 * DiemCK
+test_gpa.c: 3/3 PASS
+test_fileio.c: 41/41 PASS
 ```
+
+### Vấn đề
+
+Hai kết luận trên đang lệch với trạng thái code hiện tại:
+
+- `test_gpa.c` gọi `calculateStudentGPA()`, nhưng `gpa.h/gpa.c` không có hàm này.
+- `test_fileio.c` luôn `return 0`, nên nếu fail cũng có thể bị báo pass ở mức Makefile.
+
+### Ảnh hưởng
+
+Giảng viên hoặc thành viên khác chạy lại test sẽ thấy tài liệu ghi pass nhưng code/test không khớp.
+
+Đây là lỗi tài liệu nghiêm trọng vì mục tiêu hiện tại là chạy được Makefile và thực hiện kế hoạch kiểm thử.
+
+### Kết luận lỗi
+
+Phải sửa code test trước, chạy lại, rồi mới được ghi `68/68 PASS`.
+
+### Sửa tối thiểu
+
+Sau khi sửa `test_gpa.c` và `test_fileio.c`, chạy lại từ thư mục `source/`:
+
+```bash
+make clean
+make all
+make unit_test
+make test
+```
+
+Chỉ khi các lệnh trên pass thật mới giữ dòng:
 
 ```text
-GPA10 = Σ(DiemTK × SoTinChi) / Σ(SoTinChi)
+68/68 PASS
 ```
+
+Nếu chưa chạy lại, sửa README/test_note thành:
 
 ```text
-GPA4 = Σ(DiemHe4 × SoTinChi) / Σ(SoTinChi)
+Kết quả kiểm thử cần cập nhật lại sau khi chạy:
+make clean
+make all
+make unit_test
+make test
 ```
-
-#### Tiêu chí hoàn thành
-
-- Có đủ CRUD cho sinh viên, môn học và lớp học phần.
-- **Không cho phép xóa** Sinh viên, Môn học hoặc Lớp học phần nếu đã tồn tại bản ghi liên quan trong `scores.txt` (xem ràng buộc toàn vẹn tham chiếu tại Mục 3.1).
-- Không cho phép thêm dữ liệu bị trùng khóa chính.
-- Tính đúng điểm tổng kết theo công thức.
-- Tính đúng GPA hệ 10.
-- Có ít nhất một thuật toán sắp xếp cơ bản (Bubble Sort hoặc Selection Sort).
-- Có tìm kiếm tuyến tính.
-- Các hàm nghiệp vụ có thể được gọi từ module giao diện của Thành viên 3.
-- Code có comment ở những đoạn thuật toán quan trọng.
 
 ---
 
-### 10.3. Thành viên 3 — Console UI & Documentation
+## 4. Lỗi README: hướng dẫn clone repository đang sai
 
-#### Vai trò chính
+### File liên quan
 
-Thành viên 3 phụ trách phần giao diện console, kiểm tra dữ liệu đầu vào, báo cáo kết quả và tài liệu dự án.
+- `README.md`
 
-Các nhiệm vụ chính:
+### Hiện trạng
 
-- Xây dựng menu chính và các submenu.
-- Tích hợp giao diện với các module của Thành viên 1 và Thành viên 2.
-- Kiểm tra dữ liệu đầu vào (validation tích hợp trong `ui.c`).
-- In bảng điểm, bảng danh sách, báo cáo thống kê (tích hợp trong `ui.c`).
-- Thiết kế test case và chụp ảnh kiểm thử.
-- Viết báo cáo Word và hoàn thiện tài liệu nộp bài.
+README đang ghi:
 
-#### Sản phẩm cần hoàn thành
+```bash
+git clone https://github.com//.git
+cd
+```
 
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | Menu chính | `source/ui.h`, `source/ui.c`, `source/main.c` | Xây dựng menu console vòng lặp cho đến khi người dùng chọn thoát | Tuần 2 |
-| 2 | Submenu quản lý sinh viên | `source/ui.c` | Giao diện gọi các chức năng thêm, sửa, xóa, tìm kiếm sinh viên | Tuần 2–3 |
-| 3 | Submenu quản lý môn học | `source/ui.c` | Giao diện gọi các chức năng quản lý môn học | Tuần 2–3 |
-| 4 | Submenu quản lý lớp học phần | `source/ui.c` | Giao diện gọi các chức năng quản lý lớp học phần | Tuần 3 |
-| 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm | Tuần 3 |
-| 6 | Validation và in báo cáo | `source/ui.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực; in bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng (gộp trong `ui.c`) | Tuần 3–4 |
-| 7 | Bảng test case | `docs/test-plan.md` hoặc `report/` | Viết danh sách test case từ TC01 đến TC14 | Tuần 4 |
-| 8 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho các test case chính | Tuần 4–5 |
-| 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` | Viết báo cáo cuối kỳ theo đúng thể thức | Tuần 5 |
-| 10 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ | Tuần 5 |
-| 11 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README | Tuần 5 |
+### Ảnh hưởng
 
-#### Các hàm giao diện và validation tối thiểu cần có
+Người chấm hoặc thành viên khác làm theo README sẽ không clone được repo.
+
+### Kết luận lỗi
+
+Đây là lỗi tài liệu **bắt buộc sửa**.
+
+### Sửa tối thiểu
+
+Đổi thành:
+
+```bash
+git clone https://github.com/PKT-zZ/QLSV_MI3310.git
+cd QLSV_MI3310
+```
+
+---
+
+## 5. Lỗi README: hướng dẫn build/chạy lệch với Makefile
+
+### File liên quan
+
+- `README.md`
+- `source/Makefile`
+
+### Hiện trạng
+
+Trong `source/Makefile`, file thực thi chính được đặt là:
+
+```make
+MAIN_EXE = ../qlsv.exe
+```
+
+Nhưng README phần build thủ công lại ghi:
+
+```bash
+gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
+score.c gpa.c sort.c search.c ui.c -o ../qlsv
+```
+
+và hướng dẫn chạy:
+
+```bash
+./qlsv
+```
+
+trên Linux/macOS.
+
+### Ảnh hưởng
+
+Có 2 cách build tạo ra 2 tên file khác nhau:
+
+- Makefile tạo `qlsv.exe`.
+- README build thủ công tạo `qlsv`.
+
+Điều này làm hướng dẫn chạy không thống nhất. Nếu người dùng build bằng Makefile nhưng chạy `./qlsv`, sẽ không thấy file.
+
+### Kết luận lỗi
+
+Đây là lỗi tài liệu **bắt buộc sửa** vì ảnh hưởng trực tiếp đến chạy chương trình.
+
+### Sửa tối thiểu
+
+Thống nhất theo Makefile hiện tại:
+
+```bash
+cd source
+make clean
+make all
+```
+
+Sau đó chạy từ thư mục gốc:
+
+```bash
+./qlsv.exe
+```
+
+Trên PowerShell:
+
+```powershell
+.\qlsv.exe
+```
+
+Nếu muốn README vẫn có build thủ công, sửa output thủ công thành:
+
+```bash
+gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
+score.c gpa.c sort.c search.c ui.c -o ../qlsv.exe
+```
+
+---
+
+## 6. Rủi ro Makefile khi chạy test trên Git Bash/MSYS2
+
+### File liên quan
+
+- `source/Makefile`
+- `docs/test_note.md`
+
+### Hiện trạng
+
+Makefile đang dùng:
+
+```make
+ifeq ($(OS),Windows_NT)
+	DOTSLASH =
+	CLEAN_CMD = del /Q ..\*.exe 2>nul
+else
+	DOTSLASH = ./
+	CLEAN_CMD = rm -f ../*.exe
+endif
+```
+
+Các target test chạy file `.exe` bằng:
+
+```make
+cd .. && $(DOTSLASH)test_gpa.exe
+```
+
+Nếu `OS=Windows_NT`, `DOTSLASH` rỗng, lệnh thành:
+
+```bash
+cd .. && test_gpa.exe
+```
+
+### Vấn đề
+
+Trên Windows CMD/PowerShell, gọi `test_gpa.exe` kiểu này thường chạy được.
+
+Nhưng trên Git Bash/MSYS2, current directory thường không nằm trong `PATH`, nên cần:
+
+```bash
+./test_gpa.exe
+```
+
+Trong khi `docs/test_note.md` lại hướng dẫn dùng Git Bash/MSYS2 để chạy test bằng Makefile.
+
+### Ảnh hưởng
+
+Người dùng làm đúng theo `docs/test_note.md` nhưng vẫn có thể gặp lỗi dạng:
+
+```text
+test_gpa.exe: command not found
+```
+
+hoặc tương tự khi chạy test.
+
+### Kết luận lỗi
+
+Đây là lỗi tương thích Makefile/tài liệu cần sửa để chạy kiểm thử ổn trên môi trường nhóm đang dùng.
+
+### Sửa tối thiểu
+
+Cách đơn giản nhất: dùng `./` cho lệnh chạy file `.exe` trong Makefile:
+
+```make
+DOTSLASH = ./
+```
+
+Hoặc bỏ nhánh `ifeq ($(OS),Windows_NT)` cho biến `DOTSLASH`.
+
+Ví dụ:
+
+```make
+DOTSLASH = ./
+
+ifeq ($(OS),Windows_NT)
+	CLEAN_CMD = del /Q ..\*.exe 2>nul
+else
+	CLEAN_CMD = rm -f ../*.exe
+endif
+```
+
+Nếu chủ yếu chạy bằng Git Bash/MSYS2, nên ưu tiên cách này.
+
+---
+
+## 7. README/test_note lệch tên hàm GPA
+
+### File liên quan
+
+- `docs/test_note.md`
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+
+### Hiện trạng
+
+`docs/test_note.md` ghi:
+
+```text
+test_gpa.c — Tính GPA
+Kiểm tra calculateStudentGPA tính đúng công thức...
+```
+
+Nhưng code hiện tại không có API `calculateStudentGPA`.
+
+API thật hiện tại là:
+
+```c
+calculateStudentGPA4(...)
+calculateStudentGPA10(...)
+```
+
+### Ảnh hưởng
+
+Tài liệu mô tả sai module đang test.
+
+Nếu sau đó sửa `test_gpa.c` gọi `calculateStudentGPA4()`, nhưng không sửa `test_note.md`, tài liệu vẫn lệch.
+
+### Kết luận lỗi
+
+Phải sửa `docs/test_note.md` cho khớp tên hàm thật.
+
+### Sửa tối thiểu
+
+Đổi mô tả:
+
+```text
+Kiểm tra calculateStudentGPA tính đúng công thức...
+```
+
+thành:
+
+```text
+Kiểm tra calculateStudentGPA4 tính đúng công thức GPA hệ 4 theo trọng số tín chỉ.
+```
+
+Nếu muốn bổ sung kiểm thử GPA hệ 10, cần thêm test riêng cho `calculateStudentGPA10()`.
+
+---
+
+## 8. README đang nhắc file/thư mục chưa có hoặc chưa chắc tồn tại trong repo nộp
+
+### File liên quan
+
+- `README.md`
+- repo root
+
+### Hiện trạng
+
+README phần tài liệu liên quan ghi:
+
+```text
+Báo cáo cuối kỳ: report/BaoCao_QLSV_NhomXX.docx
+Ảnh kiểm thử: screenshots/
+```
+
+Trong phần kế hoạch còn nhắc:
+
+```text
+docs/test-plan.md hoặc report/
+screenshots/
+report/BaoCao_QLSV_NhomXX.docx
+```
+
+### Vấn đề
+
+Nếu repo nộp không có các thư mục/file này, README đang mô tả không đúng trạng thái repo.
+
+### Ảnh hưởng
+
+Không làm code lỗi, nhưng làm hồ sơ nộp thiếu nhất quán. Giảng viên mở README rồi tìm `report/`, `screenshots/`, `docs/test-plan.md` có thể không thấy.
+
+### Kết luận lỗi
+
+Cần sửa trước khi nộp nếu README được dùng làm tài liệu chính.
+
+### Sửa tối thiểu
+
+Một trong hai cách:
+
+#### Cách 1 — tạo đủ file/thư mục
+
+Tạo:
+
+```text
+report/
+screenshots/
+docs/test-plan.md
+```
+
+nếu thật sự cần nộp.
+
+#### Cách 2 — sửa README cho đúng thực tế
+
+Ví dụ:
+
+```text
+Tài liệu kiểm thử hiện có: docs/test_note.md
+Ảnh kiểm thử và báo cáo Word sẽ được bổ sung ở bản nộp cuối nếu giảng viên yêu cầu.
+```
+
+Nếu không định nộp `docs/test-plan.md`, nên bỏ dòng nhắc file này.
+
+---
+
+## 9. README mô tả một số prototype/hàm UI không khớp code hiện tại
+
+### File liên quan
+
+- `README.md`
+- `source/ui.h`
+- `source/ui.c`
+
+### Hiện trạng
+
+README phần Thành viên 3 ghi các hàm tối thiểu cần có:
 
 ```c
 void showMainMenu();
@@ -749,204 +590,339 @@ void displayTable();
 void displayScoreCard();
 ```
 
+và các hàm validation/đọc input:
+
 ```c
-/* Các hàm validation và đọc dữ liệu đầu vào — khai báo trong ui.h, cài trong ui.c */
-int   validateMSSV(const char* mssv);
-int   validateScore(float score);
-int   validateDate(const char* date);
-int   isStudentKeyDuplicate(StudentArray* arr, const char* key);
-int   isSubjectKeyDuplicate(SubjectArray* arr, const char* key);
-int   isClassKeyDuplicate(CourseClassArray* arr, const char* key);
-int   readInt(const char* message);
+int validateMSSV(const char* mssv);
+int validateScore(float score);
+int validateDate(const char* date);
+int isStudentKeyDuplicate(StudentArray* arr, const char* key);
+int isSubjectKeyDuplicate(SubjectArray* arr, const char* key);
+int isClassKeyDuplicate(CourseClassArray* arr, const char* key);
+int readInt(const char* message);
 float readFloat(const char* message);
 ```
 
-#### Các báo cáo cần in được
+Nhưng `source/ui.h` hiện chỉ public:
+
+```c
+void showMainMenu(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);
+```
+
+Các hàm còn lại phần lớn là `static` trong `ui.c`, hoặc tên thật khác README.
+
+### Ảnh hưởng
+
+Không nhất thiết làm chương trình lỗi, nhưng làm README sai lệch nếu giảng viên đối chiếu prototype với code.
+
+### Kết luận lỗi
+
+Cần sửa README để không yêu cầu các prototype không public, hoặc đổi code/header nếu nhóm thật sự muốn public các hàm này.
+
+### Sửa tối thiểu
+
+Trong README, đổi từ “các hàm tối thiểu cần có” sang “các chức năng giao diện cần có”, ví dụ:
 
 ```text
-Bảng danh sách sinh viên
-Bảng danh sách môn học
-Bảng điểm của một sinh viên
-Bảng điểm của một lớp học phần
+Các chức năng giao diện cần có:
+- Menu chính.
+- Menu quản lý sinh viên.
+- Menu quản lý môn học.
+- Menu quản lý lớp học phần.
+- Menu quản lý điểm.
+- Báo cáo/bảng điểm.
+- Kiểm tra dữ liệu nhập.
 ```
 
-#### Tiêu chí hoàn thành
-
-- Menu dễ dùng, có hướng dẫn rõ ràng cho người nhập.
-- Người dùng nhập sai thì chương trình báo lỗi và cho nhập lại.
-- Không để chương trình crash khi nhập dữ liệu sai kiểu.
-- Các bảng hiển thị rõ ràng trên console.
-- Có đủ ảnh kiểm thử cho các chức năng chính.
-- Báo cáo Word đầy đủ nội dung kỹ thuật, ảnh minh chứng và kết luận.
-- README được cập nhật đúng với trạng thái cuối cùng của dự án.
+Không nên liệt kê prototype nếu code không public các prototype đó trong `ui.h`.
 
 ---
 
-## 11. Bảng tổng hợp sản phẩm bàn giao theo thành viên
+## 10. README mục 13 có TC20 “đầy đủ các môn/lớp học phần, điểm và GPA”, nhưng bảng điểm sinh viên hiện chỉ in MaLHP, chưa in tên môn/mã học phần
 
-| Thành viên | Nhóm sản phẩm chính | File/Thư mục cần có | Mức độ ưu tiên |
-|---|---|---|---|
-| Thành viên 1 | Core Data, Typed Arrays, File I/O, dữ liệu mẫu, kiểm thử nền tảng | `types.h`, `arrays.h/.c`, `fileio.h/.c`, `data/*.txt`, `source/test_types.c`, `source/test_arrays.c`, `source/test_fileio_unit.c`, `source/test_gpa.c`, `source/test_fileio.c`, `docs/test_note.md` | Cao |
-| Thành viên 2 | CRUD, xử lý điểm, GPA, tìm kiếm tuyến tính, sắp xếp | `student.h/.c`, `subject.h/.c`, `courseclass.h/.c`, `score.h/.c`, `gpa.h/.c`, `sort.h/.c`, `search.h/.c` | Cao |
-| Thành viên 3 | Console UI, validation, report, test, documentation | `main.c`, `ui.h/.c`, `screenshots/`, `report/`, `README.md` | Cao |
+### File liên quan
 
----
+- `README.md`
+- `source/ui.c`
 
-## 12. Quy trình làm việc và nghiệm thu
+### Hiện trạng
 
-Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ các điều kiện sau:
+README TC20 ghi:
 
 ```text
-[ ] Có file mã nguồn hoặc tài liệu tương ứng trong đúng thư mục.
-[ ] Code biên dịch được cùng toàn bộ chương trình.
-[ ] Không làm hỏng chức năng của thành viên khác.
-[ ] Với chức năng quan trọng, có ảnh hoặc test case minh chứng.
+Hiển thị bảng điểm sinh viên
+Kết quả mong đợi: Hiển thị đầy đủ các môn/lớp học phần, điểm và GPA
 ```
 
-Mỗi thành viên đặt tên branch theo nhóm việc mình phụ trách, ví dụ: `feature/student-crud`, `feature/gpa-calculation`, `feature/console-ui`, `docs/final-report`. Sau khi hoàn thành, tạo Pull Request vào `main` để thành viên khác review trước khi merge.
+Trong `ui.c`, `showStudentScoreCard()` hiện in:
 
----
-
-## 13. Kế hoạch kiểm thử
-
-Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tính năng mà bài yêu cầu):
-
-| Mã test | Chức năng | Dữ liệu / Tình huống kiểm thử | Kết quả mong đợi |
-|---|---|---|---|
-| TC01 | Thêm sinh viên hợp lệ | Nhập sinh viên mới với MSSV chưa tồn tại | Sinh viên được thêm thành công |
-| TC02 | Thêm sinh viên trùng MSSV | Nhập MSSV đã tồn tại trong `students.txt` | Hiển thị lỗi, không thêm dữ liệu |
-| TC03 | Thêm môn học hợp lệ | Nhập môn học mới với `MaHP` chưa tồn tại | Môn học được thêm thành công |
-| TC04 | Thêm môn học trùng mã | Nhập `MaHP` đã tồn tại trong `subjects.txt` | Hiển thị lỗi, không thêm dữ liệu |
-| TC05 | Thêm lớp học phần hợp lệ | Nhập `MaLHP` mới và `MaHP` đã tồn tại | Lớp học phần được thêm thành công |
-| TC06 | Thêm lớp học phần với mã học phần không tồn tại | Nhập `MaHP` không có trong `subjects.txt` | Hiển thị lỗi, không thêm lớp học phần |
-| TC07 | Nhập điểm hợp lệ | Nhập `MSSV`, `MaLHP`, `DiemQT`, `DiemCK` hợp lệ | Bản ghi điểm được thêm thành công |
-| TC08 | Nhập điểm ngoài khoảng `0–10` | Nhập `DiemQT = -1` hoặc `DiemCK = 11` | Hiển thị lỗi, không lưu điểm |
-| TC09 | Nhập điểm cho sinh viên không tồn tại | Nhập `MSSV` không có trong `students.txt` | Hiển thị lỗi, không lưu điểm |
-| TC10 | Nhập điểm cho lớp học phần không tồn tại | Nhập `MaLHP` không có trong `course_classes.txt` | Hiển thị lỗi, không lưu điểm |
-| TC11 | Nhập điểm trùng cặp `(MSSV, MaLHP)` | Nhập điểm cho sinh viên đã có điểm trong lớp học phần đó | Hiển thị lỗi hoặc chuyển sang chức năng cập nhật điểm |
-| TC12 | Cập nhật điểm | Cập nhật `DiemQT` hoặc `DiemCK` của một bản ghi đã tồn tại | Điểm được cập nhật thành công, điểm tổng kết được tính lại |
-| TC13 | Tính điểm tổng kết | `DiemQT = 8.5`, `DiemCK = 7.0` | `DiemTK = 0.5 * 8.5 + 0.5 * 7.0 = 7.75` |
-| TC14 | Tính GPA hệ 10 | Sinh viên có nhiều môn với điểm tổng kết và số tín chỉ khác nhau | GPA hệ 10 được tính đúng theo công thức tín chỉ |
-| TC15 | Xếp loại học lực | GPA hệ 10 thuộc các khoảng Xuất sắc, Giỏi, Khá, Trung bình, Yếu | Hiển thị đúng xếp loại |
-| TC16 | Tìm sinh viên tồn tại | Tìm theo MSSV hoặc họ tên có trong dữ liệu | Hiển thị đúng thông tin sinh viên |
-| TC17 | Tìm sinh viên không tồn tại | Tìm MSSV không có trong dữ liệu | Hiển thị thông báo không tìm thấy |
-| TC18 | Sắp xếp sinh viên theo MSSV | Danh sách sinh viên chưa được sắp xếp | Danh sách hiển thị tăng dần theo MSSV |
-| TC19 | Sắp xếp sinh viên theo họ tên | Danh sách sinh viên chưa được sắp xếp theo tên | Danh sách hiển thị đúng thứ tự theo họ tên |
-| TC20 | Hiển thị bảng điểm sinh viên | Nhập MSSV của sinh viên có điểm | Hiển thị đầy đủ các môn/lớp học phần, điểm và GPA |
-| TC21 | Hiển thị bảng điểm lớp học phần | Nhập `MaLHP` có nhiều sinh viên đã nhập điểm | Hiển thị danh sách sinh viên và điểm trong lớp học phần |
-| TC22 | Không cho xóa sinh viên đã có điểm | Xóa sinh viên có `MSSV` đang xuất hiện trong `scores.txt` | Hiển thị lỗi, không xóa sinh viên |
-| TC23 | Không cho xóa lớp học phần đã có điểm | Xóa lớp học phần có `MaLHP` đang xuất hiện trong `scores.txt` | Hiển thị lỗi, không xóa lớp học phần |
-| TC24 | Không cho xóa môn học đang có lớp học phần | Xóa môn học có `MaHP` đang được dùng trong `course_classes.txt` | Hiển thị lỗi, không xóa môn học |
-| TC25 | Đọc file rỗng | Một trong các file dữ liệu rỗng | Chương trình không crash, tạo danh sách rỗng |
-| TC26 | Đọc file sai định dạng | Một dòng thiếu trường hoặc sai kiểu dữ liệu | Bỏ qua dòng lỗi, dữ liệu hợp lệ vẫn được load |
-| TC27 | Lưu dữ liệu và mở lại chương trình | Thêm/sửa dữ liệu, thoát chương trình, chạy lại | Dữ liệu vẫn còn sau khi khởi động lại |
-| TC28 | Quy đổi GPA hệ 4 | Điểm tổng kết thuộc các mốc quy đổi hệ 4 | Điểm hệ 4 được quy đổi đúng |
-
----
-
-## 14. Kết quả kiểm thử module nền tảng (TV1)
-
-TV1 đã hoàn thành bộ kiểm thử tự động gồm 5 file, bao phủ toàn bộ phạm vi code do TV1 phụ trách (`types.h`, `arrays.c`, `fileio.c`, `gpa.c`). Chi tiết từng test case xem tại [`docs/test_note.md`](docs/test_note.md).
-
-**Tổng kết: 68/68 PASS — không có lỗi.**
-
-| File test | Loại | Module kiểm tra | Số case | Kết quả |
-|---|---|---|---|---|
-| `source/test_types.c` | Unit | Struct layout trong `types.h` | 7 | ✅ 7/7 |
-| `source/test_arrays.c` | Unit | Mảng động — init, add, resize, find, remove, clear, edge case | 11 | ✅ 11/11 |
-| `source/test_fileio_unit.c` | Unit | Đọc/ghi file bằng file tạm, không đụng `data/` | 6 | ✅ 6/6 |
-| `source/test_gpa.c` | Unit | Công thức GPA có trọng số tín chỉ, sinh viên không có điểm | 3 | ✅ 3/3 |
-| `source/test_fileio.c` | Tích hợp | Toàn bộ pipeline `loadAllData` → `saveAllData` với `data/` thật | 41 | ✅ 41/41 |
-
-> Khi chạy test sẽ có một vài dòng `[CANH BAO]` xuất hiện — đây là kết quả của các test case cố tình đưa vào dữ liệu sai định dạng để kiểm tra chương trình xử lý được không, không phải lỗi thật.
-
-### Chạy test
-
-Trỏ terminal vào thư mục `source/` trước, sau đó:
-
-```bash
-make unit_test   # Chạy 4 unit test, không đụng đến data/
-make test        # Chạy integration test với dữ liệu thật trong data/
+```text
+MaLHP | DiemQT | DiemCK | DiemTK | He4
 ```
 
-Chạy từng bộ riêng lẻ nếu cần:
+và cuối bảng có:
 
-```bash
-make test_types
-make test_arrays
-make test_fileio_unit
-make test_gpa
+```text
+GPA he 10
+GPA he 4
+Hoc luc
 ```
 
-> **Windows với MSYS2:** thay `make` bằng `mingw32-make` nếu lệnh `make` không nhận.
+### Vấn đề
 
-Nếu không dùng Makefile, chạy thủ công từ thư mục `source/` (Linux/macOS):
+Chức năng đã có GPA/học lực, nhưng phần “đầy đủ các môn/lớp học phần” trong README chưa thật sự đầy đủ nếu chỉ in `MaLHP`.
 
-```bash
-gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types && cd .. && ./test_types && cd source
-gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays && cd .. && ./test_arrays && cd source
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit && cd .. && ./test_fileio_unit && cd source
-gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa && cd .. && ./test_gpa && cd source
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio && cd .. && ./test_fileio && cd source
+Người dùng nhìn bảng điểm chưa biết lớp học phần đó thuộc môn nào, tên môn là gì, số tín chỉ bao nhiêu.
+
+### Ảnh hưởng
+
+Không làm code crash, nhưng khi demo TC20 có thể bị hỏi vì sao “đầy đủ các môn/lớp học phần” mà chỉ thấy `MaLHP`.
+
+### Kết luận lỗi
+
+Đây là lỗi khớp yêu cầu/tài liệu ở mức nên sửa trước khi demo mục 13.
+
+### Sửa tối thiểu
+
+Trong `showStudentScoreCard()`, khi duyệt từng `ScoreRecord`, tra thêm:
+
+1. `CourseClass` theo `maLHP`.
+2. `Subject` theo `maHP`.
+
+Sau đó in thêm ít nhất:
+
+```text
+MaLHP | MaHP | SoTC | DiemQT | DiemCK | DiemTK | He4
+```
+
+Nếu muốn tốt hơn:
+
+```text
+MaLHP | MaHP | TenHP | SoTC | DiemQT | DiemCK | DiemTK | He4
 ```
 
 ---
 
-## 15. Hướng dẫn build và chạy chương trình
+## 11. README mục 13 có TC21 “danh sách sinh viên và điểm”, nhưng bảng điểm lớp hiện chỉ in MSSV, chưa in họ tên
 
-### 15.1. Yêu cầu môi trường
+### File liên quan
 
-Cần cài đặt:
+- `README.md`
+- `source/ui.c`
 
-- GCC hoặc trình biên dịch C tương đương.
-- Make, nếu sử dụng Makefile.
-- Git, nếu muốn clone repo từ GitHub.
+### Hiện trạng
 
-### 15.2. Clone repository
+README TC21 ghi:
 
-```bash
-git clone https://github.com/<ten-nhom>/<ten-repo>.git
-cd <ten-repo>
+```text
+Hiển thị bảng điểm lớp học phần
+Kết quả mong đợi: Hiển thị danh sách sinh viên và điểm trong lớp học phần
 ```
 
-### 15.3. Build chương trình
+Trong `ui.c`, `showClassScoreTable()` hiện in:
 
-Nếu dùng Makefile:
+```text
+MSSV | DiemQT | DiemCK | DiemTK | He4
+```
 
-```bash
-cd source
+### Vấn đề
+
+Code có hiển thị mã sinh viên và điểm, nhưng nếu hiểu “danh sách sinh viên” là thông tin sinh viên đầy đủ hơn, bảng đang thiếu `HoTen`.
+
+### Ảnh hưởng
+
+Không làm chương trình sai nghiêm trọng, nhưng khi demo có thể bị hỏi vì sao bảng điểm lớp không có tên sinh viên.
+
+### Kết luận lỗi
+
+Nên sửa để TC21 thuyết phục hơn.
+
+### Sửa tối thiểu
+
+Đổi `showClassScoreTable()` để nhận thêm `StudentArray* students`, rồi khi in mỗi điểm thì tra `MSSV` sang họ tên.
+
+In dạng:
+
+```text
+MSSV | HoTen | DiemQT | DiemCK | DiemTK | He4
+```
+
+Nếu không muốn sửa code, cần sửa TC21 trong README thành:
+
+```text
+Hiển thị danh sách MSSV và điểm trong lớp học phần
+```
+
+---
+
+## 12. README mục 13 và docs/test_note chưa tách rõ test tự động với test thủ công
+
+### File liên quan
+
+- `README.md`
+- `docs/test_note.md`
+
+### Hiện trạng
+
+README có mục 13 “Kế hoạch kiểm thử” gồm các TC01–TC28, phần lớn là test thủ công qua menu.
+
+`docs/test_note.md` lại ghi kết quả `68/68 PASS` cho các test tự động:
+
+- `test_types.c`
+- `test_arrays.c`
+- `test_fileio_unit.c`
+- `test_gpa.c`
+- `test_fileio.c`
+
+Nhưng chưa nói rõ:
+
+- TC01–TC28 trong README đã chạy thủ công chưa.
+- TC nào được test tự động.
+- TC nào cần demo bằng tay.
+- Kết quả manual test ra sao.
+
+### Ảnh hưởng
+
+Nhóm có thể bị nhầm rằng `68/68 PASS` nghĩa là toàn bộ mục 13 đã pass, trong khi thực tế `68/68` chỉ là các test code/unit/integration.
+
+### Kết luận lỗi
+
+Cần sửa tài liệu để không đánh đồng unit/integration test với manual test theo mục 13.
+
+### Sửa tối thiểu
+
+Trong `docs/test_note.md`, thêm phân tách:
+
+```md
+## A. Automated test bằng Makefile
+
+- test_types.c
+- test_arrays.c
+- test_fileio_unit.c
+- test_gpa.c
+- test_fileio.c
+
+Lệnh chạy:
+make clean
 make all
+make unit_test
+make test
+
+## B. Manual test theo README mục 13
+
+- TC01–TC06: quản lý sinh viên/môn/lớp.
+- TC07–TC13: nhập, cập nhật, kiểm tra điểm.
+- TC14–TC15: GPA hệ 10, xếp loại.
+- TC16–TC19: tìm kiếm, sắp xếp.
+- TC20–TC21: bảng điểm.
+- TC22–TC24: chặn xóa dữ liệu đang được tham chiếu.
+- TC25–TC28: File I/O, save-load, quy đổi hệ 4.
+
+Kết quả manual test: chỉ ghi PASS sau khi đã thao tác thật trên chương trình.
 ```
-
-Nếu chưa có Makefile, có thể biên dịch thủ công (chạy từ thư mục `source/`):
-
-```bash
-gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
-    score.c gpa.c sort.c search.c ui.c -o ../qlsv
-```
-
-> **Lưu ý:** Lệnh trên được chạy từ bên trong thư mục `source/`, do đó `-o ../qlsv` sẽ đặt file thực thi ra **thư mục gốc** của project — nhất quán với lệnh chạy `./qlsv` ở Mục 14.4.
-
-### 15.4. Chạy chương trình
-
-Trên Linux/macOS:
-
-```bash
-./qlsv
-```
-
-Trên Windows:
-
-```bash
-qlsv.exe
-```
-
-> **Lưu ý:** Chạy chương trình từ thư mục gốc của project để các đường dẫn `data/*.txt` hoạt động đúng.
 
 ---
 
-## 16. Tài liệu liên quan
+## 13. Không xếp “xóa điểm” vào lỗi bắt buộc theo README hiện tại
 
-- Báo cáo cuối kỳ: `report/BaoCao_QLSV_NhomXX.docx`
-- Ảnh kiểm thử: `screenshots/`
-- Dữ liệu mẫu: `data/`
+### File liên quan
+
+- `README.md`
+- `source/ui.c`
+- `source/score.c/h`
+
+### Hiện trạng
+
+Menu điểm hiện có:
+
+```text
+1. Hien thi danh sach diem
+2. Nhap diem
+3. Cap nhat diem
+4. Tim diem
+0. Quay lai
+```
+
+Không có xóa điểm.
+
+### Đánh giá
+
+Nếu xét CRUD đầy đủ thì thiếu xóa điểm. Tuy nhiên, theo README hiện tại:
+
+- Quản lý điểm số được mô tả là nhập và cập nhật điểm.
+- Mục 13 không có test case xóa điểm.
+- TC07–TC12 chỉ yêu cầu nhập/cập nhật/tính lại điểm.
+
+### Kết luận
+
+Không coi “xóa điểm” là lỗi bắt buộc trong phạm vi sửa hiện tại.
+
+Chỉ cần thêm nếu:
+
+- Đề bài chính thức yêu cầu quản lý điểm có đủ thêm/sửa/xóa.
+- README được sửa thành có “xóa điểm”.
+- Nhóm muốn demo CRUD điểm đầy đủ hơn.
+
+---
+
+## 14. Checklist lỗi cần sửa theo đúng ưu tiên
+
+```md
+- [ ] Sửa `source/test_gpa.c`: đổi `calculateStudentGPA()` thành `calculateStudentGPA4()`.
+- [ ] Sửa comment trong `test_gpa.c` cho khớp API thật.
+- [ ] Sửa `source/test_fileio.c`: đổi `return 0;` thành `return fail > 0 ? 1 : 0;`.
+- [ ] Chạy lại `make unit_test`; nếu còn lỗi thì chưa được cập nhật README/test_note.
+- [ ] Chạy lại `make test`; kiểm tra integration test trả exit code đúng.
+- [ ] Sửa README phần clone: `https://github.com/PKT-zZ/QLSV_MI3310.git`.
+- [ ] Sửa README phần build/chạy: thống nhất dùng `qlsv.exe` nếu Makefile tạo `qlsv.exe`.
+- [ ] Sửa README/test_note: bỏ hoặc tạm treo kết luận `68/68 PASS` cho đến khi chạy lại thật.
+- [ ] Sửa `docs/test_note.md`: đổi mô tả `calculateStudentGPA` thành `calculateStudentGPA4`.
+- [ ] Sửa `docs/test_note.md`: tách rõ automated test và manual test theo README mục 13.
+- [ ] Sửa README nếu còn nhắc `report/`, `screenshots/`, `docs/test-plan.md` nhưng repo chưa có các file/thư mục này.
+- [ ] Sửa README phần prototype UI/validation để khớp code hiện tại, hoặc bỏ danh sách prototype cụ thể.
+- [ ] Kiểm tra/sửa Makefile để chạy `.exe` ổn trên Git Bash/MSYS2 nếu nhóm dùng môi trường này.
+- [ ] Cải thiện bảng điểm sinh viên: nên in thêm `MaHP`/tên môn/số tín chỉ để khớp TC20.
+- [ ] Cải thiện bảng điểm lớp học phần: nên in thêm họ tên sinh viên để khớp TC21.
+```
+
+---
+
+## 15. Lệnh kiểm tra cuối sau khi sửa
+
+Chạy từ thư mục `source/`:
+
+```bash
+make clean
+make all
+make unit_test
+make test
+```
+
+Sau đó chạy chương trình chính từ thư mục gốc:
+
+```bash
+./qlsv.exe
+```
+
+Trên PowerShell:
+
+```powershell
+.\qlsv.exe
+```
+
+Nếu dùng Git Bash/MSYS2 và Makefile vẫn lỗi khi gọi `.exe`, sửa lại biến `DOTSLASH` như đã nêu ở mục 6.
+
+---
+
+## 16. Chốt lỗi bắt buộc nhất
+
+Nếu chỉ còn ít thời gian, sửa theo thứ tự này:
+
+1. `test_gpa.c` gọi sai hàm.
+2. `test_fileio.c` trả exit code sai.
+3. README clone/build/chạy sai.
+4. README/test_note ghi pass sai.
+5. test_note mô tả sai tên hàm GPA.
+6. Makefile chạy `.exe` chưa ổn trên Git Bash/MSYS2 nếu đó là môi trường nhóm dùng.
+
+Các lỗi bảng điểm TC20/TC21 nên sửa tiếp theo để demo mục 13 thuyết phục hơn.
