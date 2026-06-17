@@ -159,7 +159,7 @@ sudo dnf install gcc make           # Fedora
 Trỏ terminal vào thư mục `source/` trước:
 
 ```
-cd đường-dẫn-đến-project/source
+cd QLSV_MI3310/source
 ```
 
 Sau đó:
