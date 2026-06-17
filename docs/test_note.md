@@ -1,5 +1,5 @@
 # Ghi chú test
-
+Phụ trách: Thành viên 1
 ---
 
 ## 1. Môi trường chạy code
@@ -103,3 +103,102 @@ cd .. && test_fileio.exe          # Windows
 Khi viết các hàm UI hoặc Logic (Thêm/Sửa/Xóa), nhớ tuân thủ quy tắc sau để bảo vệ tính toàn vẹn dữ liệu nhé:
 1. **Trước khi xóa Sinh Viên hoặc Môn học:** phải gọi hàm check xem có bản ghi điểm (`ScoreRecord`) hay Lớp học phần (`CourseClass`) nào đang dính tới nó không. Nếu có thì chặn lại không cho xóa (báo lỗi ra màn hình).
 2. Khi dùng các hàm có đuôi `_get` (ví dụ `sa_get`), nhớ check `NULL` trước khi trỏ lấy data.
+
+---
+
+## Trạng thái tổng quan
+
+| Chỉ số | Kết quả |
+|---|---|
+| Tổng số test case | **68** |
+| Passed | **68** |
+| Failed | **0** |
+| Tỉ lệ | **100 %** |
+
+Toàn bộ hệ thống mảng động và I/O đã được kiểm thử và vận hành ổn định. Không phát hiện memory leak, crash, hay sai lệch dữ liệu trong bất kỳ kịch bản nào đã test.
+
+---
+
+## Chi tiết kiểm thử theo module
+
+### 1. `test_types.c` — Kiểm tra định nghĩa struct (7 PASS)
+
+Xác nhận `types.h` khai báo đúng layout bộ nhớ cho 4 kiểu dữ liệu lõi.
+
+| Case đã cover | Ghi chú |
+|---|---|
+| `sizeof(s.mssv) == 12` | Đủ chứa mã SV 9 chữ số + null |
+| `sizeof(s.hoTen) == 60` | Đủ cho tên đầy đủ tiếng Việt không dấu |
+| Gán/đọc `mssv`, `maHP`, `soTinChi`, `hocKy`, `namHoc`, `diemTK` | Kiểm tra từng trường trên cả 4 struct |
+
+File này không phụ thuộc bất kỳ module hay file dữ liệu nào — chạy độc lập hoàn toàn.
+
+---
+
+### 2. `test_arrays.c` — Kiểm tra mảng động `StudentArray` (11 PASS)
+
+Xác nhận các hàm `sa_*` trong `arrays.c` xử lý đúng vòng đời của mảng, bao gồm các tình huống biên.
+
+| Case đã cover | Ghi chú |
+|---|---|
+| Khởi tạo mảng rỗng | `size=0`, `capacity=init_cap` ngay sau `sa_init` |
+| Thêm phần tử bình thường | `size` tăng đúng sau mỗi `sa_add` |
+| **Tự động mở rộng (resize x2)** | Thêm phần tử thứ 3 khi capacity=2 → resize không crash, dữ liệu cũ nguyên vẹn |
+| Tìm kiếm đúng | `sa_find` trả đúng index với khóa tồn tại |
+| Tìm kiếm khóa không có | `sa_find` trả `-1` |
+| OOB get: index âm và index == size | `sa_get` trả `NULL` |
+| OOB remove: index == size | `sa_remove` trả `0`, mảng không bị hỏng |
+| Xóa + dịch trái | Sau `sa_remove(0)`, phần tử index 1 dịch về index 0 đúng |
+| Giải phóng bộ nhớ | Sau `sa_clear`: `data=NULL`, `size=0` |
+
+> **Kỹ thuật resize:** Hàm `sa_resize` (và 3 hàm tương đương) dùng con trỏ tạm `tmp` khi gọi `realloc` — đảm bảo không mất con trỏ gốc nếu `realloc` thất bại. Sau `sa_clear`, con trỏ được đặt về `NULL` ngăn double-free.
+
+---
+
+### 3. `test_fileio_unit.c` — Kiểm tra đọc/ghi file (6 PASS, không dùng `data/`)
+
+Xác nhận `loadStudents`/`saveStudents` hoạt động đúng với file tạm tự tạo, hoàn toàn tách biệt khỏi dữ liệu thật.
+
+| Case đã cover | Ghi chú |
+|---|---|
+| Đọc 1 dòng hợp lệ | Parse đúng MSSV, HoTen, Lop, Birthday |
+| **Dòng thiếu trường bị bỏ qua** | Dòng có 2/4 trường → `[CANH BAO]`, bỏ qua, không crash |
+| **Trùng khóa chính bị bỏ qua** | MSSV xuất hiện lần 2 → `[CANH BAO]`, giữ bản ghi đầu tiên |
+| Save → Load lại (round-trip) | Dữ liệu sau khi ghi file rồi đọc lại khớp 100% |
+| Số lượng bản ghi sau lọc | Chỉ load đúng số dòng hợp lệ |
+
+> Các file tạm (`unit_tmp_in.txt`, `unit_tmp_out.txt`) được tạo và xóa tự động trong cùng test case — không để lại artifact trên disk.
+
+---
+
+### 4. `test_gpa.c` — Kiểm tra tính GPA có trọng số (3 PASS)
+
+Xác nhận `calculateStudentGPA` tính đúng công thức GPA = Σ(diemHe4 × soTinChi) / Σ(soTinChi).
+
+| Case đã cover | Kết quả mong đợi | Kết quả thực tế |
+|---|---|---|
+| 1 môn (2TC, He4=4.0) | GPA = 4.0 | ✅ PASS |
+| **2 môn có trọng số** (2TC×4.0 + 3TC×2.0) | GPA = (8+6)/5 = **2.8** | ✅ PASS |
+| Sinh viên không có bản ghi điểm | GPA = 0.0 | ✅ PASS |
+
+Toàn bộ data được dựng in-memory — không phụ thuộc file, không phụ thuộc `fileio.c`.
+
+---
+
+### 5. `test_fileio.c` — Kiểm thử tích hợp với data thật (41 PASS)
+
+Kiểm tra end-to-end toàn bộ pipeline I/O với 4 file trong `data/`. Đây là bộ test hồi quy (regression test) đảm bảo dữ liệu và logic phối hợp đúng.
+
+| Nhóm | Cases | PASS |
+|---|---|---|
+| **Nhóm 1 – Load cơ bản** | Đếm số bản ghi (6 SV, 5 MH, 5 LHP, 22 điểm); kiểm tra giá trị cụ thể (tên, lớp, ngày sinh, số TC, học kỳ) | 14/14 |
+| **Nhóm 2 – Điểm số** | `DiemQT/CK ∈ [0,10]`; `DiemTK = 0.5×QT + 0.5×CK`; `DiemHe4 ∈ [0,4]`; tìm khóa không tồn tại → -1 | 6/6 |
+| **Nhóm 3 – Save → Reload** | Load → Save → Clear RAM → Load lại: số lượng và nội dung khớp hoàn toàn | 6/6 |
+| **Nhóm 4 – File không tồn tại** | `loadStudents` với file giả → mảng rỗng, không crash | 1/1 |
+| **Nhóm 5 – Dữ liệu sai định dạng** | File tạm có: 1 dòng hợp lệ + thiếu trường + MSSV rỗng + trùng MSSV → chỉ load đúng 1 bản ghi | 2/2 |
+| **Nhóm 6 – Toàn vẹn khóa ngoại** | Mỗi điểm có MSSV và MaLHP hợp lệ; mỗi LHP có MaHP hợp lệ (sau `loadAllData` đã cascade-delete bản ghi rác) | 2/2 |
+| **Nhóm 7 – Arrays edge cases** | `sa/suba/cca/sca_find` với khóa không tồn tại → -1; `sa_get/remove/update` với index âm và index==size → NULL/0 | 10/10 |
+
+> **Lưu ý khi đọc output:** Các dòng `[CANH BAO]` xuất hiện lúc chạy là **bình thường** — đó là test cố tình truyền dữ liệu sai để kiểm tra khả năng phục hồi của chương trình. Không phải lỗi.
+
+---
