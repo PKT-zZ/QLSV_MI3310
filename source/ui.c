@@ -1,3 +1,5 @@
+#include "score.h"
+#include "gpa.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -263,20 +265,6 @@ static int validateDate(const char* date) {
     return 1;
 }
 
-static float calcDiemTK(float diemQT, float diemCK) {
-    return 0.5f * diemQT + 0.5f * diemCK;
-}
-
-static float quyDoiHe4(float diemTK) {
-    if (diemTK >= 8.5f) return 4.0f;
-    if (diemTK >= 8.0f) return 3.5f;
-    if (diemTK >= 7.0f) return 3.0f;
-    if (diemTK >= 6.5f) return 2.5f;
-    if (diemTK >= 5.5f) return 2.0f;
-    if (diemTK >= 5.0f) return 1.5f;
-    if (diemTK >= 4.0f) return 1.0f;
-    return 0.0f;
-}
 
 static void pauseScreen(void) {
     printf("\nNhan Enter de tiep tuc...");
@@ -490,37 +478,84 @@ static void searchStudentUI(StudentArray* students) {
 
     if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
-static void sortStudentUI(StudentArray* students) {
+static void sortStudentUI(
+    StudentArray* students,
+    SubjectArray* subjects,
+    CourseClassArray* classes,
+    ScoreArray* scores
+)
+{
     int choice;
 
     printf("\n========== SAP XEP SINH VIEN ==========\n");
     printf("1. Sap xep theo MSSV\n");
     printf("2. Sap xep theo ho ten\n");
+    printf("3. Sap xep theo GPA\n");
     printf("0. Quay lai\n");
 
-    choice = readIntRange("Nhap lua chon: ", 0, 2);
+    choice = readIntRange(
+        "Nhap lua chon: ",
+        0,
+        3
+    );
 
-    switch (choice) {
+    switch (choice)
+    {
         case 1:
-            sortStudentByMSSV(students);
-            printf("Da sap xep danh sach sinh vien theo MSSV.\n");
-            displayStudents(students);
+            sortStudentByMSSV(
+                students
+            );
+
+            printf(
+                "Da sap xep danh sach sinh vien theo MSSV.\n"
+            );
+
+            displayStudents(
+                students
+            );
             break;
 
         case 2:
-            sortStudentByName(students);
-            printf("Da sap xep danh sach sinh vien theo ho ten.\n");
-            displayStudents(students);
+            sortStudentByName(
+                students
+            );
+
+            printf(
+                "Da sap xep danh sach sinh vien theo ho ten.\n"
+            );
+
+            displayStudents(
+                students
+            );
+            break;
+
+        case 3:
+            sortStudentByGPA(
+                students,
+                scores,
+                classes,
+                subjects
+            );
+
+            printf(
+                "Da sap xep danh sach sinh vien theo GPA.\n"
+            );
+
+            displayStudents(
+                students
+            );
             break;
 
         case 0:
             break;
 
         default:
-            printf("Lua chon khong hop le.\n");
+            printf(
+                "Lua chon khong hop le.\n"
+            );
     }
 }
-static void showStudentMenu(StudentArray* students, ScoreArray* scores) {
+static void showStudentMenu(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores) {
     int choice;
 
     do {
@@ -540,7 +575,7 @@ static void showStudentMenu(StudentArray* students, ScoreArray* scores) {
             case 3: editStudentUI(students); break;
             case 4: deleteStudentUI(students, scores); break;
             case 5: searchStudentUI(students); break;
-            case 6: sortStudentUI(students); break;
+            case 6: sortStudentUI(students, subjects, classes, scores); break;
             case 0: break;
             default: printf("Lua chon khong hop le.\n");
         }
@@ -929,8 +964,14 @@ static void addScoreUI(ScoreArray* scores, StudentArray* students, CourseClassAr
 
     sc.diemQT = readFloatRange("Nhap diem qua trinh (0-10): ", 0.0f, 10.0f);
     sc.diemCK = readFloatRange("Nhap diem cuoi ky (0-10): ", 0.0f, 10.0f);
-    sc.diemTK = calcDiemTK(sc.diemQT, sc.diemCK);
-    sc.diemHe4 = quyDoiHe4(sc.diemTK);
+    sc.diemTK = calculateDiemTK(
+    sc.diemQT,
+    sc.diemCK
+);
+
+sc.diemHe4 = convertToHe4(
+    sc.diemTK
+);
 
     if (sca_add(scores, sc)) {
         printf("Them diem thanh cong. DiemTK = %.2f, He4 = %.2f\n", sc.diemTK, sc.diemHe4);
@@ -960,8 +1001,16 @@ if (sc == NULL) {
 }
     sc->diemQT = readFloatRange("Nhap diem qua trinh moi (0-10): ", 0.0f, 10.0f);
     sc->diemCK = readFloatRange("Nhap diem cuoi ky moi (0-10): ", 0.0f, 10.0f);
-    sc->diemTK = calcDiemTK(sc->diemQT, sc->diemCK);
-    sc->diemHe4 = quyDoiHe4(sc->diemTK);
+    sc->diemTK =
+    calculateDiemTK(
+        sc->diemQT,
+        sc->diemCK
+    );
+
+sc->diemHe4 =
+    convertToHe4(
+        sc->diemTK
+    );
 
     printf("Cap nhat diem thanh cong. DiemTK = %.2f, He4 = %.2f\n",
            scores->data[index].diemTK, scores->data[index].diemHe4);
@@ -1039,43 +1088,135 @@ static void showScoreMenu(ScoreArray* scores,
    BAO CAO CO BAN
    ========================================================= */
 
-static void showStudentScoreCard(StudentArray* students, ScoreArray* scores) {
+static void showStudentScoreCard(
+    StudentArray* students,
+    ScoreArray* scores,
+    CourseClassArray* classes,
+    SubjectArray* subjects
+)
+{
     char mssv[12];
     int studentIndex;
     int found = 0;
 
-    readLine("Nhap MSSV can xem bang diem: ", mssv, sizeof(mssv));
-    studentIndex = sa_find(students, mssv);
+    readLine(
+        "Nhap MSSV can xem bang diem: ",
+        mssv,
+        sizeof(mssv)
+    );
 
-    if (studentIndex == -1) {
-        printf("Khong tim thay sinh vien.\n");
+    studentIndex =
+        sa_find(
+            students,
+            mssv
+        );
+
+    if (studentIndex == -1)
+    {
+        printf(
+            "Khong tim thay sinh vien.\n"
+        );
         return;
     }
 
-    Student* s = sa_get(students, studentIndex);
+    Student* s =
+        sa_get(
+            students,
+            studentIndex
+        );
 
-    if (s == NULL) {
-        printf("Loi: index sinh vien khong hop le.\n");
+    if (s == NULL)
+    {
+        printf(
+            "Loi: index sinh vien khong hop le.\n"
+        );
         return;
     }
 
-    printf("\nBang diem sinh vien: %s - %s\n", s->mssv, s->hoTen);
-    printf("%-15s | %-8s | %-8s | %-8s | %-8s\n", "MaLHP", "DiemQT", "DiemCK", "DiemTK", "He4");
-    printf("------------------------------------------------------------\n");
+    printf(
+        "\nBang diem sinh vien: %s - %s\n",
+        s->mssv,
+        s->hoTen
+    );
 
-    for (int i = 0; i < scores->size; i++) {
-        ScoreRecord* sc = &scores->data[i];
+    printf(
+        "%-15s | %-8s | %-8s | %-8s | %-8s\n",
+        "MaLHP",
+        "DiemQT",
+        "DiemCK",
+        "DiemTK",
+        "He4"
+    );
 
-        if (strcmp(sc->mssv, mssv) == 0) {
-            printf("%-15s | %-8.2f | %-8.2f | %-8.2f | %-8.2f\n",
-                   sc->maLHP, sc->diemQT, sc->diemCK, sc->diemTK, sc->diemHe4);
+    printf(
+        "------------------------------------------------------------\n"
+    );
+
+    for (int i = 0; i < scores->size; i++)
+    {
+        ScoreRecord* sc =
+            &scores->data[i];
+
+        if (
+            strcmp(
+                sc->mssv,
+                mssv
+            ) == 0
+        )
+        {
+            printf(
+                "%-15s | %-8.2f | %-8.2f | %-8.2f | %-8.2f\n",
+                sc->maLHP,
+                sc->diemQT,
+                sc->diemCK,
+                sc->diemTK,
+                sc->diemHe4
+            );
+
             found = 1;
         }
     }
 
-    if (!found) {
-        printf("Sinh vien nay chua co diem.\n");
+    if (!found)
+    {
+        printf(
+            "Sinh vien nay chua co diem.\n"
+        );
+        return;
     }
+
+    float gpa10 =
+        calculateStudentGPA10(
+            mssv,
+            scores,
+            classes,
+            subjects
+        );
+
+    float gpa4 =
+        calculateStudentGPA4(
+            mssv,
+            scores,
+            classes,
+            subjects
+        );
+
+    printf("\n");
+
+    printf(
+        "GPA he 10 : %.2f\n",
+        gpa10
+    );
+
+    printf(
+        "GPA he 4  : %.2f\n",
+        gpa4
+    );
+
+    printf(
+        "Hoc luc   : %s\n",
+        getAcademicRank(gpa10)
+    );
 }
 
 static void showClassScoreTable(CourseClassArray* classes, ScoreArray* scores) {
@@ -1107,9 +1248,12 @@ static void showClassScoreTable(CourseClassArray* classes, ScoreArray* scores) {
     if (!found) printf("Lop hoc phan nay chua co diem.\n");
 }
 
-static void showReportMenu(StudentArray* students,
-                           CourseClassArray* classes,
-                           ScoreArray* scores) {
+static void showReportMenu(
+    StudentArray* students,
+    SubjectArray* subjects,
+    CourseClassArray* classes,
+    ScoreArray* scores
+) {
     int choice;
 
     do {
@@ -1121,7 +1265,7 @@ static void showReportMenu(StudentArray* students,
         choice = readInt("Nhap lua chon: ");
 
         switch (choice) {
-            case 1: showStudentScoreCard(students, scores); break;
+            case 1:showStudentScoreCard(students, scores, classes, subjects); break;
             case 2: showClassScoreTable(classes, scores); break;
             case 0: break;
             default: printf("Lua chon khong hop le.\n");
@@ -1153,8 +1297,7 @@ void showMainMenu(StudentArray* students,
 
         switch (choice) {
             case 1:
-                showStudentMenu(students, scores);
-                break;
+                showStudentMenu(students, subjects, classes, scores); break;
 
             case 2:
                 showSubjectMenu(subjects, classes, scores);
@@ -1168,9 +1311,7 @@ void showMainMenu(StudentArray* students,
                 showScoreMenu(scores, students, classes);
                 break;
 
-            case 5:
-                showReportMenu(students, classes, scores);
-                break;
+            case 5:showReportMenu(students, subjects, classes, scores); break;
 
             case 6:
                 displayStudents(students);
