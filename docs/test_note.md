@@ -9,27 +9,59 @@
 | **Hệ điều hành** | Windows 11 |
 | **Trình biên dịch** | GCC 15.2.0 (MSYS2) |
 | **Cờ biên dịch** | `-Wall -Wextra -std=c99` |
-| **File chạy test** | `source/test_fileio.c` |
+| **File chạy test** | `source/test_fileio.c` (integration), `source/test_types.c`, `source/test_arrays.c`, `source/test_fileio_unit.c`, `source/test_gpa.c` (unit) |
 | **Dữ liệu test** | Các file `.txt` trong thư mục `data/` |
 
 ---
 
 ## 2. Hướng dẫn chạy test
 
-**Lưu ý:** Phải chạy lệnh từ thư mục gốc của project thì code mới đọc được đúng đường dẫn `data/...`
+**Lưu ý:** Tất cả lệnh `make` đều chạy từ bên trong thư mục `source/`. File `.exe` được đặt ở thư mục gốc để chương trình đọc được đúng đường dẫn `data/`.
 
-### Cách 1: Dùng Makefile
+### Các target có sẵn trong Makefile
+
+| Lệnh | Tác dụng |
+|---|---|
+| `make all` | Build chương trình chính → `../qlsv.exe` |
+| `make test` | Build và chạy integration test (`test_fileio.c`) dùng dữ liệu thật trong `data/` |
+| `make test_types` | Unit test cho `types.h` |
+| `make test_arrays` | Unit test cho `arrays.c` |
+| `make test_fileio_unit` | Unit test cho `fileio.c`, dùng file tạm, không đụng `data/` |
+| `make test_gpa` | Unit test cho `gpa.c` |
+| `make unit_test` | Chạy cả 4 unit test trên liên tiếp |
+| `make clean` | Xóa toàn bộ file `.exe` đã build |
+
+### Cách chạy
+
 ```bash
-# Trỏ vào source và chạy make
+# Trỏ vào thư mục source trước
 cd source
-mingw32-make test 
+
+# Build chương trình chính
+make all
+
+# Chạy integration test
+make test
+
+# Chạy toàn bộ unit test
+make unit_test
+
+# Chạy từng unit test riêng lẻ nếu cần
+make test_arrays
 ```
 
-### Cách 2: Gõ lệnh thủ công (Từ thư mục gốc project)
+> **Trên Windows với MSYS2:** thay `make` bằng `mingw32-make` nếu lệnh `make` không nhận, ví dụ: `mingw32-make test`.
+
+### Nếu không dùng Makefile (gõ thủ công)
+
 ```bash
-# Trên Windows
-gcc source\arrays.c source\fileio.c source\test_fileio.c -Isource -o test_fileio.exe
-.\test_fileio.exe
+# Build chương trình chính (chạy từ thư mục source/)
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c student.c subject.c courseclass.c score.c gpa.c sort.c search.c ui.c main.c -o ../qlsv.exe
+
+# Chạy integration test (score.c bắt buộc phải có vì fileio.c dùng hàm tính điểm từ đó)
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio.exe
+cd .. && ./test_fileio.exe        # Linux/macOS
+cd .. && test_fileio.exe          # Windows
 ```
 
 ---
@@ -52,6 +84,18 @@ gcc source\arrays.c source\fileio.c source\test_fileio.c -Isource -o test_fileio
 | **6. Khóa ngoại (FK)** | • Quét thấy điểm của MSSV không tồn tại $\rightarrow$ Tự động dọn dẹp điểm rác.<br>• Lớp học phần trỏ đến Mã HP không tồn tại $\rightarrow$ Xóa lớp đó. |
 | **7. Tràn mảng (OOB)**| • Gọi hàm tìm kiếm/xóa với index âm hoặc khóa không có thật $\rightarrow$ Bị chặn lại an toàn, trả về `-1` hoặc `NULL`. |
 
+---
+
+### Unit test từng module
+
+> *Các file unit test được bổ sung sau integration test. Chạy bằng `make unit_test` từ thư mục `source/`.*
+
+| File test | Module kiểm tra | Kết quả |
+|---|---|---|
+| `test_types.c` | Struct và kích thước trường trong `types.h` | ✅ PASS |
+| `test_arrays.c` | Thêm/xóa/tìm/resize mảng động, edge case index âm/ngoài phạm vi | ✅ PASS |
+| `test_fileio_unit.c` | Đọc/ghi file bằng file tạm, không dùng `data/` — kiểm tra dòng lỗi bị bỏ qua, round-trip save→load | ✅ PASS |
+| `test_gpa.c` | Công thức GPA có trọng số tín chỉ, trường hợp không có điểm → GPA = 0 | ✅ PASS |
 ---
 
 ## 4. Lưu ý quan trọng cho TV2 & TV3 khi tích hợp
