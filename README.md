@@ -905,43 +905,45 @@ Cần cài đặt:
 ### 15.2. Clone repository
 
 ```bash
-git clone https://github.com/<ten-nhom>/<ten-repo>.git
-cd <ten-repo>
+git clone https://github.com/PKT-zZ/QLSV_MI3310.git
+cd QLSV_MI3310
 ```
 
-### 15.3. Build chương trình
+### 15.3. Build chương trình + Chạy chương trình
 
-Nếu dùng Makefile:
+````md
+Dự án sử dụng `Makefile` đặt trong thư mục `source/`. Để biên dịch chương trình chính, chạy các lệnh sau từ thư mục gốc của dự án:
 
 ```bash
 cd source
+make clean
 make all
-```
+````
 
-Nếu chưa có Makefile, có thể biên dịch thủ công (chạy từ thư mục `source/`):
+Sau khi build thành công, file thực thi `qlsv.exe` sẽ được tạo ở thư mục gốc của dự án.
 
-```bash
-gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
-    score.c gpa.c sort.c search.c ui.c -o ../qlsv
-```
-
-> **Lưu ý:** Lệnh trên được chạy từ bên trong thư mục `source/`, do đó `-o ../qlsv` sẽ đặt file thực thi ra **thư mục gốc** của project — nhất quán với lệnh chạy `./qlsv` ở Mục 14.4.
+Chi tiết về môi trường build, các target trong Makefile và kết quả kiểm thử được trình bày trong file [`docs/test_note.md`](docs/test_note.md).
 
 ### 15.4. Chạy chương trình
 
-Trên Linux/macOS:
+Sau khi build thành công, quay lại thư mục gốc của dự án và chạy chương trình:
 
 ```bash
-./qlsv
+cd ..
+./qlsv.exe
 ```
 
-Trên Windows:
+Trên Windows PowerShell, có thể chạy bằng lệnh:
 
-```bash
-qlsv.exe
+```powershell
+.\qlsv.exe
 ```
 
-> **Lưu ý:** Chạy chương trình từ thư mục gốc của project để các đường dẫn `data/*.txt` hoạt động đúng.
+Chương trình sẽ hiển thị menu chính để thực hiện các chức năng quản lý sinh viên, học phần, lớp học phần, điểm số, tìm kiếm, sắp xếp và báo cáo.
+
+Các bước chạy kiểm thử tự động bằng Makefile như `make unit_test`, `make test` và kết quả kiểm thử chi tiết được ghi trong file [`docs/test_note.md`](docs/test_note.md).
+
+```
 
 ---
 
