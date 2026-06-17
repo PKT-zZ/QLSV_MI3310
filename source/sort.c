@@ -1,3 +1,4 @@
+#include "gpa.h"
 #include <string.h>
 #include "sort.h"
 
@@ -35,6 +36,47 @@ void sortStudentByName(StudentArray* students)
                 students->data[j].hoTen,
                 students->data[j + 1].hoTen
             ) > 0)
+            {
+                Student temp =
+                    students->data[j];
+
+                students->data[j] =
+                    students->data[j + 1];
+
+                students->data[j + 1] =
+                    temp;
+            }
+        }
+    }
+}
+void sortStudentByGPA(
+    StudentArray* students,
+    ScoreArray* scores,
+    CourseClassArray* classes,
+    SubjectArray* subjects
+)
+{
+    for(int i = 0; i < students->size - 1; i++)
+    {
+        for(int j = 0; j < students->size - i - 1; j++)
+        {
+            float gpa1 =
+                calculateStudentGPA10(
+                    students->data[j].mssv,
+                    scores,
+                    classes,
+                    subjects
+                );
+
+            float gpa2 =
+                calculateStudentGPA10(
+                    students->data[j + 1].mssv,
+                    scores,
+                    classes,
+                    subjects
+                );
+
+            if(gpa1 < gpa2)
             {
                 Student temp =
                     students->data[j];
