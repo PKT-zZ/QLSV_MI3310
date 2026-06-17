@@ -1,27 +1,35 @@
-## 1. Kết luận
+# QLSV_MI3310 — Tổng hợp lỗi đang có cần sửa trước khi chạy test/nộp
 
-Dự án `QLSV_MI3310` **chưa nên nộp ngay** nếu chưa sửa các lỗi dưới đây. Phần lõi của dự án đã tương đối ổn, nhưng hiện còn một số điểm có thể làm bài bị trừ nặng khi giảng viên build/test hoặc demo trực tiếp.
-
-Các việc bắt buộc cần làm:
-
-1. Sửa lỗi `test_gpa.c` gọi sai hàm GPA.
-2. Sửa `test_fileio.c` luôn trả về thành công dù test có lỗi.
-3. Bổ sung chức năng **xóa điểm**.
-4. Cập nhật `README.md` và `docs/test_note.md` cho đúng trạng thái code/test thật.
-5. Dọn file nháp `sửa_code_13.6.md` khỏi bản nộp.
-6. Chạy lại toàn bộ build/test và chỉ ghi kết quả PASS nếu đã chạy thật.
+> Phạm vi bản này: chỉ tập trung vào lỗi làm code/test/Makefile không chạy đúng, tính năng README đã nêu nhưng code/test chưa khớp, và tài liệu README/test_note đang sai lệch.  
+> Không xét các vấn đề phụ như phong cách code, comment dài, dấu hiệu AI, module chưa tối ưu, hay kiến trúc chưa sạch.
 
 ---
 
-## 2. Sửa lỗi `test_gpa.c` gọi hàm GPA không tồn tại
+## Kết luận ngắn
 
-### Mức độ
+Repo hiện **chưa nên coi là bản ổn để nộp/chạy mục 13** vì còn các lỗi trực tiếp ảnh hưởng đến build/test và tài liệu:
 
-**Bắt buộc sửa.**
+1. `test_gpa.c` đang gọi hàm `calculateStudentGPA()` nhưng `gpa.h/gpa.c` hiện không có hàm này.
+2. `test_fileio.c` vẫn `return 0` dù có thể có test fail, làm `make test` báo pass giả.
+3. `README.md` và `docs/test_note.md` đang ghi `68/68 PASS`, nhưng kết luận này không còn đáng tin khi `test_gpa.c` đang gọi sai API.
+4. Hướng dẫn clone/build/chạy trong `README.md` đang sai hoặc lệch với Makefile thực tế.
+5. `README.md` nhắc một số file/thư mục/tên hàm chưa khớp repo hiện tại.
+6. Makefile có thể chạy được về mặt target, nhưng phần chạy file `.exe` trên Git Bash/MSYS2 có rủi ro do biến `DOTSLASH` đang phụ thuộc `$(OS)` theo kiểu chưa chắc đúng với shell đang dùng.
+
+---
+
+## 1. Lỗi build/test: `test_gpa.c` gọi hàm không tồn tại
+
+### File liên quan
+
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+- `source/Makefile`
 
 ### Hiện trạng
 
-Trong `source/gpa.h`, các hàm được khai báo là:
+Trong `source/gpa.h`, API hiện có:
 
 ```c
 float calculateStudentGPA4(...);
@@ -29,7 +37,7 @@ float calculateStudentGPA10(...);
 const char* getAcademicRank(float gpa10);
 ```
 
-Trong `source/gpa.c`, các hàm được triển khai cũng là:
+Trong `source/gpa.c`, code cũng chỉ triển khai:
 
 ```c
 calculateStudentGPA4(...)
@@ -37,28 +45,39 @@ calculateStudentGPA10(...)
 getAcademicRank(...)
 ```
 
-Tuy nhiên, trong `source/test_gpa.c`, test lại gọi:
+Nhưng trong `source/test_gpa.c`, test vẫn gọi:
 
 ```c
 calculateStudentGPA(...)
 ```
 
-Hàm này hiện không tồn tại trong `gpa.c` và cũng không được khai báo trong `gpa.h`.
+ở 3 chỗ:
 
-### Rủi ro
-
-Target `make test_gpa` hoặc `make unit_test` có thể lỗi compile/link.
-
-Đây là lỗi rất dễ bị phát hiện nếu giảng viên chạy:
-
-```bash
-make clean
-make unit_test
+```c
+float gpa1 = calculateStudentGPA("SV001", &scores, &clss, &subs);
+float gpa2 = calculateStudentGPA("SV001", &scores, &clss, &subs);
+float gpa3 = calculateStudentGPA("SV999", &scores, &clss, &subs);
 ```
 
-### Cách sửa tối thiểu
+### Ảnh hưởng
 
-Sửa trong `test_gpa.c`, đổi các lệnh gọi:
+`make unit_test` sẽ bị lỗi ở target `test_gpa`, vì Makefile đang build:
+
+```make
+test_gpa:
+	$(CC) $(CFLAGS) arrays.c gpa.c test_gpa.c -o ../test_gpa.exe
+	cd .. && $(DOTSLASH)test_gpa.exe
+```
+
+Khi link, `test_gpa.c` cần hàm `calculateStudentGPA`, nhưng `gpa.c` không cung cấp hàm này.
+
+### Kết luận lỗi
+
+Đây là lỗi **bắt buộc sửa**. Nếu không sửa, kết quả `unit_test` không thể đúng.
+
+### Sửa tối thiểu
+
+Đổi trong `source/test_gpa.c`:
 
 ```c
 calculateStudentGPA(...)
@@ -70,7 +89,7 @@ thành:
 calculateStudentGPA4(...)
 ```
 
-Ví dụ:
+Cụ thể:
 
 ```c
 float gpa1 = calculateStudentGPA4("SV001", &scores, &clss, &subs);
@@ -78,69 +97,69 @@ float gpa2 = calculateStudentGPA4("SV001", &scores, &clss, &subs);
 float gpa3 = calculateStudentGPA4("SV999", &scores, &clss, &subs);
 ```
 
-### Phương án khác
-
-Có thể thêm wrapper để tương thích với test cũ.
-
-Trong `gpa.h`:
+Sửa luôn comment đầu file:
 
 ```c
-float calculateStudentGPA(
-    const char* mssv,
-    ScoreArray* scores,
-    CourseClassArray* classes,
-    SubjectArray* subjects
-);
+//Test: hàm calculateStudentGPA()
 ```
 
-Trong `gpa.c`:
+thành:
 
 ```c
-float calculateStudentGPA(
-    const char* mssv,
-    ScoreArray* scores,
-    CourseClassArray* classes,
-    SubjectArray* subjects
-) {
-    return calculateStudentGPA4(mssv, scores, classes, subjects);
-}
+//Test: hàm calculateStudentGPA4()
 ```
-
-### Khuyến nghị
-
-Nên sửa `test_gpa.c` gọi thẳng `calculateStudentGPA4()` để tên hàm rõ nghĩa và thống nhất với `gpa.h`.
 
 ---
 
-## 3. Sửa `test_fileio.c` luôn báo thành công giả
+## 2. Lỗi test: `test_fileio.c` có thể báo pass giả
 
-### Mức độ
+### File liên quan
 
-**Bắt buộc sửa.**
+- `source/test_fileio.c`
+- `source/Makefile`
+- `docs/test_note.md`
+- `README.md`
 
 ### Hiện trạng
 
-Trong `source/test_fileio.c`, chương trình có biến đếm số test lỗi, ví dụ:
+Trong `test_fileio.c`, chương trình có biến đếm lỗi:
 
 ```c
-int fail = 0;
+int pass = 0, fail = 0;
 ```
 
-Nhưng cuối chương trình vẫn:
+Cuối chương trình có phân nhánh in kết quả:
+
+```c
+if (fail == 0)
+    printf("KET QUA: %d/%d PASS -- tat ca dung!\n", pass, pass + fail);
+else
+    printf("KET QUA: %d PASS, %d FAIL -- co loi!\n", pass, fail);
+```
+
+Nhưng ngay sau đó vẫn:
 
 ```c
 return 0;
 ```
 
-ngay cả khi `fail > 0`.
+### Ảnh hưởng
 
-### Rủi ro
+Nếu có test fail, chương trình vẫn trả exit code `0`.
 
-`make test` có thể báo thành công dù bên trong test đã ghi nhận lỗi.
+Điều này làm:
 
-Đây là lỗi nghiêm trọng vì kết quả test không còn đáng tin.
+```bash
+make test
+```
 
-### Cách sửa tối thiểu
+vẫn có thể được Makefile xem là thành công dù bên trong test đã báo lỗi.
+
+### Kết luận lỗi
+
+Đây là lỗi **bắt buộc sửa** vì làm sai kết quả kiểm thử.
+
+### Sửa tối thiểu
 
 Đổi:
 
@@ -154,165 +173,168 @@ thành:
 return fail > 0 ? 1 : 0;
 ```
 
-Sau khi sửa, nếu có test fail, chương trình test sẽ trả về exit code khác 0 và `make test` sẽ báo lỗi đúng.
+Sau khi sửa, nếu integration test có lỗi, `make test` sẽ trả lỗi đúng.
 
 ---
 
-## 4. Bổ sung chức năng xóa điểm
+## 3. Lỗi tài liệu: README và test_note ghi `68/68 PASS` không còn đáng tin
 
-### Mức độ
+### File liên quan
 
-**Bắt buộc sửa nếu yêu cầu bài có đủ CRUD cho điểm.**
+- `README.md`
+- `docs/test_note.md`
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+- `source/test_fileio.c`
 
 ### Hiện trạng
 
-Menu quản lý điểm hiện có các chức năng như:
+`README.md` đang ghi:
 
-- Hiển thị điểm.
-- Nhập điểm.
-- Cập nhật điểm.
-- Tìm điểm.
-
-Nhưng chưa có chức năng **xóa điểm**.
-
-Trong khi đó, với quản lý điểm, yêu cầu thông thường là phải có đủ:
-
-- Thêm điểm.
-- Sửa điểm.
-- Xóa điểm.
-- Tìm/hiển thị điểm.
-
-### Rủi ro
-
-Khi demo, giảng viên có thể hỏi:
-
-> “Phần quản lý điểm có đủ thêm, sửa, xóa không?”
-
-Nếu không có xóa điểm, chức năng CRUD điểm bị thiếu.
-
-### Cách sửa tối thiểu
-
-#### 4.1. Thêm prototype vào `score.h`
-
-```c
-int deleteScoreRecord(
-    ScoreArray* scores,
-    const char* mssv,
-    const char* maLHP
-);
+```text
+Tổng kết: 68/68 PASS — không có lỗi.
 ```
 
-#### 4.2. Thêm hàm vào `score.c`
+`docs/test_note.md` cũng ghi:
 
-```c
-int deleteScoreRecord(
-    ScoreArray* scores,
-    const char* mssv,
-    const char* maLHP
-) {
-    int idx = sca_find(scores, mssv, maLHP);
-
-    if (idx == -1) {
-        return 0;
-    }
-
-    return sca_remove(scores, idx);
-}
+```text
+Kết quả tổng hợp 68/68 test case PASS — không có lỗi.
 ```
 
-#### 4.3. Thêm hàm UI trong `ui.c`
+Trong đó có ghi:
 
-```c
-static void deleteScoreUI(ScoreArray* scores) {
-    char mssv[12];
-    char maLHP[15];
-
-    readLine("Nhap MSSV can xoa diem: ", mssv, sizeof(mssv));
-    readLine("Nhap MaLHP can xoa diem: ", maLHP, sizeof(maLHP));
-
-    if (deleteScoreRecord(scores, mssv, maLHP)) {
-        printf("Xoa diem thanh cong.\n");
-    } else {
-        printf("Khong tim thay ban ghi diem can xoa.\n");
-    }
-}
+```text
+test_gpa.c: 3/3 PASS
+test_fileio.c: 41/41 PASS
 ```
 
-Lưu ý: tên hàm `readLine()` cần khớp với hàm đọc input thật đang dùng trong `ui.c`.
+### Vấn đề
 
-#### 4.4. Sửa menu quản lý điểm
+Hai kết luận trên đang lệch với trạng thái code hiện tại:
 
-Ví dụ:
+- `test_gpa.c` gọi `calculateStudentGPA()`, nhưng `gpa.h/gpa.c` không có hàm này.
+- `test_fileio.c` luôn `return 0`, nên nếu fail cũng có thể bị báo pass ở mức Makefile.
 
-```c
-printf("\n========== QUAN LY DIEM =========="
-       "\n1. Hien thi danh sach diem"
-       "\n2. Nhap diem"
-       "\n3. Cap nhat diem"
-       "\n4. Xoa diem"
-       "\n5. Tim diem"
-       "\n0. Quay lai\n");
+### Ảnh hưởng
+
+Giảng viên hoặc thành viên khác chạy lại test sẽ thấy tài liệu ghi pass nhưng code/test không khớp.
+
+Đây là lỗi tài liệu nghiêm trọng vì mục tiêu hiện tại là chạy được Makefile và thực hiện kế hoạch kiểm thử.
+
+### Kết luận lỗi
+
+Phải sửa code test trước, chạy lại, rồi mới được ghi `68/68 PASS`.
+
+### Sửa tối thiểu
+
+Sau khi sửa `test_gpa.c` và `test_fileio.c`, chạy lại từ thư mục `source/`:
+
+```bash
+make clean
+make all
+make unit_test
+make test
 ```
 
-Trong `switch`:
-
-```c
-case 4:
-    deleteScoreUI(scores);
-    break;
-
-case 5:
-    searchScoreUI(scores);
-    break;
-```
-
----
-
-## 5. Cập nhật `README.md`
-
-### Mức độ
-
-**Bắt buộc sửa trước khi nộp.**
-
-### Các lỗi cần sửa
-
-#### 5.1. Không ghi kết quả test PASS nếu chưa chạy lại
-
-Nếu `README.md` đang ghi dạng:
+Chỉ khi các lệnh trên pass thật mới giữ dòng:
 
 ```text
 68/68 PASS
 ```
 
-thì không nên giữ nguyên nếu chưa sửa code và chạy lại thật sự.
+Nếu chưa chạy lại, sửa README/test_note thành:
 
-Đặc biệt, khi `test_gpa.c` còn gọi sai hàm GPA, kết luận test PASS là không đáng tin.
-
-#### 5.2. Sửa URL clone
-
-Nếu README còn placeholder:
-
-```bash
-git clone https://github.com/<ten-nhom>/<ten-repo>.git
-cd <ten-repo>
+```text
+Kết quả kiểm thử cần cập nhật lại sau khi chạy:
+make clean
+make all
+make unit_test
+make test
 ```
 
-cần đổi thành:
+---
+
+## 4. Lỗi README: hướng dẫn clone repository đang sai
+
+### File liên quan
+
+- `README.md`
+
+### Hiện trạng
+
+README đang ghi:
+
+```bash
+git clone https://github.com//.git
+cd
+```
+
+### Ảnh hưởng
+
+Người chấm hoặc thành viên khác làm theo README sẽ không clone được repo.
+
+### Kết luận lỗi
+
+Đây là lỗi tài liệu **bắt buộc sửa**.
+
+### Sửa tối thiểu
+
+Đổi thành:
 
 ```bash
 git clone https://github.com/PKT-zZ/QLSV_MI3310.git
 cd QLSV_MI3310
 ```
 
-#### 5.3. Sửa hướng dẫn build/chạy cho khớp Makefile
+---
 
-Nếu Makefile tạo file:
+## 5. Lỗi README: hướng dẫn build/chạy lệch với Makefile
 
-```text
-qlsv.exe
+### File liên quan
+
+- `README.md`
+- `source/Makefile`
+
+### Hiện trạng
+
+Trong `source/Makefile`, file thực thi chính được đặt là:
+
+```make
+MAIN_EXE = ../qlsv.exe
 ```
 
-thì README nên hướng dẫn rõ:
+Nhưng README phần build thủ công lại ghi:
+
+```bash
+gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
+score.c gpa.c sort.c search.c ui.c -o ../qlsv
+```
+
+và hướng dẫn chạy:
+
+```bash
+./qlsv
+```
+
+trên Linux/macOS.
+
+### Ảnh hưởng
+
+Có 2 cách build tạo ra 2 tên file khác nhau:
+
+- Makefile tạo `qlsv.exe`.
+- README build thủ công tạo `qlsv`.
+
+Điều này làm hướng dẫn chạy không thống nhất. Nếu người dùng build bằng Makefile nhưng chạy `./qlsv`, sẽ không thấy file.
+
+### Kết luận lỗi
+
+Đây là lỗi tài liệu **bắt buộc sửa** vì ảnh hưởng trực tiếp đến chạy chương trình.
+
+### Sửa tối thiểu
+
+Thống nhất theo Makefile hiện tại:
 
 ```bash
 cd source
@@ -320,340 +342,587 @@ make clean
 make all
 ```
 
-Chạy từ thư mục gốc project:
+Sau đó chạy từ thư mục gốc:
 
 ```bash
 ./qlsv.exe
 ```
 
-Hoặc trên Windows PowerShell:
+Trên PowerShell:
 
 ```powershell
 .\qlsv.exe
 ```
 
-#### 5.4. Ghi rõ công thức điểm tổng kết
+Nếu muốn README vẫn có build thủ công, sửa output thủ công thành:
 
-README nên ghi rõ:
-
-```text
-DiemTK = (DiemQT + DiemCK) / 2
+```bash
+gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
+score.c gpa.c sort.c search.c ui.c -o ../qlsv.exe
 ```
 
-và quy đổi hệ 4 theo các ngưỡng trong `score.c`.
+---
 
-Nếu đề bài yêu cầu trọng số khác, ví dụ 30% quá trình và 70% cuối kỳ, cần sửa cả code và README.
+## 6. Rủi ro Makefile khi chạy test trên Git Bash/MSYS2
 
-#### 5.5. Bỏ hoặc tạo các thư mục được README nhắc tới
+### File liên quan
 
-Nếu README có nhắc các thư mục như:
+- `source/Makefile`
+- `docs/test_note.md`
+
+### Hiện trạng
+
+Makefile đang dùng:
+
+```make
+ifeq ($(OS),Windows_NT)
+	DOTSLASH =
+	CLEAN_CMD = del /Q ..\*.exe 2>nul
+else
+	DOTSLASH = ./
+	CLEAN_CMD = rm -f ../*.exe
+endif
+```
+
+Các target test chạy file `.exe` bằng:
+
+```make
+cd .. && $(DOTSLASH)test_gpa.exe
+```
+
+Nếu `OS=Windows_NT`, `DOTSLASH` rỗng, lệnh thành:
+
+```bash
+cd .. && test_gpa.exe
+```
+
+### Vấn đề
+
+Trên Windows CMD/PowerShell, gọi `test_gpa.exe` kiểu này thường chạy được.
+
+Nhưng trên Git Bash/MSYS2, current directory thường không nằm trong `PATH`, nên cần:
+
+```bash
+./test_gpa.exe
+```
+
+Trong khi `docs/test_note.md` lại hướng dẫn dùng Git Bash/MSYS2 để chạy test bằng Makefile.
+
+### Ảnh hưởng
+
+Người dùng làm đúng theo `docs/test_note.md` nhưng vẫn có thể gặp lỗi dạng:
+
+```text
+test_gpa.exe: command not found
+```
+
+hoặc tương tự khi chạy test.
+
+### Kết luận lỗi
+
+Đây là lỗi tương thích Makefile/tài liệu cần sửa để chạy kiểm thử ổn trên môi trường nhóm đang dùng.
+
+### Sửa tối thiểu
+
+Cách đơn giản nhất: dùng `./` cho lệnh chạy file `.exe` trong Makefile:
+
+```make
+DOTSLASH = ./
+```
+
+Hoặc bỏ nhánh `ifeq ($(OS),Windows_NT)` cho biến `DOTSLASH`.
+
+Ví dụ:
+
+```make
+DOTSLASH = ./
+
+ifeq ($(OS),Windows_NT)
+	CLEAN_CMD = del /Q ..\*.exe 2>nul
+else
+	CLEAN_CMD = rm -f ../*.exe
+endif
+```
+
+Nếu chủ yếu chạy bằng Git Bash/MSYS2, nên ưu tiên cách này.
+
+---
+
+## 7. README/test_note lệch tên hàm GPA
+
+### File liên quan
+
+- `docs/test_note.md`
+- `source/test_gpa.c`
+- `source/gpa.h`
+- `source/gpa.c`
+
+### Hiện trạng
+
+`docs/test_note.md` ghi:
+
+```text
+test_gpa.c — Tính GPA
+Kiểm tra calculateStudentGPA tính đúng công thức...
+```
+
+Nhưng code hiện tại không có API `calculateStudentGPA`.
+
+API thật hiện tại là:
+
+```c
+calculateStudentGPA4(...)
+calculateStudentGPA10(...)
+```
+
+### Ảnh hưởng
+
+Tài liệu mô tả sai module đang test.
+
+Nếu sau đó sửa `test_gpa.c` gọi `calculateStudentGPA4()`, nhưng không sửa `test_note.md`, tài liệu vẫn lệch.
+
+### Kết luận lỗi
+
+Phải sửa `docs/test_note.md` cho khớp tên hàm thật.
+
+### Sửa tối thiểu
+
+Đổi mô tả:
+
+```text
+Kiểm tra calculateStudentGPA tính đúng công thức...
+```
+
+thành:
+
+```text
+Kiểm tra calculateStudentGPA4 tính đúng công thức GPA hệ 4 theo trọng số tín chỉ.
+```
+
+Nếu muốn bổ sung kiểm thử GPA hệ 10, cần thêm test riêng cho `calculateStudentGPA10()`.
+
+---
+
+## 8. README đang nhắc file/thư mục chưa có hoặc chưa chắc tồn tại trong repo nộp
+
+### File liên quan
+
+- `README.md`
+- repo root
+
+### Hiện trạng
+
+README phần tài liệu liên quan ghi:
+
+```text
+Báo cáo cuối kỳ: report/BaoCao_QLSV_NhomXX.docx
+Ảnh kiểm thử: screenshots/
+```
+
+Trong phần kế hoạch còn nhắc:
+
+```text
+docs/test-plan.md hoặc report/
+screenshots/
+report/BaoCao_QLSV_NhomXX.docx
+```
+
+### Vấn đề
+
+Nếu repo nộp không có các thư mục/file này, README đang mô tả không đúng trạng thái repo.
+
+### Ảnh hưởng
+
+Không làm code lỗi, nhưng làm hồ sơ nộp thiếu nhất quán. Giảng viên mở README rồi tìm `report/`, `screenshots/`, `docs/test-plan.md` có thể không thấy.
+
+### Kết luận lỗi
+
+Cần sửa trước khi nộp nếu README được dùng làm tài liệu chính.
+
+### Sửa tối thiểu
+
+Một trong hai cách:
+
+#### Cách 1 — tạo đủ file/thư mục
+
+Tạo:
 
 ```text
 report/
 screenshots/
+docs/test-plan.md
 ```
 
-nhưng repo không có, cần chọn một trong hai:
+nếu thật sự cần nộp.
 
-- Tạo thư mục/file tương ứng nếu thực sự cần nộp.
-- Hoặc xóa khỏi README để tránh tài liệu nói không đúng repo.
+#### Cách 2 — sửa README cho đúng thực tế
+
+Ví dụ:
+
+```text
+Tài liệu kiểm thử hiện có: docs/test_note.md
+Ảnh kiểm thử và báo cáo Word sẽ được bổ sung ở bản nộp cuối nếu giảng viên yêu cầu.
+```
+
+Nếu không định nộp `docs/test-plan.md`, nên bỏ dòng nhắc file này.
 
 ---
 
-## 6. Cập nhật `docs/test_note.md`
+## 9. README mô tả một số prototype/hàm UI không khớp code hiện tại
 
-### Mức độ
+### File liên quan
 
-**Bắt buộc sửa trước khi nộp.**
-
-### Hiện trạng cần tránh
-
-Không nên để `docs/test_note.md` chỉ mô tả test cũ, ví dụ chỉ nói về `test_fileio.c` và ghi kết quả cũ như:
-
-```text
-41 PASS / 0 FAIL
-```
-
-trong khi repo đã có thêm các test:
-
-- `test_types.c`
-- `test_arrays.c`
-- `test_fileio_unit.c`
-- `test_gpa.c`
-
-Ngoài ra, cần sửa các lỗi format đường dẫn nếu có, ví dụ:
-
-```text
-source\a rrays.c
-source\f ileio.c
-source\t est_fileio.c
-```
-
-### Nội dung nên cập nhật
-
-`docs/test_note.md` nên phân biệt rõ:
-
-#### Unit test
-
-- `test_types.c`
-- `test_arrays.c`
-- `test_fileio_unit.c`
-- `test_gpa.c`
-
-Lệnh chạy:
-
-```bash
-make unit_test
-```
-
-#### Integration test
-
-- `test_fileio.c`
-
-Lệnh chạy:
-
-```bash
-make test
-```
-
-#### Lệnh kiểm tra tổng thể
-
-```bash
-make clean
-make all
-make unit_test
-make test
-```
-
-### Mẫu nội dung thay thế tối thiểu
-
-```md
-# Ghi chú kiểm thử
-
-## 1. Môi trường kiểm thử
-
-- Hệ điều hành: Windows 11
-- Compiler: GCC / MinGW hoặc MSYS2
-- Cờ biên dịch: `-Wall -Wextra -std=c99`
-- Thư mục chạy lệnh: `source/`
-
-## 2. Unit test
-
-Các file unit test:
-
-- `test_types.c`
-- `test_arrays.c`
-- `test_fileio_unit.c`
-- `test_gpa.c`
-
-Chạy:
-
-```bash
-make unit_test
-```
-
-## 3. Integration test
-
-File integration test:
-
-- `test_fileio.c`
-
-Chạy:
-
-```bash
-make test
-```
-
-## 4. Kết quả chạy gần nhất
-
-Sau khi sửa code, chạy lại:
-
-```bash
-make clean
-make all
-make unit_test
-make test
-```
-
-Kết quả:
-
-- `make all`: ...
-- `make unit_test`: ...
-- `make test`: ...
-
-Chỉ ghi PASS nếu đã chạy thật và không có lỗi.
-```
-
----
-
-## 7. Dọn file nháp `sửa_code_13.6.md`
-
-### Mức độ
-
-**Bắt buộc dọn trước khi nộp chính thức.**
+- `README.md`
+- `source/ui.h`
+- `source/ui.c`
 
 ### Hiện trạng
 
-Repo có file:
+README phần Thành viên 3 ghi các hàm tối thiểu cần có:
+
+```c
+void showMainMenu();
+void showStudentMenu();
+void showSubjectMenu();
+void showCourseClassMenu();
+void showScoreMenu();
+void displayTable();
+void displayScoreCard();
+```
+
+và các hàm validation/đọc input:
+
+```c
+int validateMSSV(const char* mssv);
+int validateScore(float score);
+int validateDate(const char* date);
+int isStudentKeyDuplicate(StudentArray* arr, const char* key);
+int isSubjectKeyDuplicate(SubjectArray* arr, const char* key);
+int isClassKeyDuplicate(CourseClassArray* arr, const char* key);
+int readInt(const char* message);
+float readFloat(const char* message);
+```
+
+Nhưng `source/ui.h` hiện chỉ public:
+
+```c
+void showMainMenu(StudentArray* students, SubjectArray* subjects, CourseClassArray* classes, ScoreArray* scores);
+```
+
+Các hàm còn lại phần lớn là `static` trong `ui.c`, hoặc tên thật khác README.
+
+### Ảnh hưởng
+
+Không nhất thiết làm chương trình lỗi, nhưng làm README sai lệch nếu giảng viên đối chiếu prototype với code.
+
+### Kết luận lỗi
+
+Cần sửa README để không yêu cầu các prototype không public, hoặc đổi code/header nếu nhóm thật sự muốn public các hàm này.
+
+### Sửa tối thiểu
+
+Trong README, đổi từ “các hàm tối thiểu cần có” sang “các chức năng giao diện cần có”, ví dụ:
 
 ```text
-sửa_code_13.6.md
+Các chức năng giao diện cần có:
+- Menu chính.
+- Menu quản lý sinh viên.
+- Menu quản lý môn học.
+- Menu quản lý lớp học phần.
+- Menu quản lý điểm.
+- Báo cáo/bảng điểm.
+- Kiểm tra dữ liệu nhập.
 ```
 
-Đây là tên file giống ghi chú nháp trong quá trình sửa code.
+Không nên liệt kê prototype nếu code không public các prototype đó trong `ui.h`.
 
-### Rủi ro
+---
 
-- Trông không giống file cần nộp chính thức.
-- Tên file có dấu, dễ gây lỗi hoặc bất tiện khi thao tác terminal.
-- Nội dung có thể làm giảng viên thấy đây là bản nháp/chưa hoàn thiện.
-- Có thể làm tăng nghi ngờ về việc dùng AI/agent nếu nội dung giống checklist sửa code.
+## 10. README mục 13 có TC20 “đầy đủ các môn/lớp học phần, điểm và GPA”, nhưng bảng điểm sinh viên hiện chỉ in MaLHP, chưa in tên môn/mã học phần
 
-### Cách xử lý khuyến nghị
+### File liên quan
 
-Xóa khỏi bản nộp:
+- `README.md`
+- `source/ui.c`
 
-```bash
-git rm "sửa_code_13.6.md"
-git commit -m "Remove temporary code review note"
-```
+### Hiện trạng
 
-Nếu muốn giữ lại, chuyển vào `docs/` và đổi tên không dấu:
+README TC20 ghi:
 
 ```text
-docs/refactor_note.md
+Hiển thị bảng điểm sinh viên
+Kết quả mong đợi: Hiển thị đầy đủ các môn/lớp học phần, điểm và GPA
 ```
 
-Tuy nhiên, nếu không bắt buộc phải nộp file này, nên xóa.
+Trong `ui.c`, `showStudentScoreCard()` hiện in:
+
+```text
+MaLHP | DiemQT | DiemCK | DiemTK | He4
+```
+
+và cuối bảng có:
+
+```text
+GPA he 10
+GPA he 4
+Hoc luc
+```
+
+### Vấn đề
+
+Chức năng đã có GPA/học lực, nhưng phần “đầy đủ các môn/lớp học phần” trong README chưa thật sự đầy đủ nếu chỉ in `MaLHP`.
+
+Người dùng nhìn bảng điểm chưa biết lớp học phần đó thuộc môn nào, tên môn là gì, số tín chỉ bao nhiêu.
+
+### Ảnh hưởng
+
+Không làm code crash, nhưng khi demo TC20 có thể bị hỏi vì sao “đầy đủ các môn/lớp học phần” mà chỉ thấy `MaLHP`.
+
+### Kết luận lỗi
+
+Đây là lỗi khớp yêu cầu/tài liệu ở mức nên sửa trước khi demo mục 13.
+
+### Sửa tối thiểu
+
+Trong `showStudentScoreCard()`, khi duyệt từng `ScoreRecord`, tra thêm:
+
+1. `CourseClass` theo `maLHP`.
+2. `Subject` theo `maHP`.
+
+Sau đó in thêm ít nhất:
+
+```text
+MaLHP | MaHP | SoTC | DiemQT | DiemCK | DiemTK | He4
+```
+
+Nếu muốn tốt hơn:
+
+```text
+MaLHP | MaHP | TenHP | SoTC | DiemQT | DiemCK | DiemTK | He4
+```
 
 ---
 
-## 8. Chạy lại toàn bộ build/test
+## 11. README mục 13 có TC21 “danh sách sinh viên và điểm”, nhưng bảng điểm lớp hiện chỉ in MSSV, chưa in họ tên
 
-### Mức độ
+### File liên quan
 
-**Bắt buộc.**
+- `README.md`
+- `source/ui.c`
 
-Sau khi sửa các lỗi trên, chạy từ thư mục `source/`:
+### Hiện trạng
 
-```bash
-make clean
-make all
-make unit_test
-make test
+README TC21 ghi:
+
+```text
+Hiển thị bảng điểm lớp học phần
+Kết quả mong đợi: Hiển thị danh sách sinh viên và điểm trong lớp học phần
 ```
 
-Nếu đã thêm target `full_test`, có thể chạy thêm:
+Trong `ui.c`, `showClassScoreTable()` hiện in:
 
-```bash
-make full_test
+```text
+MSSV | DiemQT | DiemCK | DiemTK | He4
 ```
 
-### Kết quả cần đạt
+### Vấn đề
 
-- `make clean`: không lỗi.
-- `make all`: build được `qlsv.exe`.
-- `make unit_test`: tất cả unit test pass.
-- `make test`: integration test pass.
-- Chạy chương trình chính được.
-- Menu chính vào được các nhóm chức năng.
-- Thử thao tác thêm/sửa/xóa/tìm ít nhất một bản ghi cho từng nhóm chức năng chính.
+Code có hiển thị mã sinh viên và điểm, nhưng nếu hiểu “danh sách sinh viên” là thông tin sinh viên đầy đủ hơn, bảng đang thiếu `HoTen`.
+
+### Ảnh hưởng
+
+Không làm chương trình sai nghiêm trọng, nhưng khi demo có thể bị hỏi vì sao bảng điểm lớp không có tên sinh viên.
+
+### Kết luận lỗi
+
+Nên sửa để TC21 thuyết phục hơn.
+
+### Sửa tối thiểu
+
+Đổi `showClassScoreTable()` để nhận thêm `StudentArray* students`, rồi khi in mỗi điểm thì tra `MSSV` sang họ tên.
+
+In dạng:
+
+```text
+MSSV | HoTen | DiemQT | DiemCK | DiemTK | He4
+```
+
+Nếu không muốn sửa code, cần sửa TC21 trong README thành:
+
+```text
+Hiển thị danh sách MSSV và điểm trong lớp học phần
+```
 
 ---
 
-## 9. Những điểm không bắt buộc sửa ngay
+## 12. README mục 13 và docs/test_note chưa tách rõ test tự động với test thủ công
 
-Các điểm dưới đây nên sửa nếu còn thời gian, nhưng không xếp vào nhóm bắt buộc nếu chương trình đã build/test/demo ổn:
+### File liên quan
 
-1. `ui.c` đang ôm quá nhiều trách nhiệm.
-2. `search.c` có thể chưa được tích hợp triệt để.
-3. File I/O dùng `atoi/atof`, nên parse số chưa thật chặt.
-4. Comment/README có thể hơi nhiều ký hiệu trình bày.
-5. Một số module nghiệp vụ có nhưng UI vẫn gọi trực tiếp array.
-6. Test chưa bao phủ hết `score.c`, `sort.c`, `student.c`, `subject.c`, `courseclass.c`.
+- `README.md`
+- `docs/test_note.md`
 
----
+### Hiện trạng
 
-## 10. Checklist bắt buộc cuối cùng
+README có mục 13 “Kế hoạch kiểm thử” gồm các TC01–TC28, phần lớn là test thủ công qua menu.
+
+`docs/test_note.md` lại ghi kết quả `68/68 PASS` cho các test tự động:
+
+- `test_types.c`
+- `test_arrays.c`
+- `test_fileio_unit.c`
+- `test_gpa.c`
+- `test_fileio.c`
+
+Nhưng chưa nói rõ:
+
+- TC01–TC28 trong README đã chạy thủ công chưa.
+- TC nào được test tự động.
+- TC nào cần demo bằng tay.
+- Kết quả manual test ra sao.
+
+### Ảnh hưởng
+
+Nhóm có thể bị nhầm rằng `68/68 PASS` nghĩa là toàn bộ mục 13 đã pass, trong khi thực tế `68/68` chỉ là các test code/unit/integration.
+
+### Kết luận lỗi
+
+Cần sửa tài liệu để không đánh đồng unit/integration test với manual test theo mục 13.
+
+### Sửa tối thiểu
+
+Trong `docs/test_note.md`, thêm phân tách:
 
 ```md
-- [ ] Sửa `test_gpa.c`: đổi `calculateStudentGPA()` thành `calculateStudentGPA4()` hoặc thêm wrapper tương thích.
-- [ ] Sửa `test_fileio.c`: đổi `return 0;` thành `return fail > 0 ? 1 : 0;`.
-- [ ] Thêm `deleteScoreRecord()` vào `score.h` và `score.c`.
-- [ ] Thêm `deleteScoreUI()` vào `ui.c`.
-- [ ] Thêm lựa chọn “Xoa diem” vào menu quản lý điểm.
-- [ ] Sửa `README.md`: URL clone thật, hướng dẫn chạy đúng `qlsv.exe`, công thức điểm, kết quả test thật.
-- [ ] Sửa `docs/test_note.md`: phân biệt unit test/integration test, cập nhật test mới, sửa lỗi format đường dẫn.
-- [ ] Xóa hoặc di chuyển/đổi tên file `sửa_code_13.6.md`.
-- [ ] Chạy lại `make clean`.
-- [ ] Chạy lại `make all`.
-- [ ] Chạy lại `make unit_test`.
-- [ ] Chạy lại `make test`.
-- [ ] Chạy thử chương trình chính và demo các chức năng chính.
-- [ ] Chỉ commit/push bản cuối sau khi toàn bộ bước trên ổn.
-```
+## A. Automated test bằng Makefile
 
----
+- test_types.c
+- test_arrays.c
+- test_fileio_unit.c
+- test_gpa.c
+- test_fileio.c
 
-## 11. Thứ tự sửa đề xuất
-
-Nên sửa theo thứ tự sau để tránh rối:
-
-### Bước 1 — Sửa test/build
-
-1. Sửa `test_gpa.c`.
-2. Sửa `test_fileio.c`.
-3. Chạy:
-
-```bash
-make clean
-make unit_test
-make test
-```
-
-### Bước 2 — Sửa chức năng thiếu
-
-4. Thêm xóa điểm trong `score.h/.c`.
-5. Thêm xóa điểm trong `ui.c`.
-6. Chạy:
-
-```bash
-make all
-```
-
-và test thủ công chức năng xóa điểm.
-
-### Bước 3 — Sửa tài liệu
-
-7. Cập nhật `README.md`.
-8. Cập nhật `docs/test_note.md`.
-9. Xóa hoặc dọn `sửa_code_13.6.md`.
-
-### Bước 4 — Kiểm tra lần cuối
-
-10. Chạy:
-
-```bash
+Lệnh chạy:
 make clean
 make all
 make unit_test
 make test
-```
 
-11. Chạy chương trình chính và demo thử.
+## B. Manual test theo README mục 13
+
+- TC01–TC06: quản lý sinh viên/môn/lớp.
+- TC07–TC13: nhập, cập nhật, kiểm tra điểm.
+- TC14–TC15: GPA hệ 10, xếp loại.
+- TC16–TC19: tìm kiếm, sắp xếp.
+- TC20–TC21: bảng điểm.
+- TC22–TC24: chặn xóa dữ liệu đang được tham chiếu.
+- TC25–TC28: File I/O, save-load, quy đổi hệ 4.
+
+Kết quả manual test: chỉ ghi PASS sau khi đã thao tác thật trên chương trình.
+```
 
 ---
 
-## 12. Kết luận cuối
+## 13. Không xếp “xóa điểm” vào lỗi bắt buộc theo README hiện tại
 
-Sau khi sửa các mục bắt buộc trên, dự án sẽ đạt trạng thái an toàn hơn nhiều để nộp và bảo vệ.
+### File liên quan
 
-Ưu tiên cao nhất là:
+- `README.md`
+- `source/ui.c`
+- `source/score.c/h`
 
-1. Sửa lỗi `test_gpa.c`.
-2. Sửa `test_fileio.c`.
-3. Bổ sung xóa điểm.
-4. Cập nhật tài liệu theo kết quả thật.
-5. Dọn file nháp khỏi repo.
+### Hiện trạng
 
-Không nên nộp khi README ghi test pass nhưng target test thực tế vẫn có khả năng fail.
+Menu điểm hiện có:
+
+```text
+1. Hien thi danh sach diem
+2. Nhap diem
+3. Cap nhat diem
+4. Tim diem
+0. Quay lai
+```
+
+Không có xóa điểm.
+
+### Đánh giá
+
+Nếu xét CRUD đầy đủ thì thiếu xóa điểm. Tuy nhiên, theo README hiện tại:
+
+- Quản lý điểm số được mô tả là nhập và cập nhật điểm.
+- Mục 13 không có test case xóa điểm.
+- TC07–TC12 chỉ yêu cầu nhập/cập nhật/tính lại điểm.
+
+### Kết luận
+
+Không coi “xóa điểm” là lỗi bắt buộc trong phạm vi sửa hiện tại.
+
+Chỉ cần thêm nếu:
+
+- Đề bài chính thức yêu cầu quản lý điểm có đủ thêm/sửa/xóa.
+- README được sửa thành có “xóa điểm”.
+- Nhóm muốn demo CRUD điểm đầy đủ hơn.
+
+---
+
+## 14. Checklist lỗi cần sửa theo đúng ưu tiên
+
+```md
+- [ ] Sửa `source/test_gpa.c`: đổi `calculateStudentGPA()` thành `calculateStudentGPA4()`.
+- [ ] Sửa comment trong `test_gpa.c` cho khớp API thật.
+- [ ] Sửa `source/test_fileio.c`: đổi `return 0;` thành `return fail > 0 ? 1 : 0;`.
+- [ ] Chạy lại `make unit_test`; nếu còn lỗi thì chưa được cập nhật README/test_note.
+- [ ] Chạy lại `make test`; kiểm tra integration test trả exit code đúng.
+- [ ] Sửa README phần clone: `https://github.com/PKT-zZ/QLSV_MI3310.git`.
+- [ ] Sửa README phần build/chạy: thống nhất dùng `qlsv.exe` nếu Makefile tạo `qlsv.exe`.
+- [ ] Sửa README/test_note: bỏ hoặc tạm treo kết luận `68/68 PASS` cho đến khi chạy lại thật.
+- [ ] Sửa `docs/test_note.md`: đổi mô tả `calculateStudentGPA` thành `calculateStudentGPA4`.
+- [ ] Sửa `docs/test_note.md`: tách rõ automated test và manual test theo README mục 13.
+- [ ] Sửa README nếu còn nhắc `report/`, `screenshots/`, `docs/test-plan.md` nhưng repo chưa có các file/thư mục này.
+- [ ] Sửa README phần prototype UI/validation để khớp code hiện tại, hoặc bỏ danh sách prototype cụ thể.
+- [ ] Kiểm tra/sửa Makefile để chạy `.exe` ổn trên Git Bash/MSYS2 nếu nhóm dùng môi trường này.
+- [ ] Cải thiện bảng điểm sinh viên: nên in thêm `MaHP`/tên môn/số tín chỉ để khớp TC20.
+- [ ] Cải thiện bảng điểm lớp học phần: nên in thêm họ tên sinh viên để khớp TC21.
+```
+
+---
+
+## 15. Lệnh kiểm tra cuối sau khi sửa
+
+Chạy từ thư mục `source/`:
+
+```bash
+make clean
+make all
+make unit_test
+make test
+```
+
+Sau đó chạy chương trình chính từ thư mục gốc:
+
+```bash
+./qlsv.exe
+```
+
+Trên PowerShell:
+
+```powershell
+.\qlsv.exe
+```
+
+Nếu dùng Git Bash/MSYS2 và Makefile vẫn lỗi khi gọi `.exe`, sửa lại biến `DOTSLASH` như đã nêu ở mục 6.
+
+---
+
+## 16. Chốt lỗi bắt buộc nhất
+
+Nếu chỉ còn ít thời gian, sửa theo thứ tự này:
+
+1. `test_gpa.c` gọi sai hàm.
+2. `test_fileio.c` trả exit code sai.
+3. README clone/build/chạy sai.
+4. README/test_note ghi pass sai.
+5. test_note mô tả sai tên hàm GPA.
+6. Makefile chạy `.exe` chưa ổn trên Git Bash/MSYS2 nếu đó là môi trường nhóm dùng.
+
+Các lỗi bảng điểm TC20/TC21 nên sửa tiếp theo để demo mục 13 thuyết phục hơn.
