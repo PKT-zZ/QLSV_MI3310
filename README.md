@@ -1,4 +1,4 @@
-# Quản lý sinh viên và điểm số | Student Management System
+<img width="1085" height="555" alt="image" src="https://github.com/user-attachments/assets/18e5d2c6-c04d-46a5-bf61-e03d9837be94" /># Quản lý sinh viên và điểm số | Student Management System
 
 ## 1. Giới thiệu dự án
 
@@ -786,7 +786,7 @@ Bảng điểm của một lớp học phần
 
 | Thành viên | Nhóm sản phẩm chính | File/Thư mục cần có | Mức độ ưu tiên |
 |---|---|---|---|
-| Thành viên 1 | Core Data, Typed Arrays, File I/O, dữ liệu mẫu | `types.h`, `arrays.h/.c`, `fileio.h/.c`, `data/*.txt` | Cao |
+| Thành viên 1 | Core Data, Typed Arrays, File I/O, dữ liệu mẫu, kiểm thử nền tảng | `types.h`, `arrays.h/.c`, `fileio.h/.c`, `data/*.txt`, `source/test_types.c`, `source/test_arrays.c`, `source/test_fileio_unit.c`, `source/test_gpa.c`, `source/test_fileio.c`, `docs/test_note.md` | Cao |
 | Thành viên 2 | CRUD, xử lý điểm, GPA, tìm kiếm tuyến tính, sắp xếp | `student.h/.c`, `subject.h/.c`, `courseclass.h/.c`, `score.h/.c`, `gpa.h/.c`, `sort.h/.c`, `search.h/.c` | Cao |
 | Thành viên 3 | Console UI, validation, report, test, documentation | `main.c`, `ui.h/.c`, `screenshots/`, `report/`, `README.md` | Cao |
 
@@ -844,9 +844,57 @@ Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tín
 
 ---
 
-## 14. Hướng dẫn build và chạy chương trình
+## 14. Kết quả kiểm thử module nền tảng (TV1)
 
-### 14.1. Yêu cầu môi trường
+TV1 đã hoàn thành bộ kiểm thử tự động gồm 5 file, bao phủ toàn bộ phạm vi code do TV1 phụ trách (`types.h`, `arrays.c`, `fileio.c`, `gpa.c`). Chi tiết từng test case xem tại [`docs/test_note.md`](docs/test_note.md).
+
+**Tổng kết: 68/68 PASS — không có lỗi.**
+
+| File test | Loại | Module kiểm tra | Số case | Kết quả |
+|---|---|---|---|---|
+| `source/test_types.c` | Unit | Struct layout trong `types.h` | 7 | ✅ 7/7 |
+| `source/test_arrays.c` | Unit | Mảng động — init, add, resize, find, remove, clear, edge case | 11 | ✅ 11/11 |
+| `source/test_fileio_unit.c` | Unit | Đọc/ghi file bằng file tạm, không đụng `data/` | 6 | ✅ 6/6 |
+| `source/test_gpa.c` | Unit | Công thức GPA có trọng số tín chỉ, sinh viên không có điểm | 3 | ✅ 3/3 |
+| `source/test_fileio.c` | Tích hợp | Toàn bộ pipeline `loadAllData` → `saveAllData` với `data/` thật | 41 | ✅ 41/41 |
+
+> Khi chạy test sẽ có một vài dòng `[CANH BAO]` xuất hiện — đây là kết quả của các test case cố tình đưa vào dữ liệu sai định dạng để kiểm tra chương trình xử lý được không, không phải lỗi thật.
+
+### Chạy test
+
+Trỏ terminal vào thư mục `source/` trước, sau đó:
+
+```bash
+make unit_test   # Chạy 4 unit test, không đụng đến data/
+make test        # Chạy integration test với dữ liệu thật trong data/
+```
+
+Chạy từng bộ riêng lẻ nếu cần:
+
+```bash
+make test_types
+make test_arrays
+make test_fileio_unit
+make test_gpa
+```
+
+> **Windows với MSYS2:** thay `make` bằng `mingw32-make` nếu lệnh `make` không nhận.
+
+Nếu không dùng Makefile, chạy thủ công từ thư mục `source/` (Linux/macOS):
+
+```bash
+gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types && cd .. && ./test_types && cd source
+gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays && cd .. && ./test_arrays && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit && cd .. && ./test_fileio_unit && cd source
+gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa && cd .. && ./test_gpa && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio && cd .. && ./test_fileio && cd source
+```
+
+---
+
+## 15. Hướng dẫn build và chạy chương trình
+
+### 15.1. Yêu cầu môi trường
 
 Cần cài đặt:
 
@@ -854,14 +902,14 @@ Cần cài đặt:
 - Make, nếu sử dụng Makefile.
 - Git, nếu muốn clone repo từ GitHub.
 
-### 14.2. Clone repository
+### 15.2. Clone repository
 
 ```bash
 git clone https://github.com/<ten-nhom>/<ten-repo>.git
 cd <ten-repo>
 ```
 
-### 14.3. Build chương trình
+### 15.3. Build chương trình
 
 Nếu dùng Makefile:
 
@@ -879,7 +927,7 @@ gcc main.c arrays.c fileio.c student.c subject.c courseclass.c \
 
 > **Lưu ý:** Lệnh trên được chạy từ bên trong thư mục `source/`, do đó `-o ../qlsv` sẽ đặt file thực thi ra **thư mục gốc** của project — nhất quán với lệnh chạy `./qlsv` ở Mục 14.4.
 
-### 14.4. Chạy chương trình
+### 15.4. Chạy chương trình
 
 Trên Linux/macOS:
 
@@ -894,30 +942,6 @@ qlsv.exe
 ```
 
 > **Lưu ý:** Chạy chương trình từ thư mục gốc của project để các đường dẫn `data/*.txt` hoạt động đúng.
-
----
-
-## 15. Quy trình làm việc Git/GitHub của nhóm
-
-Nhóm thống nhất không làm trực tiếp trên branch `main`. Quy trình gồm 3 bước:
-
-**1. Tạo branch và code:**
-
-```bash
-git checkout main && git pull origin main
-git checkout -b feature/ten-tinh-nang
-# ... code, test ...
-```
-
-**2. Commit và push:**
-
-```bash
-git add .
-git commit -m "Mô tả ngắn nội dung thay đổi"
-git push origin feature/ten-tinh-nang
-```
-
-**3. Tạo Pull Request trên GitHub vào `main`, thành viên khác review rồi mới merge.**
 
 ---
 
