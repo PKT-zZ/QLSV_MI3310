@@ -458,7 +458,6 @@ QLSV_MI3310/
 ## 9. Sản phẩm cần đạt của từng thành viên
 
 Phần này mô tả chi tiết các sản phẩm mà từng thành viên cần hoàn thành trong quá trình triển khai dự án.  
-Mỗi sản phẩm cần được commit lên GitHub thông qua branch riêng và Pull Request trước khi merge vào `main`.
 
 ---
 
@@ -693,8 +692,6 @@ Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ c�
 [ ] Không làm hỏng chức năng của thành viên khác.
 [ ] Với chức năng quan trọng, có ảnh hoặc test case minh chứng.
 ```
-
-Mỗi thành viên đặt tên branch theo nhóm việc mình phụ trách, ví dụ: `feature/student-crud`, `feature/gpa-calculation`, `feature/console-ui`, `docs/final-report`. Sau khi hoàn thành, tạo Pull Request vào `main` để thành viên khác review trước khi merge.
 
 ---
 
