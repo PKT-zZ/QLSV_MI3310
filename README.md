@@ -451,118 +451,18 @@ QLSV_MI3310/
 └── .gitignore
 ```
 
-> `screenshots/` dùng để lưu ảnh minh chứng kiểm thử. Nhóm chọn khoảng **10–15 test case tiêu biểu** trong Mục 13 để chụp ảnh, không bắt buộc phải chụp đủ toàn bộ TC01–TC28.
+> `screenshots/` dùng để lưu ảnh minh chứng kiểm thử. Nhóm chọn khoảng **10–15 test case tiêu biểu** trong Mục 12 để chụp ảnh, không bắt buộc phải chụp đủ toàn bộ TC01–TC28.
 >
 > Nếu Git không nhận thư mục `screenshots/` khi chưa có ảnh, có thể tạo tạm file `screenshots/.gitkeep`, sau đó thay bằng ảnh kiểm thử khi hoàn thiện.
 
-## 9. Lộ trình triển khai 5 tuần
-
-### Tuần 1: Chốt thiết kế và xây dựng cấu trúc lõi
-
-Mục tiêu:
-
-- Chốt yêu cầu kỹ thuật.
-- Tạo cấu trúc thư mục.
-- Viết `types.h`.
-- Bắt đầu cài đặt mảng dữ liệu (Typed Array hoặc mảng tĩnh).
-- Phác thảo menu console.
-
-Sản phẩm cuối tuần:
-
-- `types.h`
-- `arrays.h` (hoặc khai báo mảng tĩnh)
-- Cấu trúc thư mục ban đầu
-- Tài liệu thiết kế nội bộ
-
----
-
-### Tuần 2: Hoàn thiện cấu trúc dữ liệu, File I/O và CRUD danh mục
-
-Mục tiêu:
-
-- Hoàn thiện `arrays.c` (hoặc mảng tĩnh).
-- Viết module đọc/ghi file.
-- Cài CRUD cho sinh viên, môn học và lớp học phần.
-- Có menu cơ bản chạy được.
-
-Sản phẩm cuối tuần:
-
-- `arrays.c`
-- `fileio.c`
-- `student.c`
-- `subject.c`
-- `courseclass.c`
-- Menu cơ bản
-
----
-
-### Tuần 3: Nhập điểm, tính GPA, tìm kiếm và sắp xếp
-
-Mục tiêu:
-
-- Cài module điểm số.
-- Cài công thức tính điểm tổng kết.
-- Cài GPA hệ 10, GPA hệ 4 và xếp loại.
-- Cài Linear Search và một thuật toán sắp xếp (Bubble Sort hoặc Selection Sort).
-- Tích hợp validation.
-
-Sản phẩm cuối tuần:
-
-- `score.c`
-- `gpa.c`
-- `sort.c`
-- `search.c`
-- Menu nhập điểm hoạt động (validation tích hợp trong `ui.c`)
-
----
-
-### Tuần 4: Hoàn thiện giao diện, báo cáo bảng điểm và kiểm thử tích hợp
-
-Mục tiêu:
-
-- Hoàn thiện toàn bộ menu.
-- Cài chức năng in bảng điểm.
-- Kiểm thử end-to-end.
-- Chụp ảnh minh chứng các test case chính.
-
-Sản phẩm cuối tuần:
-
-- Chương trình chạy hoàn chỉnh
-- Chức năng in bảng điểm (tích hợp trong `ui.c`)
-- Ít nhất 80% test case pass
-- Ảnh kiểm thử trong thư mục `screenshots/`
-
----
-
-### Tuần 5: Tinh chỉnh, kiểm thử cuối và đóng gói nộp bài
-
-Mục tiêu:
-
-- Review toàn bộ code.
-- Xóa code thừa.
-- Bổ sung comment.
-- Hoàn thiện báo cáo Word.
-- Đóng gói sản phẩm cuối.
-
-Sản phẩm cuối tuần:
-
-- Mã nguồn sạch
-- Báo cáo hoàn chỉnh
-- File dữ liệu mẫu
-- Ảnh kiểm thử
-- README hoàn thiện
-- File ZIP nộp bài
-
----
-
-## 10. Sản phẩm cần đạt của từng thành viên
+## 9. Sản phẩm cần đạt của từng thành viên
 
 Phần này mô tả chi tiết các sản phẩm mà từng thành viên cần hoàn thành trong quá trình triển khai dự án.  
 Mỗi sản phẩm cần được commit lên GitHub thông qua branch riêng và Pull Request trước khi merge vào `main`.
 
 ---
 
-### 10.1. Thành viên 1 — Core Data & File I/O
+### 9.1. Thành viên 1 — Core Data & File I/O
 
 #### Vai trò chính
 
@@ -576,16 +476,16 @@ Thành viên 1 phụ trách phần nền tảng dữ liệu của chương trìn
 
 #### Sản phẩm cần hoàn thành
 
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | Định nghĩa kiểu dữ liệu chính | `source/types.h` | Khai báo các struct `Student`, `Subject`, `CourseClass`, `ScoreRecord` | Tuần 1 |
-| 2 | Header cho mảng dữ liệu | `source/arrays.h` | Khai báo struct và prototype các hàm thao tác mảng | Tuần 1 |
-| 3 | Cài đặt mảng dữ liệu | `source/arrays.c` | Cài các hàm `sa_init`, `sa_add`, `sa_get`, `sa_remove`, `sa_update`, `sa_resize`, `sa_find`, `sa_clear` (và tương tự cho các kiểu khác) | Tuần 1–2 |
-| 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số | Tuần 2 |
-| 5 | Hàm tách dòng dữ liệu | `fileio.c` | Dùng `strtok()` để tách dòng theo ký tự `\|`; đảm bảo các trường bắt buộc không để trống, kiểm tra đủ số trường và xử lý dòng sai định dạng | Tuần 2 |
-| 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính | Tuần 2 |
-| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test_note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình | Tuần 4 |
-| 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết | Tuần 5 |
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu |
+|---|---|---|---|
+| 1 | Định nghĩa kiểu dữ liệu chính | `source/types.h` | Khai báo các struct `Student`, `Subject`, `CourseClass`, `ScoreRecord` |
+| 2 | Header cho mảng dữ liệu | `source/arrays.h` | Khai báo struct và prototype các hàm thao tác mảng |
+| 3 | Cài đặt mảng dữ liệu | `source/arrays.c` | Cài các hàm `sa_init`, `sa_add`, `sa_get`, `sa_remove`, `sa_update`, `sa_resize`, `sa_find`, `sa_clear` (và tương tự cho các kiểu khác) |
+| 4 | Module đọc/ghi file | `source/fileio.h`, `source/fileio.c` | Cài các hàm load/save dữ liệu cho sinh viên, môn học, lớp học phần và điểm số |
+| 5 | Hàm tách dòng dữ liệu | `fileio.c` | Dùng `strtok()` để tách dòng theo ký tự `\|`; đảm bảo các trường bắt buộc không để trống, kiểm tra đủ số trường và xử lý dòng sai định dạng |
+| 6 | Dữ liệu mẫu | `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt` | Chuẩn bị dữ liệu mẫu đủ lớn để test các chức năng chính |
+| 7 | Kiểm thử File I/O | Có thể ghi trong `docs/test_note.md` hoặc ảnh trong `screenshots/` | Kiểm tra đọc file rỗng, file sai định dạng, lưu dữ liệu và mở lại chương trình |
+| 8 | Review code nền tảng | Toàn bộ file do TV1 phụ trách | Xóa code thừa, kiểm tra cấp phát/giải phóng bộ nhớ, bổ sung comment cần thiết |
 
 #### Các hàm tối thiểu cần có
 
@@ -633,7 +533,7 @@ void saveScores(ScoreArray* scores, const char* path);
 
 ---
 
-### 10.2. Thành viên 2 — Business Logic & Algorithms
+### 9.2. Thành viên 2 — Business Logic & Algorithms
 
 #### Vai trò chính
 
@@ -648,19 +548,19 @@ Thành viên 2 phụ trách phần xử lý nghiệp vụ và thuật toán củ
 
 #### Sản phẩm cần hoàn thành
 
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | CRUD sinh viên | `source/student.h`, `source/student.c` | Thêm, sửa, xóa, tìm sinh viên theo MSSV, họ tên, lớp | Tuần 2–3 |
-| 2 | CRUD môn học | `source/subject.h`, `source/subject.c` | Thêm, sửa, xóa, tìm môn học theo mã học phần hoặc tên môn | Tuần 2–3 |
-| 3 | Quản lý lớp học phần | `source/courseclass.h`, `source/courseclass.c` | Tạo/xóa lớp học phần, quản lý danh sách lớp học phần | Tuần 2–3 |
-| 4 | Quản lý điểm số | `source/score.h`, `source/score.c` | Nhập điểm quá trình, điểm cuối kỳ, cập nhật điểm, tìm điểm theo MSSV hoặc mã lớp học phần | Tuần 3 |
-| 5 | Tính điểm và GPA | `source/gpa.h`, `source/gpa.c` | Tính `diemTK`, GPA hệ 10, xếp loại học lực; GPA hệ 4 nếu còn thời gian | Tuần 3 |
-| 6 | Tìm kiếm tuyến tính *(bắt buộc)* | `source/search.h`, `source/search.c` | Cài `linearSearch` dùng cho tìm kiếm dữ liệu chưa sắp xếp | Tuần 3 |
-| 7 | Thuật toán sắp xếp *(bắt buộc)* | `source/sort.h`, `source/sort.c` | Cài `bubbleSort` hoặc `selectionSort` để sắp xếp theo MSSV, họ tên, điểm trung bình | Tuần 3 |
-| 8 | Tìm kiếm nhị phân *(mở rộng)* | `source/search.c` | Cài `binarySearch` nếu còn thời gian; chỉ dùng sau khi mảng đã sắp xếp | Tuần 4 |
-| 9 | Quick Sort *(mở rộng)* | `source/sort.c` | Cài `quickSort` nếu còn thời gian, dùng minh họa trong báo cáo | Tuần 4 |
-| 10 | Hỗ trợ báo cáo kỹ thuật | `report/` hoặc `docs/` | Viết phần giải thích thuật toán, độ phức tạp và công thức tính điểm | Tuần 5 |
-| 11 | Sửa lỗi logic cuối kỳ | Các file nghiệp vụ | Sửa lỗi còn sót sau kiểm thử tích hợp | Tuần 4–5 |
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu |
+|---|---|---|---|
+| 1 | CRUD sinh viên | `source/student.h`, `source/student.c` | Thêm, sửa, xóa, tìm sinh viên theo MSSV, họ tên, lớp |
+| 2 | CRUD môn học | `source/subject.h`, `source/subject.c` | Thêm, sửa, xóa, tìm môn học theo mã học phần hoặc tên môn |
+| 3 | Quản lý lớp học phần | `source/courseclass.h`, `source/courseclass.c` | Tạo/xóa lớp học phần, quản lý danh sách lớp học phần |
+| 4 | Quản lý điểm số | `source/score.h`, `source/score.c` | Nhập điểm quá trình, điểm cuối kỳ, cập nhật điểm, tìm điểm theo MSSV hoặc mã lớp học phần |
+| 5 | Tính điểm và GPA | `source/gpa.h`, `source/gpa.c` | Tính `diemTK`, GPA hệ 10, xếp loại học lực; GPA hệ 4 nếu còn thời gian |
+| 6 | Tìm kiếm tuyến tính *(bắt buộc)* | `source/search.h`, `source/search.c` | Cài `linearSearch` dùng cho tìm kiếm dữ liệu chưa sắp xếp |
+| 7 | Thuật toán sắp xếp *(bắt buộc)* | `source/sort.h`, `source/sort.c` | Cài `bubbleSort` hoặc `selectionSort` để sắp xếp theo MSSV, họ tên, điểm trung bình |
+| 8 | Tìm kiếm nhị phân *(mở rộng)* | `source/search.c` | Cài `binarySearch` nếu còn thời gian; chỉ dùng sau khi mảng đã sắp xếp |
+| 9 | Quick Sort *(mở rộng)* | `source/sort.c` | Cài `quickSort` nếu còn thời gian, dùng minh họa trong báo cáo |
+| 10 | Hỗ trợ báo cáo kỹ thuật | `report/` hoặc `docs/` | Viết phần giải thích thuật toán, độ phức tạp và công thức tính điểm |
+| 11 | Sửa lỗi logic cuối kỳ | Các file nghiệp vụ | Sửa lỗi còn sót sau kiểm thử tích hợp |
 
 #### Các module/hàm nghiệp vụ chính hiện có
 
@@ -706,7 +606,7 @@ GPA4 = Σ(DiemHe4 × SoTinChi) / Σ(SoTinChi)
 
 ---
 
-### 10.3. Thành viên 3 — Console UI & Documentation
+### 9.3. Thành viên 3 — Console UI & Documentation
 
 #### Vai trò chính
 
@@ -723,19 +623,19 @@ Các nhiệm vụ chính:
 
 #### Sản phẩm cần hoàn thành
 
-| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu | Thời hạn dự kiến |
-|---|---|---|---|---|
-| 1 | Menu chính | `source/ui.h`, `source/ui.c`, `source/main.c` | Xây dựng menu console vòng lặp cho đến khi người dùng chọn thoát | Tuần 2 |
-| 2 | Submenu quản lý sinh viên | `source/ui.c` | Giao diện gọi các chức năng thêm, sửa, xóa, tìm kiếm sinh viên | Tuần 2–3 |
-| 3 | Submenu quản lý môn học | `source/ui.c` | Giao diện gọi các chức năng quản lý môn học | Tuần 2–3 |
-| 4 | Submenu quản lý lớp học phần | `source/ui.c` | Giao diện gọi các chức năng quản lý lớp học phần | Tuần 3 |
-| 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm | Tuần 3 |
-| 6 | Validation và in báo cáo | `source/ui.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực; in bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng (gộp trong `ui.c`) | Tuần 3–4 |
-| 7 | Bảng test case | `docs/test_note.md` hoặc `README.md` | Viết danh sách test case từ TC01 đến TC28 | Tuần 4 |
-| 8 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho khoảng 10–15 test case tiêu biểu trong Mục 13 | Tuần 4–5 |
-| 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.docx` nếu nộp kèm | Viết báo cáo cuối kỳ theo đúng thể thức nếu giảng viên yêu cầu | Tuần 5 |
-| 10 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ | Tuần 5 |
-| 11 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README | Tuần 5 |
+| STT | Sản phẩm | File/Thư mục liên quan | Mô tả yêu cầu |
+|---|---|---|---|
+| 1 | Menu chính | `source/ui.h`, `source/ui.c`, `source/main.c` | Xây dựng menu console vòng lặp cho đến khi người dùng chọn thoát |
+| 2 | Submenu quản lý sinh viên | `source/ui.c` | Giao diện gọi các chức năng thêm, sửa, xóa, tìm kiếm sinh viên |
+| 3 | Submenu quản lý môn học | `source/ui.c` | Giao diện gọi các chức năng quản lý môn học |
+| 4 | Submenu quản lý lớp học phần | `source/ui.c` | Giao diện gọi các chức năng quản lý lớp học phần |
+| 5 | Submenu quản lý điểm | `source/ui.c` | Giao diện nhập điểm, cập nhật điểm, xem điểm |
+| 6 | Validation và in báo cáo | `source/ui.c` | Kiểm tra MSSV, điểm, ngày sinh, số nguyên, số thực; in bảng điểm sinh viên, bảng điểm lớp học phần, danh sách xếp hạng (gộp trong `ui.c`) |
+| 7 | Bảng test case | `docs/test_note.md` hoặc `README.md` | Viết danh sách test case từ TC01 đến TC28 |
+| 8 | Ảnh kiểm thử | `screenshots/` | Chụp ảnh kết quả chạy chương trình cho khoảng 10–15 test case tiêu biểu trong Mục 12 |
+| 9 | Báo cáo Word | `report/BaoCao_QLSV_NhomXX.pdf` | Viết báo cáo cuối kỳ|
+| 10 | README cuối cùng | `README.md` | Cập nhật mô tả dự án, hướng dẫn build/chạy, phân công và tiến độ |
+| 11 | Đóng gói nộp bài | File `.zip` cuối cùng | Kiểm tra đủ source, data, screenshots, report, README |
 
 #### Các chức năng giao diện và validation cần có
 
@@ -773,7 +673,7 @@ Bảng điểm của một lớp học phần
 
 ---
 
-## 11. Bảng tổng hợp sản phẩm bàn giao theo thành viên
+## 10. Bảng tổng hợp sản phẩm bàn giao theo thành viên
 
 | Thành viên | Nhóm sản phẩm chính | File/Thư mục cần có | Mức độ ưu tiên |
 |---|---|---|---|
@@ -783,7 +683,7 @@ Bảng điểm của một lớp học phần
 
 ---
 
-## 12. Quy trình làm việc và nghiệm thu
+## 11. Quy trình làm việc và nghiệm thu
 
 Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ các điều kiện sau:
 
@@ -798,7 +698,7 @@ Mỗi thành viên đặt tên branch theo nhóm việc mình phụ trách, ví 
 
 ---
 
-## 13. Kế hoạch kiểm thử
+## 12. Kế hoạch kiểm thử
 
 Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tính năng mà bài yêu cầu):
 
@@ -833,7 +733,7 @@ Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tín
 | TC27 | Lưu dữ liệu và mở lại chương trình | Thêm/sửa dữ liệu, thoát chương trình, chạy lại | Dữ liệu vẫn còn sau khi khởi động lại |
 | TC28 | Quy đổi GPA hệ 4 | Điểm tổng kết thuộc các mốc quy đổi hệ 4 | Điểm hệ 4 được quy đổi đúng |
 
-### 13.1. Ảnh minh chứng kiểm thử
+### 12.1. Ảnh minh chứng kiểm thử
 
 Nhóm không cần chụp ảnh toàn bộ 28 test case. Khi nộp bài, chỉ cần chọn khoảng **10–15 test case tiêu biểu** để minh chứng chương trình đã chạy được các chức năng chính.
 
@@ -867,7 +767,7 @@ screenshots/
 
 ---
 
-## 14. Kết quả kiểm thử module nền tảng (TV1)
+## 13. Kết quả kiểm thử module nền tảng (TV1)
 
 TV1 đã hoàn thành bộ kiểm thử tự động gồm 5 file, bao phủ toàn bộ phạm vi code do TV1 phụ trách (`types.h`, `arrays.c`, `fileio.c`, `gpa.c`). Chi tiết từng test case xem tại [`docs/test_note.md`](docs/test_note.md).
 
@@ -915,9 +815,9 @@ gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fi
 
 ---
 
-## 15. Hướng dẫn build và chạy chương trình
+## 14. Hướng dẫn build và chạy chương trình
 
-### 15.1. Yêu cầu môi trường
+### 14.1. Yêu cầu môi trường
 
 Cần cài đặt:
 
@@ -925,14 +825,14 @@ Cần cài đặt:
 - Make, nếu sử dụng Makefile.
 - Git, nếu muốn clone repo từ GitHub.
 
-### 15.2. Clone repository
+### 14.2. Clone repository
 
 ```bash
 git clone https://github.com/PKT-zZ/QLSV_MI3310.git
 cd QLSV_MI3310
 ```
 
-### 15.3. Build chương trình
+### 14.3. Build chương trình
 
 Dự án sử dụng `Makefile` đặt trong thư mục `source/`. Để biên dịch chương trình chính, chạy các lệnh sau từ thư mục gốc của dự án:
 
@@ -946,7 +846,7 @@ Sau khi build thành công, file thực thi `qlsv.exe` sẽ được tạo ở t
 
 Chi tiết về môi trường build, các target trong Makefile và kết quả kiểm thử được trình bày trong file [`docs/test_note.md`](docs/test_note.md).
 
-### 15.4. Chạy chương trình
+### 14.4. Chạy chương trình
 
 Sau khi build thành công, quay lại thư mục gốc của dự án và chạy chương trình:
 
@@ -965,8 +865,8 @@ Chương trình sẽ hiển thị menu chính để thực hiện các chức n�
 
 Các bước chạy kiểm thử tự động bằng Makefile như `make unit_test`, `make test` và kết quả kiểm thử chi tiết được ghi trong file [`docs/test_note.md`](docs/test_note.md).
 
-## 16. Tài liệu liên quan
+## 15. Tài liệu liên quan
 
 - Ghi chú kiểm thử: [`docs/test_note.md`](docs/test_note.md)
 - Dữ liệu mẫu: `data/`
-- Ảnh kiểm thử: `screenshots/` — lưu khoảng 10–15 ảnh minh chứng cho các test case tiêu biểu
+- Ảnh kiểm thử: `screenshots/` — lưu 15 ảnh minh chứng cho các test case tiêu biểu
