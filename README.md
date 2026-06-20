@@ -226,36 +226,36 @@ Nhóm chọn dấu `|` thay vì dấu phẩy `,` để hạn chế lỗi khi d�
 
 ```txt
 MSSV|HoTen|Lop|Birthday
-22000001|Nguyen Van An|K67-MT|15/08/2003
-22000002|Tran Thi Bich|K67-MT|20/03/2003
-22000003|Le Hoang Cuong|K67-MT|05/11/2002
+202400000|Nguyen Van Toan|K69-MI1-01|15/08/2006
+202400001|Tran Quan Anh|K69-MI1-02|20/03/2006
+202400002|Le Hoang Thai|K69-MI1-03|05/11/2005
 ```
 
 #### `subjects.txt`
 
 ```txt
 MaHP|TenHP|SoTinChi
-KTLT|Ky Thuat Lap Trinh|3
-CTDL|Cau Truc Du Lieu|3
-CSDL|Co So Du Lieu|3
+MI3310|Ky Thuat Lap Trinh|2
+MI3060|Cau Truc Du Lieu & Thuat Toan|3
+MI3090|Co So Du Lieu|3
 ```
 
 #### `course_classes.txt`
 
 ```txt
 MaLHP|MaHP|HocKy|NamHoc
-KTLT_K67_1|KTLT|1|2024
-CTDL_K67_2|CTDL|2|2024
-CSDL_K67_2|CSDL|2|2024
+169313|MI3310|1|2025
+169307|MI3060|2|2025
+169320|MI3090|3|2025
 ```
 
 #### `scores.txt`
 
 ```txt
 MSSV|MaLHP|DiemQT|DiemCK|DiemTK|DiemHe4
-22000001|KTLT_K67_1|8.5|7.0|7.75|3.0
-22000002|KTLT_K67_1|9.0|8.5|8.75|4.0
-22000003|CTDL_K67_2|7.0|7.5|7.25|3.0
+202400000|169313|8.50|7.00|7.75|3.00
+202400000|169307|8.00|9.00|8.50|4.00
+202400000|169320|6.50|7.00|6.75|2.50
 ```
 
 ---
@@ -697,38 +697,25 @@ Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ c�
 
 ## 12. Kế hoạch kiểm thử
 
-Một số test case tham khảo (khi làm chọn tầm 10-15 tc đủ các tính năng mà bài yêu cầu):
+Bảng dưới đây liệt kê 15 test case tiêu biểu được chọn để minh chứng trong báo cáo. Các test case này tập trung vào các chức năng chính của chương trình như thêm dữ liệu, kiểm tra trùng khóa, kiểm tra khóa ngoại, nhập/cập nhật điểm, xếp loại học lực, tìm kiếm và hiển thị bảng điểm.
 
-| Mã test | Chức năng | Dữ liệu / Tình huống kiểm thử | Kết quả mong đợi |
-|---|---|---|---|
-| TC01 | Thêm sinh viên hợp lệ | Nhập sinh viên mới với MSSV chưa tồn tại | Sinh viên được thêm thành công |
-| TC02 | Thêm sinh viên trùng MSSV | Nhập MSSV đã tồn tại trong `students.txt` | Hiển thị lỗi, không thêm dữ liệu |
-| TC03 | Thêm môn học hợp lệ | Nhập môn học mới với `MaHP` chưa tồn tại | Môn học được thêm thành công |
-| TC04 | Thêm môn học trùng mã | Nhập `MaHP` đã tồn tại trong `subjects.txt` | Hiển thị lỗi, không thêm dữ liệu |
-| TC05 | Thêm lớp học phần hợp lệ | Nhập `MaLHP` mới và `MaHP` đã tồn tại | Lớp học phần được thêm thành công |
-| TC06 | Thêm lớp học phần với mã học phần không tồn tại | Nhập `MaHP` không có trong `subjects.txt` | Hiển thị lỗi, không thêm lớp học phần |
-| TC07 | Nhập điểm hợp lệ | Nhập `MSSV`, `MaLHP`, `DiemQT`, `DiemCK` hợp lệ | Bản ghi điểm được thêm thành công |
-| TC08 | Nhập điểm ngoài khoảng `0–10` | Nhập `DiemQT = -1` hoặc `DiemCK = 11` | Hiển thị lỗi, không lưu điểm |
-| TC09 | Nhập điểm cho sinh viên không tồn tại | Nhập `MSSV` không có trong `students.txt` | Hiển thị lỗi, không lưu điểm |
-| TC10 | Nhập điểm cho lớp học phần không tồn tại | Nhập `MaLHP` không có trong `course_classes.txt` | Hiển thị lỗi, không lưu điểm |
-| TC11 | Nhập điểm trùng cặp `(MSSV, MaLHP)` | Nhập điểm cho sinh viên đã có điểm trong lớp học phần đó | Hiển thị lỗi hoặc chuyển sang chức năng cập nhật điểm |
-| TC12 | Cập nhật điểm | Cập nhật `DiemQT` hoặc `DiemCK` của một bản ghi đã tồn tại | Điểm được cập nhật thành công, điểm tổng kết được tính lại |
-| TC13 | Tính điểm tổng kết | `DiemQT = 8.5`, `DiemCK = 7.0` | `DiemTK = 0.5 * 8.5 + 0.5 * 7.0 = 7.75` |
-| TC14 | Tính GPA hệ 10 | Sinh viên có nhiều môn với điểm tổng kết và số tín chỉ khác nhau | GPA hệ 10 được tính đúng theo công thức tín chỉ |
-| TC15 | Xếp loại học lực | GPA hệ 10 thuộc các khoảng Xuất sắc, Giỏi, Khá, Trung bình, Yếu | Hiển thị đúng xếp loại |
-| TC16 | Tìm sinh viên tồn tại | Tìm theo MSSV hoặc họ tên có trong dữ liệu | Hiển thị đúng thông tin sinh viên |
-| TC17 | Tìm sinh viên không tồn tại | Tìm MSSV không có trong dữ liệu | Hiển thị thông báo không tìm thấy |
-| TC18 | Sắp xếp sinh viên theo MSSV | Danh sách sinh viên chưa được sắp xếp | Danh sách hiển thị tăng dần theo MSSV |
-| TC19 | Sắp xếp sinh viên theo họ tên | Danh sách sinh viên chưa được sắp xếp theo tên | Danh sách hiển thị đúng thứ tự theo họ tên |
-| TC20 | Hiển thị bảng điểm sinh viên | Nhập MSSV của sinh viên có điểm | Hiển thị đầy đủ các môn/lớp học phần, điểm và GPA |
-| TC21 | Hiển thị bảng điểm lớp học phần | Nhập `MaLHP` có nhiều sinh viên đã nhập điểm | Hiển thị danh sách sinh viên và điểm trong lớp học phần |
-| TC22 | Không cho xóa sinh viên đã có điểm | Xóa sinh viên có `MSSV` đang xuất hiện trong `scores.txt` | Hiển thị lỗi, không xóa sinh viên |
-| TC23 | Không cho xóa lớp học phần đã có điểm | Xóa lớp học phần có `MaLHP` đang xuất hiện trong `scores.txt` | Hiển thị lỗi, không xóa lớp học phần |
-| TC24 | Không cho xóa môn học đang có lớp học phần | Xóa môn học có `MaHP` đang được dùng trong `course_classes.txt` | Hiển thị lỗi, không xóa môn học |
-| TC25 | Đọc file rỗng | Một trong các file dữ liệu rỗng | Chương trình không crash, tạo danh sách rỗng |
-| TC26 | Đọc file sai định dạng | Một dòng thiếu trường hoặc sai kiểu dữ liệu | Bỏ qua dòng lỗi, dữ liệu hợp lệ vẫn được load |
-| TC27 | Lưu dữ liệu và mở lại chương trình | Thêm/sửa dữ liệu, thoát chương trình, chạy lại | Dữ liệu vẫn còn sau khi khởi động lại |
-| TC28 | Quy đổi GPA hệ 4 | Điểm tổng kết thuộc các mốc quy đổi hệ 4 | Điểm hệ 4 được quy đổi đúng |
+| Mã test | Chức năng                                  | Dữ liệu / Tình huống kiểm thử                                   | Kết quả mong đợi                                                           |
+| ------- | ------------------------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| TC01    | Thêm sinh viên hợp lệ                      | Nhập sinh viên mới với MSSV chưa tồn tại                        | Sinh viên được thêm thành công                                             |
+| TC02    | Thêm sinh viên trùng MSSV                  | Nhập MSSV đã tồn tại trong `students.txt`                       | Hiển thị lỗi, không thêm dữ liệu                                           |
+| TC03    | Thêm môn học hợp lệ                        | Nhập môn học mới với `MaHP` chưa tồn tại                        | Môn học được thêm thành công                                               |
+| TC04    | Thêm môn học trùng mã                      | Nhập `MaHP` đã tồn tại trong `subjects.txt`                     | Hiển thị lỗi, không thêm dữ liệu                                           |
+| TC05    | Thêm lớp học phần hợp lệ                   | Nhập `MaLHP` mới và `MaHP` đã tồn tại                           | Lớp học phần được thêm thành công                                          |
+| TC06    | Thêm lớp học phần với `MaHP` không tồn tại | Nhập `MaHP` không có trong `subjects.txt`                       | Hiển thị lỗi, không thêm lớp học phần                                      |
+| TC07    | Nhập điểm hợp lệ                           | Nhập `MSSV`, `MaLHP`, `DiemQT`, `DiemCK` hợp lệ                 | Bản ghi điểm được thêm thành công, `DiemTK` và `DiemHe4` được tính tự động |
+| TC08    | Nhập điểm ngoài khoảng `0–10`              | Nhập `DiemQT = -1` hoặc `DiemCK = 11`                           | Hiển thị lỗi, không lưu điểm không hợp lệ                                  |
+| TC09    | Nhập điểm cho sinh viên không tồn tại      | Nhập `MSSV` không có trong `students.txt`                       | Hiển thị lỗi, không lưu điểm                                               |
+| TC11    | Nhập điểm trùng cặp `(MSSV, MaLHP)`        | Nhập điểm cho sinh viên đã có điểm trong lớp học phần đó        | Hiển thị lỗi, không tạo bản ghi trùng                                      |
+| TC12    | Cập nhật điểm                              | Cập nhật `DiemQT` hoặc `DiemCK` của một bản ghi đã tồn tại      | Điểm được cập nhật thành công, `DiemTK` và `DiemHe4` được tính lại         |
+| TC15    | Xếp loại học lực                           | GPA hệ 10 thuộc các khoảng Xuất sắc, Giỏi, Khá, Trung bình, Yếu | Hiển thị đúng xếp loại học lực                                             |
+| TC16    | Tìm sinh viên tồn tại                      | Tìm theo MSSV hoặc họ tên có trong dữ liệu                      | Hiển thị đúng thông tin sinh viên                                          |
+| TC17    | Tìm sinh viên không tồn tại                | Tìm MSSV hoặc từ khóa không có trong dữ liệu                    | Hiển thị thông báo không tìm thấy                                          |
+| TC21    | Hiển thị bảng điểm lớp học phần            | Nhập `MaLHP` có nhiều sinh viên đã nhập điểm                    | Hiển thị danh sách sinh viên và điểm trong lớp học phần                    |
 
 ### 12.1. Ảnh minh chứng kiểm thử
 
