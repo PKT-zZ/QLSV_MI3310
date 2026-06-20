@@ -110,108 +110,192 @@ Chạy toàn bộ pipeline `loadAllData` → `saveAllData` → `loadAllData` v�
 
 ---
 
-## 4. Hướng dẫn chạy test
+````md
+## **4. Hướng dẫn build, chạy chương trình và chạy test**
 
-### Bước 0 — Kiểm tra GCC
+### **4.1. Kiểm tra GCC**
 
-Mở terminal trong VSCode (`Ctrl+`` `) và gõ:
+Mở terminal trong VSCode (`Ctrl + ``) và gõ:
 
-```
+```bash
 gcc --version
-```
+````
 
-Nếu thấy số phiên bản in ra thì đã sẵn sàng. Nếu báo "not found" thì cài GCC trước theo hướng dẫn bên dưới.
+Nếu thấy số phiên bản in ra thì môi trường biên dịch đã sẵn sàng. Nếu báo `not found`, cần cài GCC/MinGW/MSYS2 trước.
 
 ---
 
-### Bước 1 — Mở đúng terminal theo hệ điều hành
+### 4.2. Mở đúng terminal theo hệ điều hành
 
 **Windows**
 
-VSCode mặc định mở PowerShell — PowerShell **không chạy được** lệnh `make`. Cần chuyển sang terminal khác:
+Nên dùng **Git Bash / MINGW64** trong VSCode.
 
-- Cách 1 (khuyên dùng): Cài [MSYS2](https://www.msys2.org/), sau đó trong VSCode nhấn `Ctrl+Shift+P` → gõ `Terminal: Select Default Profile` → chọn **Git Bash**. Mở terminal mới, kiểm tra `gcc --version`.
-- Cách 2: Dùng lệnh gcc trực tiếp (xem phần cuối) — không cần `make`, chạy được trong mọi terminal kể cả PowerShell.
+Nếu dùng Git Bash mà lệnh `make` không chạy được, dùng:
 
-**macOS**
-
-GCC/Clang và `make` cần cài Xcode Command Line Tools (chỉ làm một lần):
-
-```
-xcode-select --install
+```bash
+mingw32-make
 ```
 
-Sau đó dùng terminal mặc định (zsh) trong VSCode là được.
+thay cho:
 
-**Linux**
-
-GCC và `make` thường đã có. Nếu chưa:
-
+```bash
+make
 ```
+
+**Linux/macOS**
+
+Có thể dùng terminal mặc định và lệnh `make`.
+
+Nếu chưa có GCC/Make:
+
+```bash
 sudo apt install build-essential    # Ubuntu/Debian
 sudo dnf install gcc make           # Fedora
+xcode-select --install              # macOS
 ```
 
 ---
 
-### Bước 2 — Chạy test bằng Makefile
+### 4.3. Build chương trình chính
 
-Trỏ terminal vào thư mục `source/` trước:
+Trỏ terminal vào thư mục `source/`:
 
-```
+```bash
 cd QLSV_MI3310/source
 ```
 
-Sau đó:
+Hoặc nếu đang ở thư mục gốc project:
 
-| Lệnh | Tác dụng |
-|---|---|
-| `make all` | Build chương trình chính → `../qlsv.exe` |
-| `make unit_test` | Chạy cả 4 unit test liên tiếp |
-| `make test` | Chạy integration test (dùng `data/` thật) |
-| `make clean` | Xóa toàn bộ file `.exe` đã build |
+```bash
+cd source
+```
 
-> **Windows lưu ý:** Nếu dùng terminal Git Bash, thay `make` bằng `mingw32-make`. Nếu dùng terminal MSYS2 UCRT64/MINGW64 thì `make` chạy được bình thường.
+Sau đó build chương trình:
+
+```bash
+mingw32-make clean
+mingw32-make all
+```
+
+Trên Linux/macOS có thể dùng:
+
+```bash
+make clean
+make all
+```
+
+Sau khi build thành công, file `qlsv.exe` sẽ được tạo ở thư mục gốc project:
+
+```text
+QLSV_MI3310/qlsv.exe
+```
 
 ---
 
-### Bước 2 (thay thế) — Chạy bằng lệnh gcc trực tiếp
+### 4.4. Chạy chương trình chính `qlsv.exe`
 
-Nếu `make` không hoạt động trên máy, dùng các lệnh sau. Chạy từ thư mục `source/`, **áp dụng cho mọi terminal có gcc**.
-
-**Linux / macOS / Git Bash:**
+Sau khi build xong, cần quay lại **thư mục gốc project** rồi mới chạy chương trình:
 
 ```bash
-# Unit tests
-gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types && cd .. && ./test_types && cd source
-gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays && cd .. && ./test_arrays && cd source
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit && cd .. && ./test_fileio_unit && cd source
-gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa && cd .. && ./test_gpa && cd source
-
-# Integration test
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio && cd .. && ./test_fileio && cd source
+cd ..
+./qlsv.exe
 ```
 
-**Windows (PowerShell hoặc cmd):**
+Trên PowerShell:
 
 ```powershell
-# Unit tests (bỏ ./ trước tên file exe)
-gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types.exe && cd .. && test_types.exe && cd source
-gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays.exe && cd .. && test_arrays.exe && cd source
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit.exe && cd .. && test_fileio_unit.exe && cd source
-gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa.exe && cd .. && test_gpa.exe && cd source
-
-# Integration test
-gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio.exe && cd .. && test_fileio.exe && cd source
+.\qlsv.exe
 ```
 
-> **Tại sao lệnh `fileio` và `gpa` phải `cd ..` trước khi chạy?**  
-> `test_fileio_unit` tạo file tạm tại thư mục chạy, và `test_fileio` đọc `data/` — cả hai cần thư mục gốc project làm working directory.  
-> `test_types` và `test_arrays` không đọc/ghi file gì nên chạy từ đâu cũng được.
+Lưu ý quan trọng:
 
+* Chương trình cần chạy từ thư mục gốc `QLSV_MI3310/` để đọc đúng các file trong `data/`.
+* Không nên chạy `../qlsv.exe` khi terminal vẫn đang ở `source/`, vì khi đó chương trình có thể không đọc đúng `data/students.txt`, `data/subjects.txt`, `data/course_classes.txt`, `data/scores.txt`.
+* Nếu chương trình báo không mở được file `data/*.txt`, hãy thoát chương trình, quay về thư mục gốc project rồi chạy lại:
 
-## 5. Lưu ý cho TV2 & TV3 khi tích hợp
+```bash
+cd /d/Code/Environment/QLSV_MI3310
+./qlsv.exe
+```
 
-**Trước khi xóa Sinh viên hoặc Môn học**, cần kiểm tra xem có bản ghi điểm hoặc Lớp học phần nào đang tham chiếu đến nó không. Nếu có thì nên chặn thao tác xóa và thông báo ra màn hình, tránh để dữ liệu mồ côi trong mảng.
+---
 
-**Khi dùng `sa_get`, `suba_get`, `cca_get`, `sca_get`**, luôn kiểm tra `NULL` trước khi dereference — các hàm này trả `NULL` nếu index ngoài phạm vi và đây là hành vi có chủ đích.
+### 4.5. Chạy test bằng Makefile
+
+Các lệnh test chạy trong thư mục `source/`.
+
+Nếu đang ở thư mục gốc project:
+
+```bash
+cd source
+```
+
+Chạy unit test:
+
+```bash
+mingw32-make unit_test
+```
+
+Chạy integration test:
+
+```bash
+mingw32-make test
+```
+
+Trên Linux/macOS có thể dùng:
+
+```bash
+make unit_test
+make test
+```
+
+Ý nghĩa các lệnh:
+
+| Lệnh                     | Tác dụng                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `mingw32-make all`       | Build chương trình chính `../qlsv.exe`                                        |
+| `mingw32-make unit_test` | Chạy 4 unit test: `test_types`, `test_arrays`, `test_fileio_unit`, `test_gpa` |
+| `mingw32-make test`      | Chạy integration test `test_fileio` với dữ liệu thật trong `data/`            |
+| `mingw32-make clean`     | Xóa các file `.exe` đã build                                                  |
+
+Kết quả mong đợi:
+
+```text
+Unit test: 27/27 PASS
+Integration test: 41/41 PASS
+Tổng: 68/68 PASS
+```
+
+Một số dòng `[CANH BAO]` khi chạy test là bình thường, vì test cố tình đưa vào file không tồn tại hoặc dữ liệu sai định dạng để kiểm tra khả năng xử lý lỗi.
+
+---
+
+### 4.6. Chạy bằng lệnh GCC trực tiếp nếu Makefile không hoạt động
+
+Nếu `make` hoặc `mingw32-make` không hoạt động, có thể chạy thủ công từ thư mục `source/`.
+
+**Git Bash / Linux / macOS:**
+
+```bash
+gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types.exe && cd .. && ./test_types.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays.exe && cd .. && ./test_arrays.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit.exe && cd .. && ./test_fileio_unit.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa.exe && cd .. && ./test_gpa.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio.exe && cd .. && ./test_fileio.exe && cd source
+```
+
+**PowerShell/CMD:**
+
+```powershell
+gcc -Wall -Wextra -std=c99 test_types.c -o ../test_types.exe && cd .. && .\test_types.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c test_arrays.c -o ../test_arrays.exe && cd .. && .\test_arrays.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio_unit.c -o ../test_fileio_unit.exe && cd .. && .\test_fileio_unit.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c gpa.c test_gpa.c -o ../test_gpa.exe && cd .. && .\test_gpa.exe && cd source
+gcc -Wall -Wextra -std=c99 arrays.c fileio.c score.c test_fileio.c -o ../test_fileio.exe && cd .. && .\test_fileio.exe && cd source
+```
+
+> `test_fileio` cần chạy từ thư mục gốc project vì test này dùng dữ liệu thật trong `data/`.
+
+```
+```
