@@ -6,6 +6,10 @@
 #include <ctype.h>
 #include "ui.h"
 #include "sort.h"
+#include "student.h"
+#include "subject.h"
+#include "courseclass.h"
+#include "search.h"
 
 /* =========================================================
    HAM TIEN ICH NHAP DU LIEU VA VALIDATION
@@ -352,7 +356,7 @@ static void addStudentUI(StudentArray* students) {
             continue;
         }
 
-        if (sa_find(students, s.mssv) != -1) {
+        if (findStudentRecord(students, s.mssv) != NULL) {
             printf("MSSV da ton tai. Vui long nhap MSSV khac.\n");
             continue;
         }
@@ -369,7 +373,7 @@ static void addStudentUI(StudentArray* students) {
         printf("Ngay sinh khong hop le. Vi du dung: 15/08/2006\n");
     }
 
-    if (sa_add(students, s)) {
+    if (addStudentRecord(students, s)) {
         printf("Them sinh vien thanh cong.\n");
     } else {
         printf("Them sinh vien that bai do loi bo nho.\n");
@@ -379,31 +383,28 @@ static void addStudentUI(StudentArray* students) {
 static void editStudentUI(StudentArray* students) {
     char mssv[12];
     char buffer[100];
-    int index;
+    Student* found;
+    Student s;
 
     readLine("Nhap MSSV can sua: ", mssv, sizeof(mssv));
-    index = sa_find(students, mssv);
+    found = findStudentRecord(students, mssv);
 
-    if (index == -1) {
+    if (found == NULL) {
         printf("Khong tim thay sinh vien.\n");
         return;
     }
-Student* s = sa_get(students, index);
 
-if (s == NULL) {
-    printf("Loi: index sinh vien khong hop le.\n");
-    return;
-}
+    s = *found;
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("Ho ten moi: ", buffer, sizeof(buffer))) {
-        strncpy(s->hoTen, buffer, sizeof(s->hoTen) - 1);
-        s->hoTen[sizeof(s->hoTen) - 1] = '\0';
+        strncpy(s.hoTen, buffer, sizeof(s.hoTen) - 1);
+        s.hoTen[sizeof(s.hoTen) - 1] = '\0';
     }
 
     if (readLineOptional("Lop moi: ", buffer, sizeof(buffer))) {
-        strncpy(s->lop, buffer, sizeof(s->lop) - 1);
-        s->lop[sizeof(s->lop) - 1] = '\0';
+        strncpy(s.lop, buffer, sizeof(s.lop) - 1);
+        s.lop[sizeof(s.lop) - 1] = '\0';
     }
 
     while (1) {
@@ -412,25 +413,24 @@ if (s == NULL) {
         }
 
         if (validateDate(buffer)) {
-            strncpy(s->birthday, buffer, sizeof(s->birthday) - 1);
-            s->birthday[sizeof(s->birthday) - 1] = '\0';
+            strncpy(s.birthday, buffer, sizeof(s.birthday) - 1);
+            s.birthday[sizeof(s.birthday) - 1] = '\0';
             break;
         }
 
         printf("Ngay sinh khong hop le. Vui long nhap lai hoac Enter de bo qua.\n");
     }
 
+    updateStudentRecord(students, s);
     printf("Sua sinh vien thanh cong.\n");
 }
 
 static void deleteStudentUI(StudentArray* students, ScoreArray* scores) {
     char mssv[12];
-    int index;
 
     readLine("Nhap MSSV can xoa: ", mssv, sizeof(mssv));
-    index = sa_find(students, mssv);
 
-    if (index == -1) {
+    if (findStudentRecord(students, mssv) == NULL) {
         printf("Khong tim thay sinh vien.\n");
         return;
     }
@@ -440,7 +440,7 @@ static void deleteStudentUI(StudentArray* students, ScoreArray* scores) {
         return;
     }
 
-    if (sa_remove(students, index)) {
+    if (deleteStudentRecord(students, mssv)) {
         printf("Xoa sinh vien thanh cong.\n");
     } else {
         printf("Xoa sinh vien that bai.\n");
@@ -450,7 +450,6 @@ static void deleteStudentUI(StudentArray* students, ScoreArray* scores) {
 static void searchStudentUI(StudentArray* students) {
     int choice;
     char key[100];
-    int found = 0;
 
     printf("\n1. Tim theo MSSV\n");
     printf("2. Tim theo ho ten\n");
@@ -459,24 +458,22 @@ static void searchStudentUI(StudentArray* students) {
 
     readLine("Nhap tu khoa: ", key, sizeof(key));
 
-    printf("\n%-12s | %-25s | %-12s | %-12s\n", "MSSV", "Ho ten", "Lop", "Birthday");
-    printf("-----------------------------------------------------------------------\n");
+    if (choice == 1) {
+        Student* s = searchStudentByMSSV(students, key);
 
-    for (int i = 0; i < students->size; i++) {
-        Student* s = &students->data[i];
-        int match = 0;
+        printf("\n%-12s | %-25s | %-12s | %-12s\n", "MSSV", "Ho ten", "Lop", "Birthday");
+        printf("-----------------------------------------------------------------------\n");
 
-        if (choice == 1 && strcmp(s->mssv, key) == 0) match = 1;
-        if (choice == 2 && strstr(s->hoTen, key) != NULL) match = 1;
-        if (choice == 3 && strcmp(s->lop, key) == 0) match = 1;
-
-        if (match) {
+        if (s != NULL) {
             printf("%-12s | %-25s | %-12s | %-12s\n", s->mssv, s->hoTen, s->lop, s->birthday);
-            found = 1;
+        } else {
+            printf("Khong tim thay ket qua phu hop.\n");
         }
+    } else if (choice == 2) {
+        searchStudentByName(students, key);
+    } else {
+        searchStudentByClass(students, key);
     }
-
-    if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
 static void sortStudentUI(
     StudentArray* students,
@@ -604,7 +601,7 @@ static void addSubjectUI(SubjectArray* subjects) {
             continue;
         }
 
-        if (suba_find(subjects, s.maHP) != -1) {
+        if (findSubjectRecord(subjects, s.maHP) != NULL) {
             printf("MaHP da ton tai.\n");
             continue;
         }
@@ -620,7 +617,7 @@ static void addSubjectUI(SubjectArray* subjects) {
         printf("So tin chi khong hop le.\n");
     }
 
-    if (suba_add(subjects, s)) {
+    if (addSubjectRecord(subjects, s)) {
         printf("Them mon hoc thanh cong.\n");
     } else {
         printf("Them mon hoc that bai.\n");
@@ -630,49 +627,45 @@ static void addSubjectUI(SubjectArray* subjects) {
 static void editSubjectUI(SubjectArray* subjects) {
     char maHP[10];
     char buffer[100];
-    int index;
+    Subject* found;
+    Subject s;
 
     readLine("Nhap MaHP can sua: ", maHP, sizeof(maHP));
-    index = suba_find(subjects, maHP);
+    found = findSubjectRecord(subjects, maHP);
 
-    if (index == -1) {
+    if (found == NULL) {
         printf("Khong tim thay mon hoc.\n");
         return;
     }
-Subject* s = suba_get(subjects, index);
 
-if (s == NULL) {
-    printf("Loi: index mon hoc khong hop le.\n");
-    return;
-}
+    s = *found;
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("Ten hoc phan moi: ", buffer, sizeof(buffer))) {
-        strncpy(s->tenHP, buffer, sizeof(s->tenHP) - 1);
-        s->tenHP[sizeof(s->tenHP) - 1] = '\0';
+        strncpy(s.tenHP, buffer, sizeof(s.tenHP) - 1);
+        s.tenHP[sizeof(s.tenHP) - 1] = '\0';
     }
 
     if (readLineOptional("So tin chi moi: ", buffer, sizeof(buffer))) {
     int credit;
 
     if (parseIntStrict(buffer, &credit) && validateCredit(credit)) {
-        s->soTinChi = credit;
+        s.soTinChi = credit;
     } else {
         printf("So tin chi khong hop le, giu nguyen gia tri cu.\n");
     }
 }
 
+    updateSubjectRecord(subjects, s);
     printf("Sua mon hoc thanh cong.\n");
 }
 
 static void deleteSubjectUI(SubjectArray* subjects, CourseClassArray* classes) {
     char maHP[10];
-    int index;
 
     readLine("Nhap MaHP can xoa: ", maHP, sizeof(maHP));
-    index = suba_find(subjects, maHP);
 
-    if (index == -1) {
+    if (findSubjectRecord(subjects, maHP) == NULL) {
         printf("Khong tim thay mon hoc.\n");
         return;
     }
@@ -682,7 +675,7 @@ static void deleteSubjectUI(SubjectArray* subjects, CourseClassArray* classes) {
         return;
     }
 
-    if (suba_remove(subjects, index)) {
+    if (deleteSubjectRecord(subjects, maHP)) {
         printf("Xoa mon hoc thanh cong.\n");
     } else {
         printf("Xoa mon hoc that bai.\n");
@@ -692,7 +685,6 @@ static void deleteSubjectUI(SubjectArray* subjects, CourseClassArray* classes) {
 static void searchSubjectUI(SubjectArray* subjects) {
     int choice;
     char key[100];
-    int found = 0;
 
     printf("\n1. Tim theo MaHP\n");
     printf("2. Tim theo ten hoc phan\n");
@@ -700,23 +692,20 @@ static void searchSubjectUI(SubjectArray* subjects) {
 
     readLine("Nhap tu khoa: ", key, sizeof(key));
 
-    printf("\n%-10s | %-35s | %-8s\n", "MaHP", "Ten hoc phan", "So TC");
-    printf("--------------------------------------------------------------\n");
+    if (choice == 1) {
+        Subject* s = searchSubjectByCode(subjects, key);
 
-    for (int i = 0; i < subjects->size; i++) {
-        Subject* s = &subjects->data[i];
-        int match = 0;
+        printf("\n%-10s | %-35s | %-8s\n", "MaHP", "Ten hoc phan", "So TC");
+        printf("--------------------------------------------------------------\n");
 
-        if (choice == 1 && strcmp(s->maHP, key) == 0) match = 1;
-        if (choice == 2 && strstr(s->tenHP, key) != NULL) match = 1;
-
-        if (match) {
+        if (s != NULL) {
             printf("%-10s | %-35s | %-8d\n", s->maHP, s->tenHP, s->soTinChi);
-            found = 1;
+        } else {
+            printf("Khong tim thay ket qua phu hop.\n");
         }
+    } else {
+        searchSubjectByName(subjects, key);
     }
-
-    if (!found) printf("Khong tim thay ket qua phu hop.\n");
 }
 
 static void showSubjectMenu(SubjectArray* subjects,
@@ -770,7 +759,7 @@ static void addCourseClassUI(CourseClassArray* classes, SubjectArray* subjects) 
             continue;
         }
 
-        if (cca_find(classes, c.maLHP) != -1) {
+        if (findCourseClassRecord(classes, c.maLHP) != NULL) {
             printf("MaLHP da ton tai.\n");
             continue;
         }
@@ -797,7 +786,7 @@ static void addCourseClassUI(CourseClassArray* classes, SubjectArray* subjects) 
         printf("Nam hoc khong hop le.\n");
     }
 
-    if (cca_add(classes, c)) {
+    if (addCourseClassRecord(classes, subjects, c)) {
         printf("Them lop hoc phan thanh cong.\n");
     } else {
         printf("Them lop hoc phan that bai.\n");
@@ -807,27 +796,24 @@ static void addCourseClassUI(CourseClassArray* classes, SubjectArray* subjects) 
 static void editCourseClassUI(CourseClassArray* classes, SubjectArray* subjects) {
     char maLHP[15];
     char buffer[100];
-    int index;
+    CourseClass* found;
+    CourseClass c;
 
     readLine("Nhap MaLHP can sua: ", maLHP, sizeof(maLHP));
-    index = cca_find(classes, maLHP);
+    found = findCourseClassRecord(classes, maLHP);
 
-    if (index == -1) {
+    if (found == NULL) {
         printf("Khong tim thay lop hoc phan.\n");
         return;
     }
-CourseClass* c = cca_get(classes, index);
 
-if (c == NULL) {
-    printf("Loi: index lop hoc phan khong hop le.\n");
-    return;
-}
+    c = *found;
     printf("Nhap thong tin moi. Bo trong de giu nguyen.\n");
 
     if (readLineOptional("MaHP moi: ", buffer, sizeof(buffer))) {
         if (suba_find(subjects, buffer) != -1) {
-            strncpy(c->maHP, buffer, sizeof(c->maHP) - 1);
-            c->maHP[sizeof(c->maHP) - 1] = '\0';
+            strncpy(c.maHP, buffer, sizeof(c.maHP) - 1);
+            c.maHP[sizeof(c.maHP) - 1] = '\0';
         } else {
             printf("MaHP khong ton tai, giu nguyen gia tri cu.\n");
         }
@@ -837,7 +823,7 @@ if (c == NULL) {
     int hocKy;
 
     if (parseIntStrict(buffer, &hocKy) && validateSemester(hocKy)) {
-        c->hocKy = hocKy;
+        c.hocKy = hocKy;
     } else {
         printf("Hoc ky khong hop le, giu nguyen gia tri cu.\n");
     }
@@ -847,23 +833,22 @@ if (c == NULL) {
     int namHoc;
 
     if (parseIntStrict(buffer, &namHoc) && validateYear(namHoc)) {
-        c->namHoc = namHoc;
+        c.namHoc = namHoc;
     } else {
         printf("Nam hoc khong hop le, giu nguyen gia tri cu.\n");
     }
 }
 
+    updateCourseClassRecord(classes, c);
     printf("Sua lop hoc phan thanh cong.\n");
 }
 
 static void deleteCourseClassUI(CourseClassArray* classes, ScoreArray* scores) {
     char maLHP[15];
-    int index;
 
     readLine("Nhap MaLHP can xoa: ", maLHP, sizeof(maLHP));
-    index = cca_find(classes, maLHP);
 
-    if (index == -1) {
+    if (findCourseClassRecord(classes, maLHP) == NULL) {
         printf("Khong tim thay lop hoc phan.\n");
         return;
     }
@@ -873,7 +858,7 @@ static void deleteCourseClassUI(CourseClassArray* classes, ScoreArray* scores) {
         return;
     }
 
-    if (cca_remove(classes, index)) {
+    if (deleteCourseClassRecord(classes, maLHP)) {
         printf("Xoa lop hoc phan thanh cong.\n");
     } else {
         printf("Xoa lop hoc phan that bai.\n");
@@ -891,17 +876,27 @@ static void searchCourseClassUI(CourseClassArray* classes) {
 
     readLine("Nhap tu khoa: ", key, sizeof(key));
 
+    if (choice == 1) {
+        CourseClass* c = searchCourseClassByCode(classes, key);
+
+        printf("\n%-15s | %-10s | %-8s | %-8s\n", "MaLHP", "MaHP", "Hoc ky", "Nam hoc");
+        printf("-----------------------------------------------------------\n");
+
+        if (c != NULL) {
+            printf("%-15s | %-10s | %-8d | %-8d\n", c->maLHP, c->maHP, c->hocKy, c->namHoc);
+        } else {
+            printf("Khong tim thay ket qua phu hop.\n");
+        }
+        return;
+    }
+
     printf("\n%-15s | %-10s | %-8s | %-8s\n", "MaLHP", "MaHP", "Hoc ky", "Nam hoc");
     printf("-----------------------------------------------------------\n");
 
     for (int i = 0; i < classes->size; i++) {
         CourseClass* c = &classes->data[i];
-        int match = 0;
 
-        if (choice == 1 && strcmp(c->maLHP, key) == 0) match = 1;
-        if (choice == 2 && strcmp(c->maHP, key) == 0) match = 1;
-
-        if (match) {
+        if (strcmp(c->maHP, key) == 0) {
             printf("%-15s | %-10s | %-8d | %-8d\n", c->maLHP, c->maHP, c->hocKy, c->namHoc);
             found = 1;
         }
@@ -964,17 +959,11 @@ static void addScoreUI(ScoreArray* scores, StudentArray* students, CourseClassAr
 
     sc.diemQT = readFloatRange("Nhap diem qua trinh (0-10): ", 0.0f, 10.0f);
     sc.diemCK = readFloatRange("Nhap diem cuoi ky (0-10): ", 0.0f, 10.0f);
-    sc.diemTK = calculateDiemTK(
-    sc.diemQT,
-    sc.diemCK
-);
 
-sc.diemHe4 = convertToHe4(
-    sc.diemTK
-);
-
-    if (sca_add(scores, sc)) {
-        printf("Them diem thanh cong. DiemTK = %.2f, He4 = %.2f\n", sc.diemTK, sc.diemHe4);
+    if (addScoreRecord(scores, students, classes, sc)) {
+        int idx = sca_find(scores, sc.mssv, sc.maLHP);
+        ScoreRecord* added = sca_get(scores, idx);
+        printf("Them diem thanh cong. DiemTK = %.2f, He4 = %.2f\n", added->diemTK, added->diemHe4);
     } else {
         printf("Them diem that bai.\n");
     }
@@ -983,35 +972,23 @@ sc.diemHe4 = convertToHe4(
 static void updateScoreUI(ScoreArray* scores) {
     char mssv[12];
     char maLHP[15];
+    float diemQT, diemCK;
     int index;
 
     readLine("Nhap MSSV: ", mssv, sizeof(mssv));
     readLine("Nhap MaLHP: ", maLHP, sizeof(maLHP));
 
-    index = sca_find(scores, mssv, maLHP);
-    if (index == -1) {
+    if (sca_find(scores, mssv, maLHP) == -1) {
         printf("Khong tim thay ban ghi diem.\n");
         return;
     }
-ScoreRecord* sc = sca_get(scores, index);
 
-if (sc == NULL) {
-    printf("Loi: index diem khong hop le.\n");
-    return;
-}
-    sc->diemQT = readFloatRange("Nhap diem qua trinh moi (0-10): ", 0.0f, 10.0f);
-    sc->diemCK = readFloatRange("Nhap diem cuoi ky moi (0-10): ", 0.0f, 10.0f);
-    sc->diemTK =
-    calculateDiemTK(
-        sc->diemQT,
-        sc->diemCK
-    );
+    diemQT = readFloatRange("Nhap diem qua trinh moi (0-10): ", 0.0f, 10.0f);
+    diemCK = readFloatRange("Nhap diem cuoi ky moi (0-10): ", 0.0f, 10.0f);
 
-sc->diemHe4 =
-    convertToHe4(
-        sc->diemTK
-    );
+    updateScoreRecord(scores, mssv, maLHP, diemQT, diemCK);
 
+    index = sca_find(scores, mssv, maLHP);
     printf("Cap nhat diem thanh cong. DiemTK = %.2f, He4 = %.2f\n",
            scores->data[index].diemTK, scores->data[index].diemHe4);
 }
