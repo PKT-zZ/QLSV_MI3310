@@ -443,17 +443,30 @@ QLSV_MI3310/
 │   └── test_note.md
 │
 ├── screenshots/
-│   ├── TCxx_mo_ta_ngan_01.png
-│   ├── TCxx_mo_ta_ngan_02.png
-│   └── ...
+│   ├── TC01.png
+│   ├── TC02.png
+│   ├── ...
+│   └── main menu.png
+│
+├── report/
+│   └── KTLT.pdf
 │
 ├── README.md
 └── .gitignore
 ```
 
-> `screenshots/` dùng để lưu ảnh minh chứng kiểm thử. Nhóm chọn khoảng **10–15 test case tiêu biểu** trong Mục 12 để chụp ảnh, không bắt buộc phải chụp đủ toàn bộ TC01–TC28.
->
-> Nếu Git không nhận thư mục `screenshots/` khi chưa có ảnh, có thể tạo tạm file `screenshots/.gitkeep`, sau đó thay bằng ảnh kiểm thử khi hoàn thiện.
+Mô tả nhanh:
+
+* `source/`: chứa mã nguồn chương trình, các file header, các file kiểm thử tự động và `Makefile`.
+* `data/`: chứa dữ liệu mẫu dạng file text.
+* `docs/`: chứa ghi chú kiểm thử và tài liệu phụ trợ.
+* `screenshots/`: chứa ảnh minh chứng kết quả chạy chương trình.
+* `report/`: chứa báo cáo cuối kỳ của nhóm.
+* `README.md`: mô tả tổng quan dự án, hướng dẫn build/chạy và kiểm thử.
+* `.gitignore`: cấu hình các file/thư mục không đưa lên Git.
+
+---
+
 
 ## 9. Sản phẩm cần đạt của từng thành viên
 
@@ -697,7 +710,9 @@ Một phần việc chỉ được xem là hoàn thành khi thỏa mãn đủ c�
 
 ## 12. Kế hoạch kiểm thử
 
-Bảng dưới đây liệt kê 15 test case tiêu biểu được chọn để minh chứng trong báo cáo. Các test case này tập trung vào các chức năng chính của chương trình như thêm dữ liệu, kiểm tra trùng khóa, kiểm tra khóa ngoại, nhập/cập nhật điểm, xếp loại học lực, tìm kiếm và hiển thị bảng điểm.
+Phần này liệt kê **16 test case tiêu biểu** được chọn để minh chứng trong báo cáo và trong thư mục `screenshots/`. Các test case này tương ứng với nhóm ảnh minh chứng ở **Phụ lục D — Một số kết quả kiểm thử trên giao diện console**.
+
+Các test case dưới đây không thay thế toàn bộ bảng test case chức năng trong báo cáo, mà chỉ tập trung vào những tình huống quan trọng cần có ảnh minh chứng: thêm dữ liệu hợp lệ, chặn dữ liệu trùng khóa, kiểm tra khóa ngoại, nhập/cập nhật điểm, xếp loại học lực, tìm kiếm và hiển thị bảng điểm.
 
 | Mã test | Chức năng                                  | Dữ liệu / Tình huống kiểm thử                                   | Kết quả mong đợi                                                           |
 | ------- | ------------------------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -710,6 +725,7 @@ Bảng dưới đây liệt kê 15 test case tiêu biểu được chọn để 
 | TC07    | Nhập điểm hợp lệ                           | Nhập `MSSV`, `MaLHP`, `DiemQT`, `DiemCK` hợp lệ                 | Bản ghi điểm được thêm thành công, `DiemTK` và `DiemHe4` được tính tự động |
 | TC08    | Nhập điểm ngoài khoảng `0–10`              | Nhập `DiemQT = -1` hoặc `DiemCK = 11`                           | Hiển thị lỗi, không lưu điểm không hợp lệ                                  |
 | TC09    | Nhập điểm cho sinh viên không tồn tại      | Nhập `MSSV` không có trong `students.txt`                       | Hiển thị lỗi, không lưu điểm                                               |
+| TC10    | Nhập điểm cho lớp học phần không tồn tại   | Nhập `MaLHP` không có trong `course_classes.txt`                | Hiển thị lỗi, không lưu điểm                                               |
 | TC11    | Nhập điểm trùng cặp `(MSSV, MaLHP)`        | Nhập điểm cho sinh viên đã có điểm trong lớp học phần đó        | Hiển thị lỗi, không tạo bản ghi trùng                                      |
 | TC12    | Cập nhật điểm                              | Cập nhật `DiemQT` hoặc `DiemCK` của một bản ghi đã tồn tại      | Điểm được cập nhật thành công, `DiemTK` và `DiemHe4` được tính lại         |
 | TC15    | Xếp loại học lực                           | GPA hệ 10 thuộc các khoảng Xuất sắc, Giỏi, Khá, Trung bình, Yếu | Hiển thị đúng xếp loại học lực                                             |
@@ -719,34 +735,29 @@ Bảng dưới đây liệt kê 15 test case tiêu biểu được chọn để 
 
 ### 12.1. Ảnh minh chứng kiểm thử
 
-Nhóm không cần chụp ảnh toàn bộ 28 test case. Khi nộp bài, chỉ cần chọn khoảng **10–15 test case tiêu biểu** để minh chứng chương trình đã chạy được các chức năng chính.
+Ảnh minh chứng kiểm thử được lưu trong thư mục `screenshots/`. Mỗi ảnh tương ứng với một test case tiêu biểu trong bảng trên.
 
-Các nhóm test nên có ảnh minh chứng:
-
-- Thêm dữ liệu hợp lệ và chặn dữ liệu trùng khóa.
-- Nhập/cập nhật điểm, chặn điểm ngoài khoảng `0–10`.
-- Tính điểm tổng kết, GPA hệ 10, GPA hệ 4 và xếp loại học lực.
-- Tìm kiếm và sắp xếp sinh viên.
-- Hiển thị bảng điểm sinh viên và bảng điểm lớp học phần.
-- Chặn xóa dữ liệu đang được tham chiếu.
-- Kiểm thử load/save dữ liệu nếu cần minh chứng thêm.
-
-Ảnh kiểm thử đặt trong thư mục `screenshots/`, đặt tên ngắn gọn theo mã test case, ví dụ:
+Quy ước đặt tên ảnh:
 
 ```text
 screenshots/
-├── TC01_them_sinh_vien_hop_le.png
-├── TC02_trung_mssv.png
-├── TC07_nhap_diem_hop_le.png
-├── TC08_diem_ngoai_khoang.png
-├── TC14_gpa_he_10.png
-├── TC15_xep_loai_hoc_luc.png
-├── TC16_tim_sinh_vien.png
-├── TC18_sap_xep_mssv.png
-├── TC20_bang_diem_sinh_vien.png
-├── TC21_bang_diem_lop_hoc_phan.png
-├── TC22_chan_xoa_sinh_vien_co_diem.png
-└── TC27_luu_va_doc_lai_du_lieu.png
+├── TC01.png
+├── TC02.png
+├── TC03.png
+├── ...
+└── TC21.png
+```
+
+Lưu ý: các mã `TC01`, `TC02`, ..., `TC21` trong mục này được dùng theo nhóm ảnh minh chứng ở Phụ lục D. Đây là các test case tiêu biểu qua giao diện console, không phải toàn bộ bảng test case chức năng chi tiết của chương 6 trong báo cáo.
+
+Ngoài nhóm kiểm thử giao diện trên, dự án còn có kiểm thử tự động cho các module nền tảng. Kết quả hiện tại:
+
+| Nhóm kiểm thử    | Số test case | Kết quả    |
+| ---------------- | -----------: | ---------- |
+| Unit test        |           27 | 27/27 PASS |
+| Integration test |           41 | 41/41 PASS |
+| Tổng             |           68 | 68/68 PASS |
+
 ```
 
 ---
@@ -851,6 +862,7 @@ Các bước chạy kiểm thử tự động bằng Makefile như `make unit_te
 
 ## 15. Tài liệu liên quan
 
-- Ghi chú kiểm thử: [`docs/test_note.md`](docs/test_note.md)
-- Dữ liệu mẫu: `data/`
-- Ảnh kiểm thử: `screenshots/` — lưu 15 ảnh minh chứng cho các test case tiêu biểu
+* Báo cáo cuối kỳ: [`report/`](report/)
+* Ghi chú kiểm thử: [`docs/test_note.md`](docs/test_note.md)
+* Dữ liệu mẫu: [`data/`](data/)
+* Ảnh minh chứng kiểm thử: [`screenshots/`](screenshots/)
